@@ -68,12 +68,12 @@ module Dominion
     coins 1
     vp_tokens :dynamic
   
-    def play(game)
+    def play
       @trashed_card = yield :choose_card_to_trash
     end
   
-    def vp_tokens(game)
-      1 + (@trashed_card.cost(game) / 2).floor
+    def vp_tokens
+      1 + (@trashed_card.cost / 2).floor
     end
   end
 
@@ -89,9 +89,9 @@ module Dominion
     cost 3
     coins 2
 
-    def play(game)
-      game.gain Silver, :to => :deck
-      game.other_players.each do |player|
+    def play
+      gain Silver, :to => :deck
+      other_players.each do |player|
         @revealed = player.reveal :from => :hand, :type => :victory?, :attack => true
         player.put @revealed, :to => :deck if @revealed
       end
@@ -103,15 +103,15 @@ module Dominion
     cost 3
     coins 2
   
-    def play(game)
+    def play
       @reshuffle = yield :immediately_put_deck_into_discard_pile?
     end
   
-    def cleanup(game)
-      super.cleanup(game)
+    def cleanup
+      super.cleanup
       if @reshuffle
-        game.discard += game.deck
-        game.deck = []
+        discard += deck
+        deck = []
       end
     end
   end
@@ -123,9 +123,9 @@ module Dominion
     actions 1
     coins 1
   
-    def cost(game)
-      if game.buy_phase?
-        [8 - 2 * game.actions_played, 0].max
+    def cost
+      if buy_phase?
+        [8 - 2 * actions_played, 0].max
       else
         8
       end

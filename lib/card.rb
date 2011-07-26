@@ -61,12 +61,20 @@ module Dominion
       end
     end
     
-    def type(*unused)
+    def initialize(game)
+      @game = game
+    end
+    
+    def type
       self.class.type
     end
-  
-    def method_missing(method, *unused)
-      self.class.send method
+
+    def method_missing(method)
+      if self.class.respond_to? method
+        self.class.send method
+      else
+        @game.send method
+      end
     end
     
     def to_s

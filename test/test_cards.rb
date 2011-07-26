@@ -9,9 +9,13 @@ class TestCards < Test::Unit::TestCase
       buy_phase
     end
   end
-
+  
+  def setup
+    @game = Game.new
+  end
+  
   def test_simple_card
-    v = Village.new
+    v = Village.new @game
 
     assert_equal 2, v.actions
     assert_equal 1, v.cards
@@ -19,22 +23,21 @@ class TestCards < Test::Unit::TestCase
   end
 
   def test_peddler
-    p = Peddler.new
-    game = Game.new
+    p = Peddler.new @game
 
-    game.buy_phase = true
-    game.actions_played = 5
-    assert_equal 0, p.cost(game)
+    @game.buy_phase = true
+    @game.actions_played = 5
+    assert_equal 0, p.cost
     
-    game.buy_phase = false
-    assert_equal 8, p.cost(game)
+    @game.buy_phase = false
+    assert_equal 8, p.cost
     
-    game.buy_phase = true
-    game.actions_played = 0
-    assert_equal 8, p.cost(game)
+    @game.buy_phase = true
+    @game.actions_played = 0
+    assert_equal 8, p.cost
     
-    game.actions_played = 2
-    assert_equal 4, p.cost(game)
+    @game.actions_played = 2
+    assert_equal 4, p.cost
   end
   
   def test_cards
