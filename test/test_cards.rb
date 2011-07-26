@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + '/common'
 class TestCards < Test::Unit::TestCase
   include Dominion
 
-  class Game
+  class MockGame
     attr_accessor :buy_phase, :actions_played
     def buy_phase?
       buy_phase
@@ -11,7 +11,7 @@ class TestCards < Test::Unit::TestCase
   end
   
   def setup
-    @game = Game.new
+    @game = MockGame.new
   end
   
   def test_simple_card

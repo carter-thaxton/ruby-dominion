@@ -1,5 +1,8 @@
 task :default => :test
 
 task :test do
-  require File.dirname(__FILE__) + '/test/test_cards.rb'  
+  $:.push File.dirname(__FILE__) + '/test'
+  
+  require 'test_cards'
+  require 'test_game'
 end
