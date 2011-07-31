@@ -129,12 +129,12 @@ module Dominion
     end
     
     def setup_supply(options)
-      @kingdom_cards = options[:kingdom_cards] || Kingdom.randomly_choose_kingdom(options)
-      @colony_game = options[:colony_game?] || Kingdom.randomly_choose_if_colony_game(@kingdom_cards)
+      @kingdom_cards = options[:kingdom_cards] || Setup.randomly_choose_kingdom(options)
+      @colony_game = options[:colony_game?] || Setup.randomly_choose_if_colony_game(@kingdom_cards)
       
       @supply = {}
       all_cards.each do |card|
-        count = Kingdom.initial_count_in_supply card, num_players
+        count = Setup.initial_count_in_supply card, num_players
         pile = (1..count).collect { card.new self }
         @supply[card] = pile
       end

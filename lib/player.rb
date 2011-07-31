@@ -41,7 +41,7 @@ module Dominion
     
     def discard(card, options = {})
       found = @hand.delete card
-      raise 'Hand does not contain card: ' + card unless found
+      raise "Hand does not contain card: #{card}" unless found
       to = options[:to] || :discard
 
       case to
@@ -56,7 +56,7 @@ module Dominion
     
     def to_s
       if identity.nil?
-        '(anonymous)'
+        "Player #{position}"
       else
         identity
       end

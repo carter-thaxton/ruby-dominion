@@ -4,6 +4,6 @@ require 'card'
 require 'cards'
 require 'game'
 require 'player'
-require 'kingdom'
+require 'setup'
 
 include Dominion
