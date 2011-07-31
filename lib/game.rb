@@ -1,10 +1,8 @@
 module Dominion
   class Game
+
     PHASES = [:none, :setup, :action, :buy, :cleanup]
 
-    # Game context used for cards when unassociated with a context
-    BASE_CONTEXT = Game.new :no_setup => true
-    
     def initialize(options = {})
       @kingdom_cards = []
       @colony_game = false
@@ -15,6 +13,9 @@ module Dominion
       
       setup(options) unless options[:no_setup]
     end
+    
+    # Game context used for cards when unassociated with a context
+    BASE_CONTEXT = Game.new :no_setup => true
     
     def setup(options = {})
       # Create players, then setup supply, because supply depends on number of players
@@ -54,6 +55,10 @@ module Dominion
     
     def colony_game?
       @colony_game
+    end
+    
+    def phase
+      @phase
     end
     
     def in_progress?

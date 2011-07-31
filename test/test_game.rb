@@ -19,6 +19,8 @@ class TestCards < Test::Unit::TestCase
   end
 
   def test_game_state
+    assert !Game::BASE_CONTEXT.in_progress?
+    
     game = Game.new :no_setup => true
     assert !game.in_progress?
     
