@@ -1,3 +1,5 @@
+require 'card'
+
 module Dominion
   
   class Copper < Card

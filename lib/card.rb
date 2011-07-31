@@ -1,3 +1,5 @@
+require 'game'
+
 module Dominion
 
   def self.all_cards
@@ -5,6 +7,9 @@ module Dominion
   end
   
   class Card
+    # Game context used for cards when unassociated with a context
+    BASE_CONTEXT = Game.new :no_setup => true
+    
     # Define a DSL for cards
     class << self
       private
@@ -64,7 +69,7 @@ module Dominion
     end
     
     def initialize(game = nil, player = nil)
-      @game = game || Game::BASE_CONTEXT
+      @game = game || Card::BASE_CONTEXT
       @player = player
     end
     

@@ -14,9 +14,6 @@ module Dominion
       setup(options) unless options[:no_setup]
     end
     
-    # Game context used for cards when unassociated with a context
-    BASE_CONTEXT = Game.new :no_setup => true
-    
     def setup(options = {})
       # Create players, then setup supply, because supply depends on number of players
       # Then setup the initial decks/hands for the players, drawing from the supply
