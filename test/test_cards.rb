@@ -1,7 +1,6 @@
 require File.dirname(__FILE__) + '/common'
 
 class TestCards < Test::Unit::TestCase
-  include Dominion
 
   class MockGame
     attr_accessor :buy_phase, :actions_played

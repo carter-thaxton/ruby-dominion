@@ -17,7 +17,7 @@ module Dominion
           end
         end
       end
-    
+      
       def self.define_class_attrs(*attrs)
         attrs.each do |attr|
           send :define_method, attr do |*args|

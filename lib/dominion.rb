@@ -5,3 +5,5 @@ require 'cards'
 require 'game'
 require 'player'
 require 'kingdom'
+
+include Dominion

@@ -1,7 +1,6 @@
 require File.dirname(__FILE__) + '/common'
 
 class TestCards < Test::Unit::TestCase
-  include Dominion
 
   def test_supply
     assert_equal 10, Kingdom.initial_count_in_supply(Village, 2)

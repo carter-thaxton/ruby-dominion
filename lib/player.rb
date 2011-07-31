@@ -29,7 +29,14 @@ module Dominion
     end
     
     def draw
-      @hand.push @deck.shift
+      if @deck.empty?
+        @deck = @discard
+        @discard = []
+        @deck.shuffle!
+      end
+      card = @deck.shift
+      @hand.push card if card
+      card
     end
     
     def discard(card, options = {})
