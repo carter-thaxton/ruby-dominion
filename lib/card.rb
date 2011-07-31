@@ -1,7 +1,10 @@
 module Dominion
-  class Card
-    @all_cards = []
 
+  def self.all_cards
+    @all_cards ||= []
+  end
+  
+  class Card
     # Define a DSL for cards
     class << self
       private
@@ -29,6 +32,7 @@ module Dominion
         subclass.instance_eval do
           @type = []
           @cost = 0
+          @potion = false
           @cards = 0
           @actions = 0
           @buys = 0
@@ -37,16 +41,14 @@ module Dominion
           @vp_tokens = 0
         end
         
-        @all_cards << subclass
+        Dominion.all_cards << subclass
       end
 
       define_type_attrs :base, :action, :attack, :victory, :treasure, :curse, :reaction, :duration
-      define_class_attrs :cost, :cards, :actions, :buys, :coins, :vp, :vp_tokens
+      define_class_attrs :cost, :potion, :cards, :actions, :buys, :coins, :vp, :vp_tokens
 
       public
 
-      attr_reader :all_cards
-    
       def type(*args)
         @type = args if args.length >= 1
         @type
@@ -55,14 +57,14 @@ module Dominion
       def to_s
         (name.split '::').last
       end
-    
+      
       def kingdom?
         not base?
       end
     end
     
-    def initialize(game)
-      @game = game
+    def initialize(context = nil)
+      @context = context || Game.BASE_CONTEXT
     end
     
     def type
@@ -73,7 +75,7 @@ module Dominion
       if self.class.respond_to? method
         self.class.send method
       else
-        @game.send method
+        @context.send method
       end
     end
     

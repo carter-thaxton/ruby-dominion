@@ -23,6 +23,11 @@ module Dominion
     cost 9
     coins 5
   end
+  
+  class Potion < Card
+    type :base, :treasure, :potion
+    cost 4
+  end
 
   class Estate < Card
     type :base, :victory
@@ -61,13 +66,24 @@ module Dominion
     actions 1
     vp 1
   end
+  
+  class Fairgrounds < Card
+    type :victory
+    cost 6
+    vp :dynamic
+    
+    def vp
+      num_unique_cards = owner.all_cards.map {|c| c.class }.uniq.length
+      num_unique_cards * 2
+    end
+  end
 
   class Bishop < Card
     type :action
     cost 4
     coins 1
     vp_tokens :dynamic
-  
+
     def play
       @trashed_card = yield :choose_card_to_trash
     end
@@ -92,8 +108,8 @@ module Dominion
     def play
       gain Silver, :to => :deck
       other_players.each do |player|
-        @revealed = player.reveal :from => :hand, :type => :victory?, :attack => true
-        player.put @revealed, :to => :deck if @revealed
+        revealed = player.reveal :type => :victory, :attack => true
+        player.put @revealed, :to => :deck if revealed
       end
     end
   end
@@ -110,15 +126,15 @@ module Dominion
     def cleanup
       super.cleanup
       if @reshuffle
-        discard += deck
-        deck = []
+        discard_pile += deck
+        deck.clear
       end
     end
   end
 
   class Peddler < Card
     type :action
-    cost :dynamic   # 8*
+    cost :dynamic   # 8* (see below)
     cards 1
     actions 1
     coins 1
@@ -128,6 +144,52 @@ module Dominion
         [8 - 2 * actions_played, 0].max
       else
         8
+      end
+    end
+  end
+  
+  class Witch < Card
+    type :action, :attack
+    cost 5
+    cards 2
+    
+    def play
+      other_players.each do |player|
+        player.gain Curse
+      end
+    end
+  end
+  
+  class Mountebank < Card
+    type :action, :attack
+    cost 5
+    coins 2
+    
+    def play
+      other_players.each do |player|
+        revealed = player.reveal :type => Curse, :attack => true
+        unless revealed
+          player.gain Copper
+          player.gain Curse
+        end
+      end
+    end
+  end
+  
+  class BlackMarket < Card
+    # Good luck...
+  end
+  
+  class Familiar < Card
+    type :action, :attack
+    cost 3
+    potion true
+    cards 1
+    actions 1
+    
+    def play
+      other_players.each do |player|
+        player.gain Curse
       end
     end
   end

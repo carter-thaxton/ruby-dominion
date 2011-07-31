@@ -1,0 +1,23 @@
+
+
+               Card.class
+                    ^
+                    |
+Game <- Player <- Card
+
+
+
+peddler
+  class = Peddler
+    superclass = Card
+  player
+    game
+
+
+Card Contexts:
+- Owned by player (in hand, deck, discard, etc)
+- In game, but not by a player (in supply, trash, etc)
+- Not in game (while randomizing, picking rules, documentation of cards, etc)
+
+Abstractly, all cards have a context, even that last bit, which is essentially a game in a special phase.
+

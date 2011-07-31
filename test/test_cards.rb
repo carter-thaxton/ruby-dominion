@@ -41,7 +41,7 @@ class TestCards < Test::Unit::TestCase
   end
   
   def test_cards
-    all_cards = Card.all_cards
+    all_cards = Dominion.all_cards
   end
 
 end
