@@ -1,23 +1,74 @@
 
 
+How Card Contexts Work
+======================
+
+
+The properties of Cards are much more contextual than I first realized.
+- Some properties are invariant of any context, e.g. the number of actions a Village provides (+2).
+- Some properties are true for all Cards of a given type, but are dependent on Game state, e.g. the cost of Peddler, or the cost of any Card after Bridge is played.
+- Some properties are actually dependent on the instance of the Card itself, e.g. the coins provided by a given Bank card.  You can play two Banks in one hand, and each will provide a different number of coins.
+
+It's convenient (and necessary) to be able to ask any Card instance for its cost.  However, it's also convenient to be able to ask about the cost of "Peddler", without referring to any particular instance.  Note that this is still dependent on Game state.
+
+How should we setup the contexts and dependencies for this kind of thing.  Ideally, I'd like to be able to say:  Peddler.cost, but that may not really be possible.  Imagine two games in progress at the same time.  What value should Peddler.cost return?
+
+My compromise is the following:
+Peddler.cost always returns 8.
+However, peddler.cost (where peddler is an instance of Peddler), will return a contextual cost.
+All cards have a context, which can be a Player or a Game instance.
+
+The rules for cards refer to a number of properties and verbs, like 'deck', 'trash', 'supply', 'gain', etc.  Ideally the DSL for each Card should use these same terms.
+
+Peddler.new will return a Peddler instance with no context (actually its context defaults to Game::BASE_CONTEXT).
+
+When evaluating various buy rules, it's convenient to refer to "Peddler", not to a given Peddler instance, but as mentioned above, that's not really possible because of the dependence on game context.
+
+Two options are available:
+- Use Peddler.new(game)
+- Use something like game.supply_piles[Peddler].first
+
+The first approach basically conjures a new card instance from thin air, and pretends it's part of the current game.
+The second approach is attractive, because it does refer to the card instance you would actually buy, without any artificial contexts running around.  You can never buy "Peddler".  You can just buy "that Peddler in the supply".  That's pretty slick.  I'll run with that and see how far I get.  There may still be times when the buy rules would like to refer to the Peddlers that aren't actually available in the supply.  For those rare occurrences, there's always option #1.
+
+
+Card Contexts:
+- Owned by a player (in hand, deck, discard, etc)
+- In game, but not by a player (in supply, trash, etc)
+- Not in game (while randomizing, picking rules, documentation of cards, etc)
+
+Abstractly, all card instances have a context, even that last bit, which is essentially a game in a special phase.
+
+When method_missing is called on a Card instance, it defers first to the Card's class, if it responds to the method.  This lets the Card class be a prototype for all instances, for a number of very common properties, which are independent of any context.  e.g. cost, actions, buys, etc. for most cards.
+
+If the Card class does not respond to the missing method, then the 'context' is called.  This context is duck-typed.  It may be a Player, a Game in progress, or the Game::BASE_CONTEXT instance, which is basically a dummy game not being played.  This is useful when you want to just ask "How much does Peddler cost?".
+
+
+So, the chain of command looks something like this:
+
+- Card instance
+- Card class
+- Player instance  (optional)
+- Game instance
+- Game::BASE_CONTEXT
+
+Seem complex?  It is.  Unfortunately, that's the best I can come up with, as a place to put each rule, to cover the myriad complexities of the game, and I haven't even thought about coding Possession yet!
+
+Luckily, the mechanism defined in Card makes most of this transparent.  Check out cards.rb to see the DSL in practice.
+
+
                Card.class
                     ^
                     |
 Game <- Player <- Card
-
+  ^                 |
+  +-----------------+
 
 
 peddler
   class = Peddler
     superclass = Card
-  player
-    game
+  context = instance of Player or Game
 
 
-Card Contexts:
-- Owned by player (in hand, deck, discard, etc)
-- In game, but not by a player (in supply, trash, etc)
-- Not in game (while randomizing, picking rules, documentation of cards, etc)
-
-Abstractly, all cards have a context, even that last bit, which is essentially a game in a special phase.
 
