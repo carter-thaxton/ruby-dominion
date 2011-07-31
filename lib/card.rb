@@ -64,7 +64,7 @@ module Dominion
     end
     
     def initialize(context = nil)
-      @context = context || Game.BASE_CONTEXT
+      @context = context || Game::BASE_CONTEXT
     end
     
     def type

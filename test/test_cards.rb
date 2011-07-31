@@ -23,6 +23,11 @@ class TestCards < Test::Unit::TestCase
   end
 
   def test_peddler
+    # out of context
+    p = Peddler.new
+    assert_equal 8, p.cost
+
+    # in game context
     p = Peddler.new @game
 
     @game.buy_phase = true
