@@ -1,11 +1,35 @@
 module Dominion
   class Player
-    def initialize
+    
+    attr_reader :game, :position, :identity, :deck, :discard_pile, :hand, :in_play, :duration_in_play
+    
+    def initialize(game, position, identity)
+      @game = game
+      @position = position
+      @identity = identity
       @deck = []
       @discard_pile = []
       @hand = []
-      @played = []
-      @pending_duration_cards = []
+      @in_play = []
+      @duration_in_play = []
+    end
+    
+    def setup(options = {})
+      @deck = []
+      7.times { @deck.push game.draw_from_supply Copper, self }
+      3.times { @deck.push game.draw_from_supply Estate, self }
+      @deck.shuffle!
+
+      @hand = []
+      draw_hand
+    end
+    
+    def draw_hand
+      5.times { draw }
+    end
+    
+    def draw
+      @hand.push @deck.shift
     end
     
     def discard(card, options = {})
@@ -21,6 +45,18 @@ module Dominion
       else
         raise 'Cannot discard to: ' + to
       end
+    end
+    
+    def to_s
+      if identity.nil?
+        '(anonymous)'
+      else
+        identity
+      end
+    end
+    
+    def method_missing(method, *args)
+      @game.send method, *args
     end
     
   end

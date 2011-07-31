@@ -1,8 +1,6 @@
 
-
 How Card Contexts Work
 ======================
-
 
 The properties of Cards are much more contextual than I first realized.
 - Some properties are invariant of any context, e.g. the number of actions a Village provides (+2).
@@ -71,4 +69,80 @@ peddler
   context = instance of Player or Game
 
 
+
+Player vs PlayerIdentity
+========================
+
+A Player is a member of a Game.  A PlayerIdentity is more like a login on isotropic.
+The main reason for the distinction is so a single PlayerIdentity can play two Games at once.
+It's also convenient to have a Player with no PlayerIdentity, meaning an anonymous Player.
+Card rules should refer to Player, and never to PlayerIdentity.  (Man, that would be some duration card.)
+
+
+Where can Cards live?
+=====================
+- No Context (Game::BASE_CONTEXT)
++ Game
+  - Supply
+  - Trash
+  + Player
+    - In Play
+    - Duration In Play  (Lighthouse, Caravan, Haven, etc)
+    - Hand
+    - Deck
+    - Discard
+    - Mats (Island, Native Village, etc)
+
+Each Card instance has a 'location' property, which returns one of these locations as a symbol.
+
+What about a KingsCourt played on a duration card like Caravan?  The KingsCourt becomes a duration_in_play, just like the Caravan itself.  Note that Player.duration_cards_in_play will contain the KingsCourt, not the Caravan, and the KingsCourt contains a reference to the Caravan.  In fact, the KingsCourt 'remembers' which cards were played, for just these occasions.  You don't get to re-choose which 3 cards to play when replaying a durationized KingsCourt.  The fact that you chose to KingsCourt a KingsCourt, then choose two 2 Caravans, and a non-duration card are set in stone on the first play.
+
+
+Game State Machine
+==================
+
+This is as good a time as any to think through the various game states, and their corresponding hooks on cards.
+
+- do_setup
+- do_action
+- do_reaction
+- do_buy
+- do_cleanup
+
+Most cards have no need for do_setup.  However, this is when duration cards still in play from the previous turn take their second effect.  e.g. Haven, Caravan, and even KingsCourts on duration cards (see above).
+
+do_action is when most action cards have an effect.  e.g. this is when a Village actually gives you +2 actions and +1 card.
+
+do_reaction (see below)
+
+do_buy is called when a card is played during the buy phase.  Copper simply gives the player +1 coin.
+Cards like Venture, Loan, and Contraband are considerably more complex.
+
+do_cleanup is called when the buy phase is complete.  Duration cards actually have this hook called twice.
+
+
+Reactions
+=========
+
+do_reaction is interesting.  When an attack or other trigger for a reaction is played, we first go through all possible cards that could be played, calling the 'reacts_to?' method.  Then a choice is given to the player.  Finally, the do_reaction method is called.
+
+Examples:
+- PlayerA plays a Witch during their action phase
+- PlayerB has a Watchtower in hand, and a Lighthouse in play
+- In the DSL, 'player.gain Curse, :attack => true' is called
+- This causes two hooks to be called on the player:
+  - reacts_to? :attack
+  - reacts_to? :gain
+- In turn, the player calls reacts_to? on each card in their hand, or in their duration_cards_in_play
+- For each card that may cause a reaction, e.g. Watchtower, Lighthouse, the player is given a choice
+- If the player actually chooses to react, then the do_reaction method is called on that card
+
+- There are four possible outcomes here:
+  1. Supply pile contains no Curses, no attack
+  2. reacts_to? :attack, Lighthouse available, PlayerB plays Lighthouse, attack is unsuccessful.
+  3. reacts_to? :attack, Lighthouse available, PlayerB does not play Lighthouse, reacts_to? :gain, Watchtower available, PlayerB plays Watchtower, Curse is trashed
+  4. reacts_to? :attack, Lighthouse available, PlayerB does not play Lighthouse, reacts_to? :gain, Watchtower available, PlayerB does not play Watchtower, Curse is gained by PlayerB from supply
+
+Note that 2 and 3 are different, because a Curse is trashed in 3, but left in the supply in 2.
+I have no idea how I'm going to program a computer to make this choice intelligently.  :)
 

@@ -99,6 +99,12 @@ module Dominion
     cards 1
     actions 2
   end
+  
+  class Smithy < Card
+    type :action
+    cost 4
+    cards 3
+  end
 
   class Bureaucrat < Card
     type :action, :attack

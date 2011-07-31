@@ -63,19 +63,26 @@ module Dominion
       end
     end
     
-    def initialize(context = nil)
-      @context = context || Game::BASE_CONTEXT
+    def initialize(game = nil, player = nil)
+      @game = game || Game::BASE_CONTEXT
+      @player = player
     end
     
+    attr_reader :game
+    attr_accessor :player
+    
+    # type is an alias for class, defined by object, so method_missing won't get called
     def type
       self.class.type
     end
 
-    def method_missing(method)
+    def method_missing(method, *args)
       if self.class.respond_to? method
-        self.class.send method
+        self.class.send method, *args
+      elsif @player
+        @player.send method, *args
       else
-        @context.send method
+        @game.send method, *args
       end
     end
     

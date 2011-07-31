@@ -15,11 +15,20 @@ class TestCards < Test::Unit::TestCase
   end
   
   def test_simple_card
+    assert Village.action?
+    assert Village.kingdom?
+    assert !Village.victory?
+    
     v = Village.new @game
 
     assert_equal 2, v.actions
     assert_equal 1, v.cards
     assert_equal 0, v.buys
+    
+    assert v.action?
+    assert v.kingdom?
+    assert !v.victory?
+    assert !v.base?
   end
 
   def test_peddler
