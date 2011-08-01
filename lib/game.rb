@@ -1,7 +1,7 @@
 module Dominion
   class Game
 
-    PHASES = [:prepare, :setup, :action, :treasure, :buy, :cleanup]
+    PHASES = [:prepare, :setup, :action, :treasure, :buy, :cleanup, :game_over]
 
     def initialize(options = {})
       @kingdom_cards = []
@@ -17,15 +17,20 @@ module Dominion
     def prepare(options = {})
       # Create players, then prepare supply, because supply depends on number of players
       # Then prepare the initial decks/hands for the players, drawing from the supply
-      @phase = :prepare
+      move_to_phase :prepare
       create_players options
       prepare_supply options
       prepare_players options
-      @phase = :setup
+
+      move_to_phase :setup
+      current_player.start_turn
     end
     
-    attr_reader :kingdom_cards, :players, :current_player, :supply
-    attr_accessor :phase
+    attr_reader :phase, :kingdom_cards, :players, :current_player, :supply
+    
+    def move_to_phase(phase)
+      @phase = phase
+    end
     
     def all_cards
       base_cards + kingdom_cards
@@ -53,7 +58,11 @@ module Dominion
     end
     
     def in_progress?
-      @phase != :prepare
+      !prepare_phase? && !game_over?
+    end
+    
+    def prepare_phase?
+      @phase == :prepare
     end
     
     def setup_phase?
@@ -74,6 +83,10 @@ module Dominion
     
     def cleanup_phase?
       @phase == :cleanup
+    end
+    
+    def game_over?
+      @phase == :game_over
     end
     
     def num_players
@@ -97,6 +110,38 @@ module Dominion
       result = @supply[card_class].shift
       result.player = player
       result
+    end
+    
+    def check_for_game_over
+      provinces_gone = supply[Province].empty?
+      colonies_gone = (colony_game? && supply[Colony].empty?)
+      num_empty_piles = supply.count{ |pile| pile.empty? }
+      
+      game_over = provinces_gone || colonies_gone || num_empty_piles >= 3
+      
+      if game_over
+        move_to_phase :game_over
+        @current_player = nil
+        determine_winner
+      end
+    end
+    
+    def determine_winner
+      # needs work, to handle ties, multiple players, and scoring based on number of turns played
+      @winner = players.max { |player| [player.total_victory_points, 5] }
+    end
+    
+    def move_to_next_player
+      raise "Cannot move to next player unless in setup phase" unless setup_phase?
+      raise "There are no players" if players.empty?
+      
+      next_player_position = (current_player.position + 1) % num_players
+      player = players[next_player_position]
+      
+      @current_player = player
+      player.start_turn
+
+      player
     end
     
     private

@@ -4,7 +4,8 @@ module Dominion
     attr_reader :game, :position, :identity,
       :deck, :discard_pile, :hand,
       :actions_in_play, :treasures_in_play, :durations_in_play,
-      :actions_available, :buys_available, :coins_available
+      :actions_available, :buys_available, :coins_available,
+      :vp_tokens
     
     def initialize(game, position, identity)
       @game = game
@@ -19,6 +20,7 @@ module Dominion
       @actions_available = 0
       @buys_available = 0
       @coins_available = 0
+      @vp_tokens = 0
     end
     
     def prepare(options = {})
@@ -36,7 +38,29 @@ module Dominion
       @actions_available = 1
       @buys_available = 1
       @coins_available = 0
-      game.phase = :action
+      move_to_phase :action
+    end
+    
+    def end_turn
+      raise "Cannot end turn in #{phase} phase" unless action_phase? || treasure_phase? || buy_phase?
+      move_to_phase :cleanup
+      
+      @actions_in_play.each { |card| card.do_cleanup }
+      @discard_pile += @actions_in_play
+      @actions_in_play = []
+
+      @treasures_in_play.each { |card| card.do_cleanup }
+      @discard_pile += @treasures_in_play
+      @treasures_in_play = []
+      
+      @hand.each { |card| card.do_cleanup }
+      @discard_pile += @hand
+      @hand = []
+      
+      draw 5
+      move_to_phase :setup
+      check_for_game_over
+      move_to_next_player if in_progress?
     end
     
     def draw(count = 1)
@@ -60,34 +84,35 @@ module Dominion
     end
     
     def buy(card_class)
+      raise "No more buys available" unless @buys_available > 0
+      
       card = peek_from_supply(card_class)
       raise "#{card} costs $#{card.cost} but only $#{@coins_available} available" if card.cost > @coins_available
       
       card = gain(card_class)
+      @buys_available -= 1
       @coins_available -= card.cost
+      
       card
     end
     
-    def gain(card_class)
+    def gain(card_class, options = {})
+      to = options[:to] || :discard
+      
       card = draw_from_supply(card_class, self)
-      @discard_pile << card if card
+      if card
+        case to
+        when :discard
+          @discard_pile << card
+        when :deck
+          @deck << card
+        when :hand
+          @hand << card
+        end
+      end
+      
       card
     end
-    
-    # def discard(card, options = {})
-    #   found = @hand.delete card
-    #   raise "Hand does not contain card: #{card}" unless found
-    #   to = options[:to] || :discard
-    # 
-    #   case to
-    #   when :deck
-    #     @deck << card
-    #   when :discard
-    #     @discard_pile << card
-    #   else
-    #     raise 'Cannot discard to: ' + to
-    #   end
-    # end
     
     def play(card)
       if is_card_class(card)
@@ -105,15 +130,16 @@ module Dominion
       raise "#{card} is an action card, but currently in #{phase} phase" if card.action? && !action_phase?
       raise "#{card} is an action card, and there are no actions available" if card.action? && actions_available <= 0
       
-      game.phase = :treasure if action_phase? && card.treasure?   # automatically move to treasure phase
+      move_to_phase :treasure if action_phase? && card.treasure?   # automatically move to treasure phase
       raise "#{card} is a treasure card, but currently in #{phase} phase" if card.treasure? && !treasure_phase?
 
       hand.delete card
       
       if action_phase? && card.action?
         @actions_in_play << card
+        @actions_available -= 1
         @actions_available += card.actions
-        @buys_availalbe += card.buys
+        @buys_available += card.buys
         @coins_available += card.coins
         draw card.cards
         card.do_action
@@ -123,11 +149,26 @@ module Dominion
         @coins_available += card.coins
         card.do_treasure
       end
+      
+      card
     end
     
     def play_all_treasures
       treasure_cards = hand.find_all { |card| card.treasure? }
       treasure_cards.each { |card| play card }
+    end
+    
+    def cards_in_play
+      actions_in_play + treasures_in_play + durations_in_play
+    end
+    
+    def all_cards
+      deck + discard_pile + hand + cards_in_play
+    end
+    
+    def total_victory_points
+      vp_from_cards = all_cards.inject(0) { |sum, card| sum + card.vp }
+      vp_from_cards + vp_tokens
     end
     
     def name
