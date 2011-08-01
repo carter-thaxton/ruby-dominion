@@ -78,6 +78,7 @@ module Dominion
     # Hooks - empty by default
     def do_setup; end
     def do_action; end
+    def do_treasure; end
     def do_buy; end
     def do_cleanup; end
 

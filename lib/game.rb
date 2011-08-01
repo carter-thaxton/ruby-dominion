@@ -37,14 +37,14 @@ module Dominion
     
     def base_treasure_cards
       cards = [Copper, Silver, Gold]
-      cards.push Platinum if colony_game?
-      cards.push Potion if kingdom_cards.any? {|c| c.potion }
+      cards << Platinum if colony_game?
+      cards << Potion if kingdom_cards.any? {|c| c.potion }
       cards
     end
     
     def base_victory_cards
       cards = [Estate, Duchy, Province]
-      cards.push Colony if colony_game?
+      cards << Colony if colony_game?
       cards
     end
     
@@ -84,12 +84,17 @@ module Dominion
       @players.reject { |p| p == current_player }
     end
     
-    def draw_from_supply(card, player = nil)
-      raise "No cards of type #{card} available in supply" unless @supply[card]
-      raise "No more cards of type #{card} available in supply" if @supply[card].empty?
+    def peek_from_supply(card_class)
+      raise "No cards of type #{card_class} available in supply" unless @supply[card_class]
+      raise "No more cards of type #{card_class} available in supply" if @supply[card_class].empty?
+      @supply[card_class].first
+    end
+    
+    def draw_from_supply(card_class, player = nil)
       raise "Player is not playing this game!" if player && player.game != self
+      peek_from_supply(card_class)
       
-      result = @supply[card].shift
+      result = @supply[card_class].shift
       result.player = player
       result
     end
@@ -105,7 +110,7 @@ module Dominion
       
       @players = []
       player_identities.each_with_index do |player_identity, position|
-        @players.push Player.new(self, position, player_identity)
+        @players << Player.new(self, position, player_identity)
       end
       
       @current_player = @players.first

@@ -1,4 +1,7 @@
 
+irb -Ilib -rdominion
+
+
 How Card Contexts Work
 ======================
 
