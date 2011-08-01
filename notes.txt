@@ -81,19 +81,18 @@ Card rules should refer to Player, and never to PlayerIdentity.  (Man, that woul
 
 Where can Cards live?
 =====================
-- No Context (Game::BASE_CONTEXT)
+- No Context (Card::BASE_CONTEXT)
 + Game
-  - Supply
-  - Trash
+  - supply
+  - trash_pile
   + Player
-    - In Play
-    - Duration In Play  (Lighthouse, Caravan, Haven, etc)
-    - Hand
-    - Deck
-    - Discard
-    - Mats (Island, Native Village, etc)
-
-Each Card instance has a 'location' property, which returns one of these locations as a symbol.
+    - actions_in_play
+    - durations_in_play  (Lighthouse, Caravan, Haven, etc)
+    - treasures_in_play
+    - hand
+    - deck
+    - discard_pile
+    - various mats (Island, NativeVillage, etc)
 
 What about a KingsCourt played on a duration card like Caravan?  The KingsCourt becomes a duration_in_play, just like the Caravan itself.  Note that Player.duration_cards_in_play will contain the KingsCourt, not the Caravan, and the KingsCourt contains a reference to the Caravan.  In fact, the KingsCourt 'remembers' which cards were played, for just these occasions.  You don't get to re-choose which 3 cards to play when replaying a durationized KingsCourt.  The fact that you chose to KingsCourt a KingsCourt, then choose two 2 Caravans, and a non-duration card are set in stone on the first play.
 
@@ -103,23 +102,35 @@ Game State Machine
 
 This is as good a time as any to think through the various game states, and their corresponding hooks on cards.
 
+Standard phases, and corresponding hooks of every turn:
 - do_setup
 - do_action
-- do_reaction
+- do_treasure
 - do_buy
 - do_cleanup
+
+Optional hook, called when various triggers occur.  See below.
+- do_reaction
+
+The rule books say treasures are played in the 'buy' phase, but then they go to great lengths to say that you must play all treasures before doing any buys.
+
+My design separates the treasure/buy phases, and works like this:
+- actions are played in the action phase
+- treasures are played in the treasure phase
+- buys are done in the buy phase
+See how easy it is when you just name things correctly?
 
 Most cards have no need for do_setup.  However, this is when duration cards still in play from the previous turn take their second effect.  e.g. Haven, Caravan, and even KingsCourts on duration cards (see above).
 
 do_action is when most action cards have an effect.  e.g. this is when a Village actually gives you +2 actions and +1 card.
 
-do_reaction (see below)
-
-do_buy is called when a card is played during the buy phase.  Copper simply gives the player +1 coin.
+do_treasure is called when a treasure card is played.
+Copper simply gives the player +1 coin.
 Cards like Venture, Loan, and Contraband are considerably more complex.
 
-do_cleanup is called when the buy phase is complete.  Duration cards actually have this hook called twice.
+do_buy is called when a card is bought.  This is useful for reactions, such as Watchtower.
 
+do_cleanup is called on all cards in play when the buy phase is complete.  Duration cards played will not be cleaned up at this time, however.  Instead, they are brought back into play on the following do_setup.  do_cleanup is called on duration cards only when they really are cleaned up the second time around.
 
 
 Reactions
@@ -147,3 +158,20 @@ Examples:
 Note that 2 and 3 are different, because a Curse is trashed in 3, but left in the supply in 2.
 I have no idea how I'm going to program a computer to make this choice intelligently.  :)
 
+
+Inversion of Control
+====================
+
+Who calls what?  Does the game call a player, and ask them to make a choice?  Does the game just sit there,
+and let the player call it?  In some respects it seems like having the game call the player is appropriate,
+but if I ever want this to be asynchronous (e.g. run a server like isotropic), then I'll need a way to
+avoid saving all of this state on the call stack, and instead keep it in the game state.  That suggests
+a design more like the latter, where the game just sits there, waiting for methods to be called on it.
+This latter design is definitely more complicated.  It make reactions and the like very complicated.
+
+Maybe I can start simpler, by having the game call the players, and then later, if there's ever a need
+to make the program truly asynchronous, go back and put the state into the cards/game, rather than in the
+call stack.
+
+Players need a proxy, so human vs simulator can be easily plugged in.  Every time the player has to make
+a choice, it can call out to the proxy.

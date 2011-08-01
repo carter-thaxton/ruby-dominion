@@ -84,12 +84,12 @@ module Dominion
     type :action
     cost 4
     coins 1
-    vp_tokens :dynamic
 
-    def play
-      @trashed_card = yield :choose_card_to_trash
+    def do_action
+      @trashed_card = choose :type => :card, :message => "Choose a card to trash"
+      add_vp_tokens vp_tokens
     end
-  
+
     def vp_tokens
       1 + (@trashed_card.cost / 2).floor
     end
@@ -113,7 +113,7 @@ module Dominion
     cost 3
     coins 2
 
-    def play
+    def do_action
       gain Silver, :to => :deck
       other_players.each do |player|
         revealed = player.reveal :type => :victory, :attack => true
@@ -127,12 +127,8 @@ module Dominion
     cost 3
     coins 2
   
-    def play
-      @reshuffle = yield :immediately_put_deck_into_discard_pile?
-    end
-  
-    def cleanup
-      super.cleanup
+    def do_action
+      @reshuffle = choose :type => :bool, :message => "Immediately put deck into discard pile?"
       if @reshuffle
         discard_pile += deck
         deck.clear
@@ -149,7 +145,8 @@ module Dominion
   
     def cost
       if buy_phase?
-        [8 - 2 * actions_played, 0].max
+        num_actions = actions_in_play.size + durations_in_play.size
+        [8 - 2 * num_actions, 0].max
       else
         8
       end
@@ -161,7 +158,7 @@ module Dominion
     cost 5
     cards 2
     
-    def play
+    def do_action
       other_players.each do |player|
         player.gain Curse
       end
@@ -173,7 +170,7 @@ module Dominion
     cost 5
     coins 2
     
-    def play
+    def do_action
       other_players.each do |player|
         revealed = player.reveal :type => Curse, :attack => true
         unless revealed
@@ -195,7 +192,7 @@ module Dominion
     cards 1
     actions 1
     
-    def play
+    def do_action
       other_players.each do |player|
         player.gain Curse
       end

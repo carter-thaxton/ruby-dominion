@@ -3,26 +3,26 @@ require File.dirname(__FILE__) + '/common'
 class TestCards < Test::Unit::TestCase
 
   def test_supply
-    assert_equal 10, Setup.initial_count_in_supply(Village, 2)
+    assert_equal 10, Preparation.initial_count_in_supply(Village, 2)
 
-    assert_equal 10, Setup.initial_count_in_supply(Curse, 2)
-    assert_equal 20, Setup.initial_count_in_supply(Curse, 3)
-    assert_equal 30, Setup.initial_count_in_supply(Curse, 4)
+    assert_equal 10, Preparation.initial_count_in_supply(Curse, 2)
+    assert_equal 20, Preparation.initial_count_in_supply(Curse, 3)
+    assert_equal 30, Preparation.initial_count_in_supply(Curse, 4)
 
-    assert_equal  8 + 0*3, Setup.initial_count_in_supply(Estate, 0)
-    assert_equal  8 + 1*3, Setup.initial_count_in_supply(Estate, 1)
-    assert_equal  8 + 2*3, Setup.initial_count_in_supply(Estate, 2)
-    assert_equal 12 + 3*3, Setup.initial_count_in_supply(Estate, 3)
-    assert_equal 12 + 4*3, Setup.initial_count_in_supply(Estate, 4)
+    assert_equal  8 + 0*3, Preparation.initial_count_in_supply(Estate, 0)
+    assert_equal  8 + 1*3, Preparation.initial_count_in_supply(Estate, 1)
+    assert_equal  8 + 2*3, Preparation.initial_count_in_supply(Estate, 2)
+    assert_equal 12 + 3*3, Preparation.initial_count_in_supply(Estate, 3)
+    assert_equal 12 + 4*3, Preparation.initial_count_in_supply(Estate, 4)
 
     game = Game.new :num_players => 1
   end
 
   def test_game_state
-    game = Game.new :no_init => true
+    game = Game.new :no_prepare => true
     assert !game.in_progress?
     
-    game.init
+    game.prepare
     assert game.in_progress?
     
     game = Game.new

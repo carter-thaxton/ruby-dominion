@@ -1,28 +1,31 @@
 module Dominion
   class Game
 
-    PHASES = [:init, :setup, :action, :buy, :cleanup]
+    PHASES = [:prepare, :setup, :action, :treasure, :buy, :cleanup]
 
     def initialize(options = {})
       @kingdom_cards = []
       @colony_game = false
       @players = []
       @current_player = nil
-      @phase = :init
+      @phase = :prepare
       @supply = {}
       
-      init(options) unless options[:no_init]
+      prepare(options) unless options[:no_prepare]
     end
     
-    def init(options = {})
-      # Create players, then init supply, because supply depends on number of players
-      # Then init the initial decks/hands for the players, drawing from the supply
-      @phase = :init
+    def prepare(options = {})
+      # Create players, then prepare supply, because supply depends on number of players
+      # Then prepare the initial decks/hands for the players, drawing from the supply
+      @phase = :prepare
       create_players options
-      init_supply options
-      init_players options
+      prepare_supply options
+      prepare_players options
       @phase = :setup
     end
+    
+    attr_reader :kingdom_cards, :players, :current_player, :supply
+    attr_accessor :phase
     
     def all_cards
       base_cards + kingdom_cards
@@ -45,20 +48,12 @@ module Dominion
       cards
     end
     
-    def kingdom_cards
-      @kingdom_cards
-    end
-    
     def colony_game?
       @colony_game
     end
     
-    def phase
-      @phase
-    end
-    
     def in_progress?
-      @phase != :init
+      @phase != :prepare
     end
     
     def setup_phase?
@@ -69,6 +64,10 @@ module Dominion
       @phase == :action
     end
     
+    def treasure_phase?
+      @phase == :treasure
+    end
+    
     def buy_phase?
       @phase == :buy
     end
@@ -77,24 +76,12 @@ module Dominion
       @phase == :cleanup
     end
     
-    def players
-      @players
-    end
-    
     def num_players
       @players.length
     end
     
-    def current_player
-      @current_player
-    end
-    
     def other_players
       @players.reject { |p| p == current_player }
-    end
-    
-    def supply
-      @supply
     end
     
     def draw_from_supply(card, player = nil)
@@ -124,21 +111,21 @@ module Dominion
       @current_player = @players.first
     end
     
-    def init_players(options)
+    def prepare_players(options)
       @players.each do |player|
-        player.init options
+        player.prepare options
       end
     end
     
-    def init_supply(options)
-      @kingdom_cards = options[:kingdom_cards] || Setup.randomly_choose_kingdom(options)
-      @colony_game = options[:colony_game?] || Setup.randomly_choose_if_colony_game(@kingdom_cards)
+    def prepare_supply(options)
+      @kingdom_cards = options[:kingdom_cards] || Preparation.randomly_choose_kingdom(options)
+      @colony_game = options[:colony_game?] || Preparation.randomly_choose_if_colony_game(@kingdom_cards)
       
       @supply = {}
       @supply.extend PileSummary  # better to_s for supply
       
       all_cards.each do |card|
-        count = Setup.initial_count_in_supply card, num_players
+        count = Preparation.initial_count_in_supply card, num_players
         pile = (1..count).collect { card.new self }
         @supply[card] = pile
       end

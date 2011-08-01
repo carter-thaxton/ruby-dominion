@@ -1,7 +1,7 @@
 require 'cards'
 
 module Dominion
-  class Setup
+  module Preparation
     def self.randomly_choose_kingdom(options = {})
       [Village, Smithy]
     end

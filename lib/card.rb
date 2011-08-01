@@ -8,7 +8,7 @@ module Dominion
   
   class Card
     # Game context used for cards when unassociated with a context
-    BASE_CONTEXT = Game.new :no_init => true
+    BASE_CONTEXT = Game.new :no_prepare => true
     
     # Define a DSL for cards
     class << self
@@ -32,7 +32,7 @@ module Dominion
           end
         end
       end
-    
+      
       def inherited(subclass)
         subclass.instance_eval do
           @type = []
@@ -43,14 +43,13 @@ module Dominion
           @buys = 0
           @coins = 0
           @vp = 0
-          @vp_tokens = 0
         end
         
         Dominion.all_cards << subclass
       end
 
       define_type_attrs :base, :action, :attack, :victory, :treasure, :curse, :reaction, :duration
-      define_class_attrs :cost, :potion, :cards, :actions, :buys, :coins, :vp, :vp_tokens
+      define_class_attrs :cost, :potion, :cards, :actions, :buys, :coins, :vp
 
       public
 
@@ -76,6 +75,12 @@ module Dominion
     attr_reader :game
     attr_accessor :player
     
+    # Hooks - empty by default
+    def do_setup; end
+    def do_action; end
+    def do_buy; end
+    def do_cleanup; end
+
     # type is an alias for class, defined by object, so method_missing won't get called
     def type
       self.class.type
