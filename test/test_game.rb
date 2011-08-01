@@ -19,10 +19,10 @@ class TestCards < Test::Unit::TestCase
   end
 
   def test_game_state
-    game = Game.new :no_setup => true
+    game = Game.new :no_init => true
     assert !game.in_progress?
     
-    game.setup
+    game.init
     assert game.in_progress?
     
     game = Game.new

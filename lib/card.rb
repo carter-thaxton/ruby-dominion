@@ -8,7 +8,7 @@ module Dominion
   
   class Card
     # Game context used for cards when unassociated with a context
-    BASE_CONTEXT = Game.new :no_setup => true
+    BASE_CONTEXT = Game.new :no_init => true
     
     # Define a DSL for cards
     class << self

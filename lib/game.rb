@@ -1,27 +1,26 @@
 module Dominion
   class Game
 
-    PHASES = [:none, :setup, :action, :buy, :cleanup]
+    PHASES = [:init, :setup, :action, :buy, :cleanup]
 
     def initialize(options = {})
       @kingdom_cards = []
       @colony_game = false
       @players = []
       @current_player = nil
-      @phase = :none
+      @phase = :init
       @supply = {}
       
-      setup(options) unless options[:no_setup]
+      init(options) unless options[:no_init]
     end
     
-    def setup(options = {})
-      # Create players, then setup supply, because supply depends on number of players
-      # Then setup the initial decks/hands for the players, drawing from the supply
+    def init(options = {})
+      # Create players, then init supply, because supply depends on number of players
+      # Then init the initial decks/hands for the players, drawing from the supply
+      @phase = :init
       create_players options
-      setup_supply options
-      @players.each do |player|
-        player.setup options
-      end
+      init_supply options
+      init_players options
       @phase = :setup
     end
     
@@ -59,7 +58,7 @@ module Dominion
     end
     
     def in_progress?
-      @phase != :none
+      @phase != :init
     end
     
     def setup_phase?
@@ -125,7 +124,13 @@ module Dominion
       @current_player = @players.first
     end
     
-    def setup_supply(options)
+    def init_players(options)
+      @players.each do |player|
+        player.init options
+      end
+    end
+    
+    def init_supply(options)
       @kingdom_cards = options[:kingdom_cards] || Setup.randomly_choose_kingdom(options)
       @colony_game = options[:colony_game?] || Setup.randomly_choose_if_colony_game(@kingdom_cards)
       

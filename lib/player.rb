@@ -14,7 +14,7 @@ module Dominion
       @duration_in_play = []
     end
     
-    def setup(options = {})
+    def init(options = {})
       @deck = []
       7.times { @deck.push game.draw_from_supply Copper, self }
       3.times { @deck.push game.draw_from_supply Estate, self }

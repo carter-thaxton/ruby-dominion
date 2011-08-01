@@ -121,6 +121,7 @@ Cards like Venture, Loan, and Contraband are considerably more complex.
 do_cleanup is called when the buy phase is complete.  Duration cards actually have this hook called twice.
 
 
+
 Reactions
 =========
 
