@@ -178,3 +178,8 @@ call stack.
 
 Players need a proxy, so human vs simulator can be easily plugged in.  Every time the player has to make
 a choice, it can call out to the proxy.
+
+Addendum:  I found a simple way to handle this.  Just use blocks in the card code.
+If we really need to stash the call stack, we'll save the block as a variable in the game, and keep some state
+like waiting_for_response? or whatever.
+

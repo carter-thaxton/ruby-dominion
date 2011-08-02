@@ -63,6 +63,22 @@ module Dominion
       move_to_next_player if in_progress?
     end
     
+    def add_actions(actions)
+      @actions_available += actions
+    end
+    
+    def add_buys(buys)
+      @buys_available += buys
+    end
+
+    def add_coins(coins)
+      @coins_available += coins
+    end
+    
+    def add_vp_tokens(vp)
+      @vp_tokens += vp
+    end
+    
     def draw(count = 1)
       result = []
       count.times do

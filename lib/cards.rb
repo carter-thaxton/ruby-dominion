@@ -86,9 +86,10 @@ module Dominion
     coins 1
 
     def do_action
-      choose :type => :card, :message => "Choose a card to trash" do |card|
-        vp_tokens = 1 + (card.cost / 2).floor
-        add_vp_tokens vp_tokens
+      add_coins 1
+      add_vp_tokens 1
+      choose_card :from => :hand, :optional => false, :message => "Choose a card to trash" do |card|
+        add_vp_tokens (card.cost / 2).floor if card
       end
     end
   end
@@ -125,7 +126,7 @@ module Dominion
     type :action
     cost 3
     coins 2
-  
+    
     def do_action
       choose :type => :bool, :message => "Immediately put deck into discard pile?" do |reshuffle|
         if reshuffle
@@ -182,6 +183,20 @@ module Dominion
     end
   end
   
+  class Moneylender < Card
+    type :action
+    cost 4
+    
+    def do_action
+      choose_card :from => :hand, :type => Copper, :optional => false do |card|
+        if card
+          trash card
+          add_coins 3
+        end
+      end
+    end
+  end
+
   class BlackMarket < Card
     # Good luck...
   end
