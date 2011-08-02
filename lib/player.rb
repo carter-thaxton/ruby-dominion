@@ -3,9 +3,11 @@ module Dominion
     
     attr_reader :game, :position, :identity,
       :deck, :discard_pile, :hand,
-      :actions_in_play, :treasures_in_play, :durations_in_play,
-      :actions_available, :buys_available, :coins_available,
-      :vp_tokens
+      :actions_in_play, :treasures_in_play,
+      :durations_on_first_turn, :durations_on_second_turn,
+      :actions_available, :coins_available, :buys_available,
+      :vp_tokens, :pirate_ship_tokens,
+      :turn
     
     def initialize(game, position, identity)
       @game = game
@@ -16,11 +18,14 @@ module Dominion
       @hand = []
       @actions_in_play = []
       @treasures_in_play = []
-      @durations_in_play = []
+      @durations_on_first_turn = []
+      @durations_on_second_turn = []
       @actions_available = 0
-      @buys_available = 0
       @coins_available = 0
+      @buys_available = 0
       @vp_tokens = 0
+      @pirate_ship_tokens = 0
+      @turn = 0
     end
     
     def prepare(options = {})
@@ -35,9 +40,10 @@ module Dominion
     
     def start_turn
       raise "Cannot start turn in #{phase} phase" unless setup_phase?
+      @turn += 1
       @actions_available = 1
-      @buys_available = 1
       @coins_available = 0
+      @buys_available = 1
       move_to_phase :action
     end
     
@@ -45,15 +51,15 @@ module Dominion
       raise "Cannot end turn in #{phase} phase" unless action_phase? || treasure_phase? || buy_phase?
       move_to_phase :cleanup
       
-      @actions_in_play.each { |card| card.do_cleanup }
+      @actions_in_play.each { |card| card.on_cleanup }
       @discard_pile += @actions_in_play
       @actions_in_play = []
 
-      @treasures_in_play.each { |card| card.do_cleanup }
+      @treasures_in_play.each { |card| card.on_cleanup }
       @discard_pile += @treasures_in_play
       @treasures_in_play = []
       
-      @hand.each { |card| card.do_cleanup }
+      @hand.each { |card| card.on_cleanup }
       @discard_pile += @hand
       @hand = []
       
@@ -67,25 +73,24 @@ module Dominion
       @actions_available += actions
     end
     
-    def add_buys(buys)
-      @buys_available += buys
-    end
-
     def add_coins(coins)
       @coins_available += coins
     end
     
+    def add_buys(buys)
+      @buys_available += buys
+    end
+
     def add_vp_tokens(vp)
       @vp_tokens += vp
     end
     
+    def add_pirate_ship_token
+      @pirate_ship_tokens += 1
+    end
+    
     def draw(count = 1)
-      result = []
-      count.times do
-        card = draw_one
-        result << card if card
-      end
-      result
+      (1..count).select { draw_one }
     end
     
     def draw_one
@@ -106,8 +111,8 @@ module Dominion
       raise "#{card} costs $#{card.cost} but only $#{@coins_available} available" if card.cost > @coins_available
       
       card = gain(card_class)
-      @buys_available -= 1
       @coins_available -= card.cost
+      @buys_available -= 1
       
       card
     end
@@ -152,18 +157,18 @@ module Dominion
       hand.delete card
       
       if action_phase? && card.action?
-        @actions_in_play << card
         @actions_available -= 1
-        @actions_available += card.actions
-        @buys_available += card.buys
-        @coins_available += card.coins
         draw card.cards
-        card.do_action
+        add_actions card.actions
+        add_coins card.coins
+        add_buys card.buys
+        card.play_action
+        @actions_in_play << card
       elsif treasure_phase? && card.treasure?
+        add_coins card.coins
+        add_buys card.buys
+        card.play_treasure
         @treasures_in_play << card
-        @buys_available += card.buys
-        @coins_available += card.coins
-        card.do_treasure
       end
       
       card
@@ -175,7 +180,7 @@ module Dominion
     end
     
     def cards_in_play
-      actions_in_play + treasures_in_play + durations_in_play
+      actions_in_play + treasures_in_play + durations_on_first_turn + durations_on_second_turn
     end
     
     def all_cards

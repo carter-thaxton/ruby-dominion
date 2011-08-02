@@ -40,8 +40,8 @@ module Dominion
           @potion = false
           @cards = 0
           @actions = 0
-          @buys = 0
           @coins = 0
+          @buys = 0
           @vp = 0
         end
         
@@ -49,7 +49,7 @@ module Dominion
       end
 
       define_type_attrs :base, :action, :attack, :victory, :treasure, :curse, :reaction, :duration
-      define_class_attrs :cost, :potion, :cards, :actions, :buys, :coins, :vp
+      define_class_attrs :cost, :potion, :cards, :actions, :coins, :buys, :vp
 
       public
 
@@ -76,11 +76,14 @@ module Dominion
     attr_accessor :player
     
     # Hooks - empty by default
-    def do_setup; end
-    def do_action; end
-    def do_treasure; end
-    def do_buy; end
-    def do_cleanup; end
+    def play_action; end
+    def play_treasure; end
+    def on_setup_after_duration; end
+    def on_cleanup; end
+    def on_buy; end
+    def on_gain; end
+    def on_any_card_bought; end
+    def on_any_card_gained; end
 
     # type is an alias for class, defined by object, so method_missing won't get called
     def type

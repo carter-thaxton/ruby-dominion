@@ -90,14 +90,14 @@ Where can Cards live?
   - trash_pile
   + Player
     - actions_in_play
-    - durations_in_play  (Lighthouse, Caravan, Haven, etc)
+    - durations_on_first_turn  (Lighthouse, Caravan, Haven, etc)
     - treasures_in_play
     - hand
     - deck
     - discard_pile
     - various mats (Island, NativeVillage, etc)
 
-What about a KingsCourt played on a duration card like Caravan?  The KingsCourt becomes a duration_in_play, just like the Caravan itself.  Note that Player.duration_cards_in_play will contain the KingsCourt, not the Caravan, and the KingsCourt contains a reference to the Caravan.  In fact, the KingsCourt 'remembers' which cards were played, for just these occasions.  You don't get to re-choose which 3 cards to play when replaying a durationized KingsCourt.  The fact that you chose to KingsCourt a KingsCourt, then choose two 2 Caravans, and a non-duration card are set in stone on the first play.
+What about a KingsCourt played on a duration card like Caravan?  The KingsCourt becomes a duration_in_play, just like the Caravan itself.  Note that Player.durations_on_first_turn will contain the KingsCourt, not the Caravan, and the KingsCourt contains a reference to the Caravan.  In fact, the KingsCourt 'remembers' which cards were played, for just these occasions.  You don't get to re-choose which 3 cards to play when replaying a durationized KingsCourt.  The fact that you chose to KingsCourt a KingsCourt, then choose two 2 Caravans, and a non-duration card are set in stone on the first play.
 
 
 Game State Machine
@@ -105,15 +105,23 @@ Game State Machine
 
 This is as good a time as any to think through the various game states, and their corresponding hooks on cards.
 
-Standard phases, and corresponding hooks of every turn:
-- do_setup
-- do_action
-- do_treasure
-- do_buy
-- do_cleanup
+Hooks:
+- play_action         (called when this card is played as an action)
+- play_treasure       (called when this card is played as a treasure)
 
-Optional hook, called when various triggers occur.  See below.
-- do_reaction
+- on_setup_after_duration     (called when this card is brought back into the hand after a duration)
+- on_cleanup                  (called when this card is cleaned up)
+
+- on_buy              (called when this card is bought)
+- on_gain             (called when this card is gained or bought)
+- on_any_card_bought  (called while this card is in play, and any card is gained)
+- on_any_card_gained  (called while this card is in play, and any card is gained or bought)
+
+The buy hooks are only called when the card is actually bought in the buy phase.
+The gain hooks are called both on buy and when the card is gained in other manners.
+Typically, a card won't define both the buy and gain hooks, but for clarity, they are both called, and in the order 'buy' then 'gain'.
+
+
 
 The rule books say treasures are played in the 'buy' phase, but then they go to great lengths to say that you must play all treasures before doing any buys.
 
@@ -123,17 +131,22 @@ My design separates the treasure/buy phases, and works like this:
 - buys are done in the buy phase
 See how easy it is when you just name things correctly?
 
-Most cards have no need for do_setup.  However, this is when duration cards still in play from the previous turn take their second effect.  e.g. Haven, Caravan, and even KingsCourts on duration cards (see above).
 
-do_action is when most action cards have an effect.  e.g. this is when a Village actually gives you +2 actions and +1 card.
+The action phase is when most action cards have an effect.  e.g. this is when a Village actually gives you +2 actions and +1 card.  The 'play_action' hook is called after the statically defined properties are resolved, e.g. +1 card/+1 action.
 
-do_treasure is called when a treasure card is played.
-Copper simply gives the player +1 coin.
-Cards like Venture, Loan, and Contraband are considerably more complex.
+The treasure phase is when treasures are played.
+The 'play_treasure' hook is called when a treasure card is played, and after any statically defined properties are resolved, e.g. +1 coin for Copper.  Most simple treasures do not override the 'play_treasure' hook.
+Cards like Venture, Loan, and Contraband, however, are considerably more complex.
 
-do_buy is called when a card is bought.  This is useful for reactions, such as Watchtower.
+The buy phase is when cards are actually bought.
+on_buy is called when a card is bought.  This is useful for validating the purchase of a GrandMarket, for example.
 
-do_cleanup is called on all cards in play when the buy phase is complete.  Duration cards played will not be cleaned up at this time, however.  Instead, they are brought back into play on the following do_setup.  do_cleanup is called on duration cards only when they really are cleaned up the second time around.
+This should not be confused with on_any_card_bought, which is called on all cards in play any time a card is bought.  This is sometimes useful for validations of a purchase, such as Contraband.
+
+
+on_any_card_gained is useful for reactions, such as Watchtower.
+
+on_cleanup is called on cards in play when the buy phase is complete, as they are being discarded.  Duration cards played will not be cleaned up at this time, however.  Instead, they are left in the 'durations_on_first_turn' list, and are brought back into play on the following turn, and the 'on_setup_after_duration' hook is called.  At this time, the duration cards are moved to the 'durations_on_second_turn' list.  on_cleanup is called for these duration cards when they are truly cleaned-up and discarded from this second list.
 
 
 Reactions
@@ -148,7 +161,7 @@ Examples:
 - This causes two hooks to be called on the player:
   - reacts_to? :attack
   - reacts_to? :gain
-- In turn, the player calls reacts_to? on each card in their hand, or in their duration_cards_in_play
+- In turn, the player calls reacts_to? on each card in their hand, or in their durations_on_first_turn
 - For each card that may cause a reaction, e.g. Watchtower, Lighthouse, the player is given a choice
 - If the player actually chooses to react, then the do_reaction method is called on that card
 
