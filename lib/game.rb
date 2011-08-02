@@ -122,13 +122,14 @@ module Dominion
       if game_over
         move_to_phase :game_over
         @current_player = nil
-        determine_winner
       end
+
+      game_over
     end
     
-    def determine_winner
-      # needs work, to handle ties, multiple players, and scoring based on number of turns played
-      @winner = players.max { |player| [player.total_victory_points, 5] }
+    def winner
+      # needs work, to handle ties and multiple players
+      players.max_by { |player| [player.total_victory_points, -player.turn] }
     end
     
     def move_to_next_player

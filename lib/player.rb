@@ -51,6 +51,8 @@ module Dominion
     end
     
     def end_turn
+      check_turn
+      
       raise "Cannot end turn in #{phase} phase" unless action_phase? || treasure_phase? || buy_phase?
       move_to_phase :cleanup
       
@@ -108,6 +110,8 @@ module Dominion
     end
     
     def play(card)
+      check_turn
+      
       if is_card_class(card)
         # choose an instance from the player's hand of the given class
         card_class = card
@@ -121,7 +125,7 @@ module Dominion
       
       raise "#{card} is not playable" unless card.action? || card.treasure?
       raise "#{card} is an action card, but currently in #{phase} phase" if card.action? && !action_phase?
-      raise "#{card} is an action card, and there are no actions available" if card.action? && actions_available <= 0
+      raise "#{card} is an action card, and there are no more actions available" if card.action? && actions_available <= 0
       
       move_to_phase :treasure if action_phase? && card.treasure?   # automatically move to treasure phase
       raise "#{card} is a treasure card, but currently in #{phase} phase" if card.treasure? && !treasure_phase?
@@ -147,6 +151,7 @@ module Dominion
     end
     
     def play_all_treasures
+      check_turn
       treasure_cards = hand.find_all { |card| card.treasure? }
       treasure_cards.each { |card| play card }
     end
@@ -171,12 +176,14 @@ module Dominion
     end
     
     def buy(card_class)
-      move_to_phase :buy if action_phase? || treasure_phase?  # automatically move to buy phase
-
+      check_turn
+      raise "Cannot buy cards in the #{phase} phase" unless buy_phase? || treasure_phase? || action_phase?
       raise "No more buys available" unless @buys_available > 0
       
       card = peek_from_supply(card_class)
       validate_buy(card)
+      
+      move_to_phase :buy if action_phase? || treasure_phase?  # automatically move to buy phase
       
       card = gain(card_class)
       card.on_buy
@@ -196,6 +203,10 @@ module Dominion
       ensure
         card.player = orig_player
       end
+    end
+    
+    def check_turn
+      raise "It is not #{name}'s turn" unless game.current_player == self
     end
     
     def cards_in_play

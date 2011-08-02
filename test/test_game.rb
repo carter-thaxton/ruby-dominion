@@ -26,5 +26,18 @@ class TestSetup < Test::Unit::TestCase
     player.end_turn
     assert game.action_phase?
   end
+  
+  def test_winner
+    game = Game.new :no_cards => true
+
+    game.players[0].gain Estate
+    assert_equal game.players[0], game.winner
+    game.players[1].gain Duchy
+    assert_equal game.players[1], game.winner
+    game.players[0].gain Duchy
+    assert_equal game.players[0], game.winner
+    game.players[1].gain Province
+    assert_equal game.players[1], game.winner
+  end
 
 end
