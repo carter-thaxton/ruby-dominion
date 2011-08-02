@@ -86,12 +86,10 @@ module Dominion
     coins 1
 
     def do_action
-      @trashed_card = choose :type => :card, :message => "Choose a card to trash"
-      add_vp_tokens vp_tokens
-    end
-
-    def vp_tokens
-      1 + (@trashed_card.cost / 2).floor
+      choose :type => :card, :message => "Choose a card to trash" do |card|
+        vp_tokens = 1 + (card.cost / 2).floor
+        add_vp_tokens vp_tokens
+      end
     end
   end
 
@@ -116,8 +114,9 @@ module Dominion
     def do_action
       gain Silver, :to => :deck
       other_players.each do |player|
-        revealed = player.reveal :type => :victory, :attack => true
-        player.put @revealed, :to => :deck if revealed
+        player.reveal :type => :victory, :attack => true do |card|
+          player.put card, :to => :deck if card
+        end
       end
     end
   end
@@ -128,10 +127,11 @@ module Dominion
     coins 2
   
     def do_action
-      @reshuffle = choose :type => :bool, :message => "Immediately put deck into discard pile?"
-      if @reshuffle
-        discard_pile += deck
-        deck.clear
+      choose :type => :bool, :message => "Immediately put deck into discard pile?" do |reshuffle|
+        if reshuffle
+          discard_pile += deck
+          deck.clear
+        end
       end
     end
   end
@@ -172,10 +172,11 @@ module Dominion
     
     def do_action
       other_players.each do |player|
-        revealed = player.reveal :type => Curse, :attack => true
-        unless revealed
-          player.gain Copper
-          player.gain Curse
+        player.reveal :type => Curse, :attack => true do |card|
+          unless card
+            player.gain Copper
+            player.gain Curse
+          end
         end
       end
     end
