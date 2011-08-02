@@ -30,12 +30,15 @@ module Dominion
     
     def prepare(options = {})
       @deck = []
-      7.times { @deck << draw_from_supply(Copper, self) }
-      3.times { @deck << draw_from_supply(Estate, self) }
-      @deck.shuffle!
-
       @hand = []
-      draw 5
+
+      unless options[:no_cards]
+        7.times { @deck << draw_from_supply(Copper, self) }
+        3.times { @deck << draw_from_supply(Estate, self) }
+        @deck.shuffle!
+
+        draw 5
+      end
     end
     
     def start_turn
@@ -99,39 +102,8 @@ module Dominion
         @discard_pile = []
         @deck.shuffle!
       end
-      card = @deck.shift
+      card = @deck.pop
       @hand << card if card
-      card
-    end
-    
-    def buy(card_class)
-      raise "No more buys available" unless @buys_available > 0
-      
-      card = peek_from_supply(card_class)
-      raise "#{card} costs $#{card.cost} but only $#{@coins_available} available" if card.cost > @coins_available
-      
-      card = gain(card_class)
-      @coins_available -= card.cost
-      @buys_available -= 1
-      
-      card
-    end
-    
-    def gain(card_class, options = {})
-      to = options[:to] || :discard
-      
-      card = draw_from_supply(card_class, self)
-      if card
-        case to
-        when :discard
-          @discard_pile << card
-        when :deck
-          @deck << card
-        when :hand
-          @hand << card
-        end
-      end
-      
       card
     end
     
@@ -177,6 +149,53 @@ module Dominion
     def play_all_treasures
       treasure_cards = hand.find_all { |card| card.treasure? }
       treasure_cards.each { |card| play card }
+    end
+    
+    def gain(card_class, options = {})
+      to = options[:to] || :discard
+      
+      card = draw_from_supply(card_class, self)
+      if card
+        card.on_gain
+        case to
+        when :discard
+          @discard_pile << card
+        when :deck
+          @deck << card
+        when :hand
+          @hand << card
+        end
+      end
+      
+      card
+    end
+    
+    def buy(card_class)
+      move_to_phase :buy if action_phase? || treasure_phase?  # automatically move to buy phase
+
+      raise "No more buys available" unless @buys_available > 0
+      
+      card = peek_from_supply(card_class)
+      validate_buy(card)
+      
+      card = gain(card_class)
+      card.on_buy
+      @coins_available -= card.cost
+      @buys_available -= 1
+      
+      card
+    end
+    
+    def validate_buy(card)
+      raise "#{card} costs $#{card.cost} but only $#{@coins_available} available" if card.cost > @coins_available
+
+      orig_player = card.player
+      begin
+        card.player = self
+        card.validate_buy
+      ensure
+        card.player = orig_player
+      end
     end
     
     def cards_in_play

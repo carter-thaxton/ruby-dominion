@@ -6,6 +6,14 @@ module Dominion
     @all_cards ||= []
   end
   
+  def self.all_defined_cards
+    all_cards.select {|card| card.defined? }
+  end
+  
+  def self.all_defined_kingdom_cards
+    all_defined_cards.select {|card| card.kingdom? }
+  end
+  
   class Card
     # Game context used for cards when unassociated with a context
     BASE_CONTEXT = Game.new :no_prepare => true
@@ -62,6 +70,10 @@ module Dominion
         (name.split '::').last
       end
       
+      def defined?
+        !@type.empty?
+      end
+      
       def kingdom?
         not base?
       end
@@ -80,10 +92,11 @@ module Dominion
     def play_treasure; end
     def on_setup_after_duration; end
     def on_cleanup; end
-    def on_buy; end
+    def validate_buy; end
     def on_gain; end
-    def on_any_card_bought; end
+    def on_buy; end
     def on_any_card_gained; end
+    def on_any_card_bought; end
 
     # type is an alias for class, defined by object, so method_missing won't get called
     def type

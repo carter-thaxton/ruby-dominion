@@ -66,6 +66,7 @@ module Dominion
   class Curse < Card
     type :base, :curse
     cost 0
+    vp -1
   end
 
 
@@ -565,7 +566,7 @@ module Dominion
     coins 2
     buys 1
     
-    def on_buy
+    def validate_buy
       raise "Cannot buy GrandMarket when Coppers are in play" if treasures_in_play.any? { |card| card.is_a? Copper }
     end
   end
