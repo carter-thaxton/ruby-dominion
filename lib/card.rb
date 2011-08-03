@@ -86,18 +86,22 @@ module Dominion
     
     attr_reader :game
     attr_accessor :player
-    
+
     # Hooks - empty by default
     def play_action; end
     def play_treasure; end
     def on_setup_after_duration; end
     def on_cleanup; end
-    def validate_buy; end
     def on_gain; end
     def on_buy; end
     def on_any_card_gained; end
     def on_any_card_bought; end
 
+    # can be overridden in various cards, like GrandMarket
+    def can_buy
+      true
+    end
+    
     # type is an alias for class, defined by object, so method_missing won't get called
     def type
       self.class.type

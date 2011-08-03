@@ -106,14 +106,14 @@ module Dominion
     end
     
     def peek_from_supply(card_class)
-      raise "No cards of type #{card_class} available in supply" unless @supply[card_class]
-      raise "No more cards of type #{card_class} available in supply" if @supply[card_class].empty?
-      @supply[card_class].first
+      pile = @supply[card_class]
+      pile && pile.first
     end
     
     def draw_from_supply(card_class, player = nil)
       raise "Player is not playing this game!" if player && player.game != self
-      peek_from_supply(card_class)
+      raise "No cards of type #{card_class} available in supply" unless @supply[card_class]
+      raise "No more cards of type #{card_class} available in supply" if @supply[card_class].empty?
       
       result = @supply[card_class].shift
       result.player = player

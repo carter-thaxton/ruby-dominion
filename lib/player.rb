@@ -180,11 +180,7 @@ module Dominion
     
     def buy(card_class)
       check_turn
-      raise "Cannot buy cards in the #{phase} phase" unless buy_phase? || treasure_phase? || action_phase?
-      raise "No more buys available" unless @buys_available > 0
-      
-      card = peek_from_supply(card_class)
-      validate_buy(card)
+      can_buy card_class, :throw_exception => true
       
       move_to_phase :buy if action_phase? || treasure_phase?  # automatically move to buy phase
       
@@ -196,13 +192,34 @@ module Dominion
       card
     end
     
-    def validate_buy(card)
-      raise "#{card} costs $#{card.cost} but only $#{@coins_available} available" if card.cost > @coins_available
+    def can_buy(card_class, options = {})
+      throw_exception = options[:throw_exception]
+      
+      unless buy_phase? || treasure_phase? || action_phase?
+        raise "Cannot buy cards in the #{phase} phase" if throw_exception
+        return false
+      end
+      
+      unless @buys_available > 0
+        raise "No more buys available" if throw_exception
+        return false
+      end
+      
+      card = peek_from_supply card_class
+      unless card
+        raise "#{card_class} not available in supply" if throw_exception
+        return false
+      end
+      
+      if card.cost > @coins_available
+        raise "#{card} costs $#{card.cost} but only $#{@coins_available} available" if throw_exception
+        return false
+      end
 
       orig_player = card.player
       begin
         card.player = self
-        card.validate_buy
+        return card.can_buy
       ensure
         card.player = orig_player
       end

@@ -566,8 +566,12 @@ module Dominion
     coins 2
     buys 1
     
-    def validate_buy
-      raise "Cannot buy GrandMarket when Coppers are in play" if treasures_in_play.any? { |card| card.is_a? Copper }
+    def can_buy
+      !treasures_in_play.any? { |card| card.is_a? Copper }
+    end
+    
+    def on_buy
+      raise "Cannot buy GrandMarket when Coppers are in play" unless can_buy
     end
   end
 
