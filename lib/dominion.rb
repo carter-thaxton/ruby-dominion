@@ -5,5 +5,6 @@ require 'cards'
 require 'game'
 require 'player'
 require 'preparation'
+require 'util'
 
 include Dominion

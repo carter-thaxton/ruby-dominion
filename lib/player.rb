@@ -1,5 +1,8 @@
+require 'util'
+
 module Dominion
   class Player
+    include Util
     
     attr_reader :game, :position, :identity,
       :deck, :discard_pile, :hand,
@@ -222,9 +225,13 @@ module Dominion
       vp_from_cards + vp_tokens
     end
     
+    def total_treasure
+      all_cards.inject(0) { |sum, card| sum + card.coins }
+    end
+    
     def name
       if identity.nil?
-        "Player #{position}"
+        "Player #{position + 1}"
       else
         identity.to_s
       end
@@ -236,12 +243,6 @@ module Dominion
     
     def method_missing(method, *args)
       @game.send method, *args
-    end
-    
-    private
-    
-    def is_card_class(card)
-      card.is_a?(Class) && card.ancestors.include?(Card)
     end
     
   end

@@ -6,4 +6,5 @@ task :test do
   require 'test_setup'
   require 'test_cards'
   require 'test_game'
+  require 'test_big_money'
 end

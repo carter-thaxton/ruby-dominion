@@ -97,6 +97,14 @@ module Dominion
       @players.reject { |p| p == current_player }
     end
     
+    def player_to_left
+      player_to_left_of current_player
+    end
+    
+    def player_to_left_of(player)
+      players[player.position - 1 % num_players]
+    end
+    
     def peek_from_supply(card_class)
       raise "No cards of type #{card_class} available in supply" unless @supply[card_class]
       raise "No more cards of type #{card_class} available in supply" if @supply[card_class].empty?
