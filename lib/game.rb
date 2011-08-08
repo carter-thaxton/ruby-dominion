@@ -171,8 +171,6 @@ module Dominion
       @players = []
       player_identities.each_with_index do |player_identity, position|
         player_strategy = player_strategies[position]
-        player_strategy = DefaultStrategy.new unless player_strategy
-        
         @players << Player.new(self, position, player_identity, player_strategy)
       end
       

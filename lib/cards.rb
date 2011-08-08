@@ -78,6 +78,16 @@ module Dominion
   end
   
   class Chapel < Card
+    type :action
+    cost 2
+    
+    def play_action
+      choose_cards "Choose up to 4 cards to trash", :from => :hand, :max => 4 do |cards|
+        cards.each do |card|
+          trash card
+        end
+      end
+    end
   end
   
   class Moat < Card
@@ -144,11 +154,10 @@ module Dominion
     cost 4
     
     def play_action
-      choose_card "Choose a copper to trash", :from => :hand, :card_type => Copper do |card|
-        if card
-          trash card
-          add_coins 3
-        end
+      copper = hand.find {|card| card.is_a? Copper}
+      if copper
+        trash copper
+        add_coins 3
       end
     end
   end

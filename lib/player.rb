@@ -4,7 +4,9 @@ module Dominion
   class Player
     include Util
     
-    attr_reader :game, :position, :identity, :strategy,
+    attr_accessor :identity, :strategy
+    
+    attr_reader :game, :position,
       :deck, :discard_pile, :hand,
       :actions_in_play, :treasures_in_play,
       :durations_on_first_turn, :durations_on_second_turn,
@@ -117,7 +119,7 @@ module Dominion
       card
     end
     
-    def play(card, options = {}, &block)
+    def play(card, options = {})
       check_turn
       
       card = find_card_in_hand card, :required => true
@@ -136,7 +138,6 @@ module Dominion
       hand.delete card
       @card_in_play = card
       @play_choice = options[:choice]
-      @play_block = block
       
       if action_phase? && card.action?
         @actions_available -= 1
@@ -154,9 +155,7 @@ module Dominion
       end
       
       @card_in_play = nil
-      @play_block = nil
       @play_choice = nil
-      
       card
     end
     
@@ -241,44 +240,35 @@ module Dominion
     def ask(message, options = {}, &block)
       options[:message] = message
       options[:type] = :bool
+      options[:multiple] = false
       choose(options, &block)
     end
     
     def choose_card(message, options = {}, &block)
       options[:message] = message
       options[:type] = :card
+      options[:multiple] = false
       choose(options, &block)
     end
     
     def choose_cards(message, options = {}, &block)
       options[:message] = message
-      options[:type] = :cards
+      options[:type] = :card
+      options[:multiple] = true
       choose(options, &block)
     end
     
     def choose(options, &block)
       @resume_block = block
-      @response_state = options
+      @choice_options = options
       @state = :waiting_for_choice
       
-      # use choice or block if given in call to play
-      # otherwise defer to strategy
+      # use choice if given in call to play
+      # otherwise defer to strategy if available
       if @play_choice
         respond(@play_choice)
-      elsif @play_block
-        response = @play_block.call(self, @card_in_play, options[:message], options)
-        respond(*response)
-      else
-        case options[:type]
-        when :bool
-          @strategy.on_ask self, @card_in_play, options[:message], options
-        when :card
-          @strategy.on_choose_card self, @card_in_play, options[:message], options
-        when :cards
-          @strategy.on_choose_cards self, @card_in_play, options[:message], options
-        else
-          raise "Unknown type in choose"
-        end
+      elsif @strategy
+        @strategy.choose self, @card_in_play, options
       end
     end
     
@@ -289,8 +279,8 @@ module Dominion
       @state = :playing
       @resume_block.call(*args)
       @resume_block = nil
-      @play_block = nil
-      @response_state = nil
+      @choice_options = nil
+      args
     end
     
     def cards_in_play
@@ -333,16 +323,17 @@ module Dominion
     end
     
     def handle_response(*args)
-      # common operation of finding cards in hand
-      if @response_state[:from] == :hand
-        type = @response_state[:type]
-        if type == :card
-          return find_card_in_hand(args[0])
-        elsif type == :cards
-          return args.collect {|card| find_card_in_hand(card)}
+      # common operation of finding cards in hand by type
+      if @choice_options[:from] == :hand
+        if @choice_options[:type] == :card
+          if @choice_options[:multiple]
+            return args.collect {|card| find_card_in_hand(card)}
+          else
+            return find_card_in_hand(args[0])
+          end
         end
       end
-
+      
       args
     end
     
