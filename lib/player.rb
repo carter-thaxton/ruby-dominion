@@ -272,15 +272,15 @@ module Dominion
       end
     end
     
-    def respond(*args)
+    def respond(response)
       raise "Cannot respond unless waiting for choice" unless :waiting_for_choice
-      args = handle_response(*args)
+      response = handle_response(response)
       
       @state = :playing
-      @resume_block.call(*args)
+      @resume_block.call(response)
       @resume_block = nil
       @choice_options = nil
-      args
+      response
     end
     
     def cards_in_play
@@ -314,41 +314,57 @@ module Dominion
     
     private
 
-    def method_missing(method, *args)
-      @game.send method, *args
+    def method_missing(method, *args, &block)
+      @game.send method, *args, &block
     end
     
     def check_turn
       raise "It is not #{name}'s turn" unless game.current_player == self
     end
     
-    def handle_response(*args)
+    def handle_response(response)
+      if @choice_options[:multiple]
+        response = [response] unless response.is_a? Enumerable
+      end
+      
       # common operation of finding cards in hand by type
       if @choice_options[:from] == :hand
         if @choice_options[:type] == :card
           if @choice_options[:multiple]
-            return args.collect {|card| find_card_in_hand(card)}
+            return find_cards_in_hand(response)
           else
-            return find_card_in_hand(args[0])
+            return find_card_in_hand(response)
           end
         end
       end
       
-      args
+      response
     end
     
     def find_card_in_hand(card, options = {})
+      set = options[:set] || hand
       if card.is_a? Card
-        raise "#{card} is not in the player's hand" unless hand.include?(card)
+        raise "#{card} is not in the player's hand" unless set.include?(card)
       elsif is_card_class(card)
         # choose an instance from the player's hand of the given class
         card_class = card
-        card = hand.find {|card| card.is_a? card_class}
+        card = set.find {|card| card.is_a? card_class}
         if options[:required]
           raise "No card of type #{card_class} found in hand" unless card
         end
       end
       card
+    end
+
+    def find_cards_in_hand(cards, options = {})
+      tmp_hand = hand.dup
+      options[:set] = tmp_hand
+      
+      cards.collect do |card|
+        card = find_card_in_hand(card, options)
+        tmp_hand.delete card if card
+        card
+      end
     end
     
   end

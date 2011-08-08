@@ -89,7 +89,6 @@ class TestSetup < Test::Unit::TestCase
     player = game.current_player
     
     # synchronous, using :choice => [Card, Card]
-    coins = player.coins_available
     player.gain Chapel, :to => :hand
     player.gain Estate, :to => :hand
     player.gain Estate, :to => :hand
@@ -99,6 +98,19 @@ class TestSetup < Test::Unit::TestCase
     assert_equal 1, player.hand.size
     player.play_all_treasures
     assert_equal 1, player.coins_available
+    player.end_turn
+    
+    # synchronous, using :choice => Card
+    player.hand.clear
+    player.gain Chapel, :to => :hand
+    player.gain Estate, :to => :hand
+    player.gain Estate, :to => :hand
+    player.gain Copper, :to => :hand
+    player.gain Copper, :to => :hand
+    player.play Chapel, :choice => Estate
+    assert_equal 3, player.hand.size
+    player.play_all_treasures
+    assert_equal 2, player.coins_available
     player.end_turn
   end
   
