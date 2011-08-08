@@ -4,18 +4,19 @@ module Dominion
   class Player
     include Util
     
-    attr_reader :game, :position, :identity,
+    attr_reader :game, :position, :identity, :strategy,
       :deck, :discard_pile, :hand,
       :actions_in_play, :treasures_in_play,
       :durations_on_first_turn, :durations_on_second_turn,
       :actions_available, :coins_available, :buys_available,
       :vp_tokens, :pirate_ship_tokens,
-      :turn
+      :turn, :card_in_play, :state
     
-    def initialize(game, position, identity)
+    def initialize(game, position, identity, strategy)
       @game = game
       @position = position
       @identity = identity
+      @strategy = strategy
       @deck = []
       @discard_pile = []
       @hand = []
@@ -29,6 +30,8 @@ module Dominion
       @vp_tokens = 0
       @pirate_ship_tokens = 0
       @turn = 0
+      @card_in_play = nil
+      @state = :not_playing
     end
     
     def prepare(options = {})
@@ -50,6 +53,7 @@ module Dominion
       @actions_available = 1
       @coins_available = 0
       @buys_available = 1
+      @state = :playing
       move_to_phase :action
     end
     
@@ -71,6 +75,7 @@ module Dominion
       @discard_pile += @hand
       @hand = []
       
+      @state = :not_playing
       draw 5
       move_to_phase :setup
       check_for_game_over
@@ -112,15 +117,10 @@ module Dominion
       card
     end
     
-    def play(card)
+    def play(card, options = {}, &block)
       check_turn
       
-      if is_card_class(card)
-        # choose an instance from the player's hand of the given class
-        card_class = card
-        card = hand.find {|card| card.is_a? card_class}
-        raise "No card of type #{card_class} found in hand" unless card
-      end
+      card = find_card_in_hand card, :required => true
 
       raise "#{card} is not a valid card" unless card.is_a? Card
       raise "#{card} is not the player's own card!" unless card.player == self
@@ -134,6 +134,9 @@ module Dominion
       raise "#{card} is a treasure card, but currently in #{phase} phase" if card.treasure? && !treasure_phase?
 
       hand.delete card
+      @card_in_play = card
+      @play_choice = options[:choice]
+      @play_block = block
       
       if action_phase? && card.action?
         @actions_available -= 1
@@ -150,6 +153,10 @@ module Dominion
         @treasures_in_play << card
       end
       
+      @card_in_play = nil
+      @play_block = nil
+      @play_choice = nil
+      
       card
     end
     
@@ -157,6 +164,12 @@ module Dominion
       check_turn
       treasure_cards = hand.find_all { |card| card.treasure? }
       treasure_cards.each { |card| play card }
+    end
+    
+    def trash(card)
+      card = find_card_in_hand card, :required => true
+      hand.delete card
+      game.trash_pile << card
     end
     
     def gain(card_class, options = {})
@@ -225,8 +238,59 @@ module Dominion
       end
     end
     
-    def check_turn
-      raise "It is not #{name}'s turn" unless game.current_player == self
+    def ask(message, options = {}, &block)
+      options[:message] = message
+      options[:type] = :bool
+      choose(options, &block)
+    end
+    
+    def choose_card(message, options = {}, &block)
+      options[:message] = message
+      options[:type] = :card
+      choose(options, &block)
+    end
+    
+    def choose_cards(message, options = {}, &block)
+      options[:message] = message
+      options[:type] = :cards
+      choose(options, &block)
+    end
+    
+    def choose(options, &block)
+      @resume_block = block
+      @response_state = options
+      @state = :waiting_for_choice
+      
+      # use choice or block if given in call to play
+      # otherwise defer to strategy
+      if @play_choice
+        respond(@play_choice)
+      elsif @play_block
+        response = @play_block.call(self, @card_in_play, options[:message], options)
+        respond(*response)
+      else
+        case options[:type]
+        when :bool
+          @strategy.on_ask self, @card_in_play, options[:message], options
+        when :card
+          @strategy.on_choose_card self, @card_in_play, options[:message], options
+        when :cards
+          @strategy.on_choose_cards self, @card_in_play, options[:message], options
+        else
+          raise "Unknown type in choose"
+        end
+      end
+    end
+    
+    def respond(*args)
+      raise "Cannot respond unless waiting for choice" unless :waiting_for_choice
+      args = handle_response(*args)
+      
+      @state = :playing
+      @resume_block.call(*args)
+      @resume_block = nil
+      @play_block = nil
+      @response_state = nil
     end
     
     def cards_in_play
@@ -258,8 +322,42 @@ module Dominion
       name
     end
     
+    private
+
     def method_missing(method, *args)
       @game.send method, *args
+    end
+    
+    def check_turn
+      raise "It is not #{name}'s turn" unless game.current_player == self
+    end
+    
+    def handle_response(*args)
+      # common operation of finding cards in hand
+      if @response_state[:from] == :hand
+        type = @response_state[:type]
+        if type == :card
+          return find_card_in_hand(args[0])
+        elsif type == :cards
+          return args.collect {|card| find_card_in_hand(card)}
+        end
+      end
+
+      args
+    end
+    
+    def find_card_in_hand(card, options = {})
+      if card.is_a? Card
+        raise "#{card} is not in the player's hand" unless hand.include?(card)
+      elsif is_card_class(card)
+        # choose an instance from the player's hand of the given class
+        card_class = card
+        card = hand.find {|card| card.is_a? card_class}
+        if options[:required]
+          raise "No card of type #{card_class} found in hand" unless card
+        end
+      end
+      card
     end
     
   end

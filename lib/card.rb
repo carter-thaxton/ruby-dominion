@@ -107,13 +107,13 @@ module Dominion
       self.class.type
     end
 
-    def method_missing(method, *args)
+    def method_missing(method, *args, &block)
       if self.class.respond_to? method
-        self.class.send method, *args
+        self.class.send method, *args, &block
       elsif @player
-        @player.send method, *args
+        @player.send method, *args, &block
       else
-        @game.send method, *args
+        @game.send method, *args, &block
       end
     end
     

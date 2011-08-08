@@ -10,6 +10,7 @@ module Dominion
       @current_player = nil
       @phase = :prepare
       @supply = {}
+      @trash_pile = []
       
       prepare(options) unless options[:no_prepare]
     end
@@ -26,7 +27,7 @@ module Dominion
       current_player.start_turn
     end
     
-    attr_reader :phase, :kingdom_cards, :players, :current_player, :supply
+    attr_reader :phase, :kingdom_cards, :players, :current_player, :supply, :trash_pile
     
     def move_to_phase(phase)
       @phase = phase
@@ -162,9 +163,17 @@ module Dominion
         player_identities = Array.new num_players   # no identities
       end
       
+      player_strategies = options[:strategies]
+      unless player_strategies
+        player_strategies = Array.new player_identities.size  # no strategies
+      end
+      
       @players = []
       player_identities.each_with_index do |player_identity, position|
-        @players << Player.new(self, position, player_identity)
+        player_strategy = player_strategies[position]
+        player_strategy = DefaultStrategy.new unless player_strategy
+        
+        @players << Player.new(self, position, player_identity, player_strategy)
       end
       
       @current_player = @players.first

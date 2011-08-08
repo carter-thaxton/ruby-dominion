@@ -39,5 +39,41 @@ class TestSetup < Test::Unit::TestCase
     game.players[1].gain Province
     assert_equal game.players[1], game.winner
   end
+  
+  def test_basic_response
+    game = Game.new :num_players => 1, :kingdom_cards => [Chancellor]
+    player = game.current_player
+    
+    assert_equal 5, player.deck.size
+    
+    player.gain Chancellor, :to => :hand
+    player.play Chancellor
+    assert_equal :waiting_for_choice, player.state
+    
+    player.respond true
+
+    assert_equal :playing, player.state
+    assert_equal 0, player.deck.size
+    
+    player.end_turn
+    
+    player.gain Chancellor, :to => :hand
+    player.play(Chancellor) { false }
+    
+    assert_equal :playing, player.state
+    assert_not_equal 0, player.deck.size
+  end
+  
+  def test_choose_card
+    game = Game.new :num_players => 1, :kingdom_cards => [Salvager]
+    player = game.current_player
+    
+    coins = player.coins_available
+    player.gain Salvager, :to => :hand
+    player.gain Estate, :to => :hand
+    player.play Salvager, :choice => Estate
+    
+    assert_equal coins + 2, player.coins_available
+  end
 
 end

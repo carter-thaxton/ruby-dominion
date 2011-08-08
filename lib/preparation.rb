@@ -3,7 +3,7 @@ require 'cards'
 module Dominion
   module Preparation
     def self.randomly_choose_kingdom(options = {})
-      [Village, Smithy, Laboratory, Festival, CouncilRoom, Market, GreatHall, Harem, Bazaar, Monument, WorkersVillage, GrandMarket]
+      Dominion.all_defined_kingdom_cards.shuffle.take 10
     end
     
     def self.randomly_choose_if_colony_game(kingdom_cards, options = {})

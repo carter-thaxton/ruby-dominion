@@ -7,7 +7,7 @@ class TestBigMoney < Test::Unit::TestCase
   end
   
   def test_big_money_game
-    n = 1000
+    n = 10
     turns = 0
     vp = 0
     spread = 0
