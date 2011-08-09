@@ -23,6 +23,7 @@ Peddler.new will return a Peddler instance with no context (actually its context
 When evaluating various buy rules, it's convenient to refer to "Peddler", not to a given Peddler instance, but as mentioned above, that's not really possible because of the dependence on game context.
 
 Two options are available:
+
 - Use Peddler.new(game)
 - Use something like game.supply_piles[Peddler].first
 
@@ -31,6 +32,7 @@ The second approach is attractive, because it does refer to the card instance yo
 
 
 Card Contexts:
+
 - Owned by a player (in hand, deck, discard, etc)
 - In game, but not by a player (in supply, trash, etc)
 - Not in game (while randomizing, picking rules, documentation of cards, etc)
@@ -55,19 +57,18 @@ Seem complex?  It is.  Unfortunately, that's the best I can come up with, as a p
 Luckily, the mechanism defined in Card makes most of this transparent.  Check out cards.rb to see the DSL in practice.
 
 
-               Card.class
-                    ^
-                    |
-Game <- Player <- Card
-  ^                 |
-  +-----------------+
+                   Card.class
+                        ^
+                        |
+    Game <- Player <- Card
+      ^                 |
+      +-----------------+
 
 
-peddler
-  class = Peddler
-    superclass = Card
-  context = instance of Player or Game
-
+    peddler
+      class = Peddler
+        superclass = Card
+      context = instance of Player or Game
 
 
 Player vs PlayerIdentity
@@ -81,6 +82,7 @@ Card rules should refer to Player, and never to PlayerIdentity.  (Man, that woul
 
 Where can Cards live?
 =====================
+
 - No Context (Card::BASE_CONTEXT)
 + Game
   - supply
@@ -103,6 +105,7 @@ Game State Machine
 This is as good a time as any to think through the various game states, and their corresponding hooks on cards.
 
 Hooks:
+
 - play_action         (called when this card is played as an action)
 - play_treasure       (called when this card is played as a treasure)
 
@@ -123,11 +126,12 @@ Typically, a card won't define both the buy and gain hooks, but for clarity, the
 The rule books say treasures are played in the 'buy' phase, but then they go to great lengths to say that you must play all treasures before doing any buys.
 
 My design separates the treasure/buy phases, and works like this:
+
 - actions are played in the action phase
 - treasures are played in the treasure phase
 - buys are done in the buy phase
-See how easy it is when you just name things correctly?
 
+See how easy it is when you just name things correctly?
 
 The action phase is when most action cards have an effect.  e.g. this is when a Village actually gives you +2 actions and +1 card.  The 'play_action' hook is called after the statically defined properties are resolved, e.g. +1 card/+1 action.
 
@@ -152,6 +156,7 @@ Reactions
 do_reaction is interesting.  When an attack or other trigger for a reaction is played, we first go through all possible cards that could be played, calling the 'reacts_to?' method.  Then a choice is given to the player.  Finally, the do_reaction method is called.
 
 Examples:
+
 - PlayerA plays a Witch during their action phase
 - PlayerB has a Watchtower in hand, and a Lighthouse in play
 - In the DSL, 'player.gain Curse, :attack => true' is called
