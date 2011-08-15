@@ -49,16 +49,16 @@ class TestSetup < Test::Unit::TestCase
     # synchronous, using :choice
     player.gain Chancellor, :to => :hand
     player.play Chancellor, :choice => true
-    assert_equal :playing, player.state
+    assert !player.choice_in_progress, "should not be waiting for choice"
     assert_equal 0, player.deck.size
     player.end_turn
 
     # asynchronous, using respond
     player.gain Chancellor, :to => :hand
     player.play Chancellor
-    assert_equal :waiting_for_choice, player.state
+    assert player.choice_in_progress, "should be waiting for choice"
     player.respond true
-    assert_equal :playing, player.state
+    assert !player.choice_in_progress, "should not be waiting for choice"
     assert_equal 0, player.deck.size
     player.end_turn
   end

@@ -13,7 +13,7 @@ module Dominion
       :durations_on_first_turn, :durations_on_second_turn,
       :actions_available, :coins_available, :buys_available,
       :vp_tokens, :pirate_ship_tokens,
-      :turn, :card_in_play, :state
+      :turn, :card_in_play, :choice_in_progress
     
     def initialize(game, position, identity, strategy)
       @game = game
@@ -34,7 +34,7 @@ module Dominion
       @pirate_ship_tokens = 0
       @turn = 0
       @card_in_play = nil
-      @state = :not_playing
+      @choice_in_progress = nil
     end
     
     def prepare(options = {})
@@ -56,7 +56,6 @@ module Dominion
       @actions_available = 1
       @coins_available = 0
       @buys_available = 1
-      @state = :playing
       move_to_phase :action
     end
     
@@ -64,6 +63,7 @@ module Dominion
       check_turn
       
       raise "Cannot end turn in #{phase} phase" unless action_phase? || treasure_phase? || buy_phase?
+      raise "Cannot ent turn while choice in progress" if @choice_in_progress
       move_to_phase :cleanup
       
       @actions_in_play.each { |card| card.on_cleanup }
@@ -78,7 +78,6 @@ module Dominion
       @discard_pile += @hand
       @hand = []
       
-      @state = :not_playing
       draw 5
       move_to_phase :setup
       check_for_game_over
@@ -261,8 +260,7 @@ module Dominion
     
     def choose(options, &block)
       @resume_block = block
-      @choice_options = options
-      @state = :waiting_for_choice
+      @choice_in_progress = options
       
       # use choice if given in call to play
       # otherwise defer to strategy if available
@@ -274,13 +272,12 @@ module Dominion
     end
     
     def respond(response)
-      raise "Cannot respond unless waiting for choice" unless :waiting_for_choice
+      raise "Cannot respond unless waiting for choice" unless @choice_in_progress
       response = handle_response(response)
       
-      @state = :playing
       @resume_block.call(response)
       @resume_block = nil
-      @choice_options = nil
+      @choice_in_progress = nil
       response
     end
     
@@ -324,14 +321,14 @@ module Dominion
     end
     
     def handle_response(response)
-      if @choice_options[:multiple]
+      if @choice_in_progress[:multiple]
         response = [response] unless response.is_a? Enumerable
       end
       
       # common operation of finding cards in hand by type
-      if @choice_options[:from] == :hand
-        if @choice_options[:type] == :card
-          if @choice_options[:multiple]
+      if @choice_in_progress[:from] == :hand
+        if @choice_in_progress[:type] == :card
+          if @choice_in_progress[:multiple]
             return find_cards_in_hand(response)
           else
             return find_card_in_hand(response)
@@ -339,12 +336,12 @@ module Dominion
         end
       end
       
-      if @choice_options[:multiple] && @choice_options[:max]
-        raise "At most #{@choice_options[:max]} may be chosen" if response.size > @choice_options[:max]
+      if @choice_in_progress[:multiple] && @choice_in_progress[:max]
+        raise "At most #{@choice_in_progress[:max]} may be chosen" if response.size > @choice_in_progress[:max]
       end
       
-      if @choice_options[:multiple] && @choice_options[:min]
-        raise "At least #{@choice_options[:min]} must be chosen" if response.size < @choice_options[:min]
+      if @choice_in_progress[:multiple] && @choice_in_progress[:min]
+        raise "At least #{@choice_in_progress[:min]} must be chosen" if response.size < @choice_in_progress[:min]
       end
 
       response
