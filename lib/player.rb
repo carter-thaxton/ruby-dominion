@@ -1,6 +1,7 @@
 require 'util'
 
 module Dominion
+  
   class Player
     include Util
     
@@ -338,6 +339,14 @@ module Dominion
         end
       end
       
+      if @choice_options[:multiple] && @choice_options[:max]
+        raise "At most #{@choice_options[:max]} may be chosen" if response.size > @choice_options[:max]
+      end
+      
+      if @choice_options[:multiple] && @choice_options[:min]
+        raise "At least #{@choice_options[:min]} must be chosen" if response.size < @choice_options[:min]
+      end
+
       response
     end
     
