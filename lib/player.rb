@@ -63,7 +63,7 @@ module Dominion
       check_turn
       
       raise "Cannot end turn in #{phase} phase" unless action_phase? || treasure_phase? || buy_phase?
-      raise "Cannot ent turn while choice in progress" if @choice_in_progress
+      raise "Cannot end turn while choice in progress" if @choice_in_progress
       move_to_phase :cleanup
       
       @actions_in_play.each { |card| card.on_cleanup }
@@ -268,6 +268,9 @@ module Dominion
         respond(@play_choice)
       elsif @strategy
         @strategy.choose self, @card_in_play, options
+      else
+        # useful in console when no choice or strategy
+        puts options[:message]
       end
     end
     
@@ -318,6 +321,7 @@ module Dominion
     
     def check_turn
       raise "It is not #{name}'s turn" unless game.current_player == self
+      raise "Cannot play while choice in progress" if @choice_in_progress
     end
     
     def handle_response(response)

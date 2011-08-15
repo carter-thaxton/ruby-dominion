@@ -498,7 +498,6 @@ module Dominion
     coins 1
 
     def play_action
-      add_coins 1
       add_vp_tokens 1
       choose_card "Choose a card to trash", :from => :hand do |card|
         if card
