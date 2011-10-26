@@ -1,1 +1,1 @@
-irb -Ilib -rdominion
+pry -Ilib -rdominion
