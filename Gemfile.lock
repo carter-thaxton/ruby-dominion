@@ -1,0 +1,21 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    coderay (0.9.8)
+    method_source (0.6.6)
+      ruby_parser (~> 2.0.5)
+    pry (0.9.6.2)
+      coderay (~> 0.9.8)
+      method_source (~> 0.6.5)
+      ruby_parser (~> 2.0.5)
+      slop (~> 2.1.0)
+    ruby_parser (2.0.6)
+      sexp_processor (~> 3.0)
+    sexp_processor (3.0.7)
+    slop (2.1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  pry

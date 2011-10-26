@@ -35,7 +35,7 @@ module Dominion
   end
   
   class Potion < Card
-    type :base, :treasure, :potion
+    type :base, :treasure
     cost 4
   end
 
