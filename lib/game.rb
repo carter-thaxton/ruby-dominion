@@ -165,7 +165,7 @@ module Dominion
     def create_players(options)
       player_identities = options[:players]
       unless player_identities
-        num_players = options[:num_players] || 2
+        num_players = options.fetch :num_players, 2
         player_identities = Array.new num_players   # no identities
       end
       
@@ -179,7 +179,7 @@ module Dominion
     end
 
     def prepare_player_strategy(position, options)
-      strategies = options[:strategies] || []
+      strategies = options.fetch :strategies, []
       strategy = strategies[position] || options[:strategy]
       strategy = ConsoleStrategy.new if strategy == :console
       strategy
@@ -192,8 +192,8 @@ module Dominion
     end
     
     def prepare_supply(options)
-      @kingdom_cards = options[:kingdom_cards] || Preparation.randomly_choose_kingdom(options)
-      @colony_game = options[:colony_game?] || Preparation.randomly_choose_if_colony_game(@kingdom_cards)
+      @kingdom_cards = options.fetch :kingdom_cards, Preparation.randomly_choose_kingdom(options)
+      @colony_game = options.fetch :colony_game?, Preparation.randomly_choose_if_colony_game(@kingdom_cards, options)
       
       @supply = {}
       all_cards.each do |card|

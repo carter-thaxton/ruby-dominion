@@ -178,7 +178,7 @@ module Dominion
     end
     
     def gain(card_class, options = {})
-      to = options[:to] || :discard
+      to = options.fetch :to, :discard
       
       card = draw_from_supply(card_class, self)
       if card
@@ -355,7 +355,7 @@ module Dominion
     end
     
     def find_card_in_hand(card, options = {})
-      set = options[:set] || hand
+      set = options.fetch :set, hand
       if card.is_a? Card
         raise "#{card} is not in the player's hand" unless set.include?(card)
       elsif is_card_class(card)
