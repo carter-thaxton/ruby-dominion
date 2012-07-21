@@ -49,9 +49,15 @@ module Dominion
         draw 5
       end
     end
+
+    def current_player?
+      game.current_player == self
+    end
     
     def start_turn
+      check_turn
       raise "Cannot start turn in #{phase} phase" unless setup_phase?
+
       @turn += 1
       @actions_available = 1
       @coins_available = 0
@@ -61,9 +67,9 @@ module Dominion
     
     def end_turn
       check_turn
-      
       raise "Cannot end turn in #{phase} phase" unless action_phase? || treasure_phase? || buy_phase?
       raise "Cannot end turn while choice in progress" if @choice_in_progress
+
       move_to_phase :cleanup
       
       @actions_in_play.each { |card| card.on_cleanup }
@@ -130,7 +136,7 @@ module Dominion
       
       raise "#{card} is not playable" unless card.action? || card.treasure?
       raise "#{card} is an action card, but currently in #{phase} phase" if card.action? && !action_phase?
-      raise "#{card} is an action card, and there are no more actions available" if card.action? && actions_available <= 0
+      raise "#{card} is an action card, but there are no more actions available" if card.action? && actions_available <= 0
       
       move_to_phase :treasure if action_phase? && card.treasure?   # automatically move to treasure phase
       raise "#{card} is a treasure card, but currently in #{phase} phase" if card.treasure? && !treasure_phase?
@@ -320,7 +326,7 @@ module Dominion
     end
     
     def check_turn
-      raise "It is not #{name}'s turn" unless game.current_player == self
+      raise "It is not #{name}'s turn" unless current_player?
       raise "Cannot play while choice in progress" if @choice_in_progress
     end
     

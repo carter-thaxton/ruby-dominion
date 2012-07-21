@@ -114,8 +114,9 @@ module Dominion
     def draw_from_supply(card_class, player = nil)
       raise "Player is not playing this game!" if player && player.game != self
       raise "No cards of type #{card_class} available in supply" unless @supply[card_class]
-      raise "No more cards of type #{card_class} available in supply" if @supply[card_class].empty?
-      
+
+      return nil if @supply[card_class].empty?
+
       result = @supply[card_class].shift
       result.player = player
       result
