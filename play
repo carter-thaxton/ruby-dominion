@@ -1,1 +1,1 @@
-pry -Ilib -rdominion
+pry -Ilib -rdominion -e 'g = Game.new :strategy => :console; p1 = g.players[0]; p2 = g.players[1]; puts "Welcome to Dominion\n  g - game\n  p1 - player 1\n  p2 - player 2\n";'

@@ -274,9 +274,6 @@ module Dominion
         respond(@play_choice)
       elsif @strategy
         @strategy.choose self, @card_in_play, options
-      else
-        # useful in console when no choice or strategy
-        puts options[:message]
       end
     end
     

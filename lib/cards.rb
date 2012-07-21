@@ -614,7 +614,7 @@ module Dominion
   
   class Peddler < Card
     type :action
-    cost :dynamic   # 8* (see below)
+    cost 8    # 8* (see below)
     cards 1
     actions 1
     coins 1

@@ -11,7 +11,7 @@ module Dominion
       @phase = :prepare
       @supply = {}
       @trash_pile = []
-      
+
       prepare(options) unless options[:no_prepare]
     end
     
@@ -164,18 +164,20 @@ module Dominion
         player_identities = Array.new num_players   # no identities
       end
       
-      player_strategies = options[:strategies]
-      unless player_strategies
-        player_strategies = Array.new player_identities.size  # no strategies
-      end
-      
       @players = []
       player_identities.each_with_index do |player_identity, position|
-        player_strategy = player_strategies[position]
+        player_strategy = prepare_player_strategy position, options
         @players << Player.new(self, position, player_identity, player_strategy)
       end
       
       @current_player = @players.first
+    end
+
+    def prepare_player_strategy(position, options)
+      strategies = options[:strategies] || []
+      strategy = strategies[position] || options[:strategy]
+      strategy = ConsoleStrategy.new if strategy == :console
+      strategy
     end
     
     def prepare_players(options)
