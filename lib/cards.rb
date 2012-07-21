@@ -11,59 +11,69 @@ module Dominion
   # Curse
   
   class Copper < Card
+    set :base
     type :base, :treasure
     cost 0
     coins 1
   end
 
   class Silver < Card
+    set :base
     type :base, :treasure
     cost 3
     coins 2
   end
 
   class Gold < Card
+    set :base
     type :base, :treasure
     cost 6
     coins 3
   end
 
   class Platinum < Card
+    set :prosperity
     type :base, :treasure
     cost 9
     coins 5
   end
   
   class Potion < Card
+    set :alchemy
     type :base, :treasure
     cost 4
   end
 
   class Estate < Card
+    set :base
     type :base, :victory
     cost 2
     vp 1
   end
 
   class Duchy < Card
+    set :base
     type :base, :victory
     cost 5
     vp 3
   end
 
   class Province < Card
+    set :base
     type :base, :victory
     cost 8
     vp 6
   end
 
   class Colony < Card
+    set :prosperity
     type :base, :victory
     cost 11
     vp 10
   end
 
   class Curse < Card
+    set :base
     type :base, :curse
     cost 0
     vp -1
@@ -75,9 +85,11 @@ module Dominion
   #
   
   class Cellar < Card
+    set :base
   end
   
   class Chapel < Card
+    set :base
     type :action
     cost 2
     
@@ -91,9 +103,11 @@ module Dominion
   end
   
   class Moat < Card
+    set :base
   end
   
   class Chancellor < Card
+    set :base
     type :action
     cost 3
     coins 2
@@ -109,6 +123,7 @@ module Dominion
   end
 
   class Village < Card
+    set :base
     type :action
     cost 3
     cards 1
@@ -116,6 +131,7 @@ module Dominion
   end
   
   class Woodcutter < Card
+    set :base
     type :action
     cost 3
     coins 2
@@ -123,9 +139,11 @@ module Dominion
   end
   
   class Workshop < Card
+    set :base
   end
   
   class Bureaucrat < Card
+    set :base
     type :action, :attack
     cost 3
     coins 2
@@ -141,15 +159,19 @@ module Dominion
   end
 
   class Feast < Card
+    set :base
   end
   
   class Gardens < Card
+    set :base
   end
   
   class Militia < Card
+    set :base
   end
   
   class Moneylender < Card
+    set :base
     type :action
     cost 4
     
@@ -163,24 +185,30 @@ module Dominion
   end
   
   class Remodel < Card
+    set :base
   end
   
   class Smithy < Card
+    set :base
     type :action
     cost 4
     cards 3
   end
 
   class Spy < Card
+    set :base
   end
   
   class Thief < Card
+    set :base
   end
   
   class ThroneRoom < Card
+    set :base
   end
   
   class CouncilRoom < Card
+    set :base
     type :action
     cost 5
     cards 4
@@ -194,6 +222,7 @@ module Dominion
   end
   
   class Festival < Card
+    set :base
     type :action
     cost 5
     actions 2
@@ -202,6 +231,7 @@ module Dominion
   end
   
   class Laboratory < Card
+    set :base
     type :action
     cost 5
     cards 2
@@ -209,9 +239,11 @@ module Dominion
   end
   
   class Library < Card
+    set :base
   end
   
   class Market < Card
+    set :base
     type :action
     cost 5
     cards 1
@@ -221,9 +253,11 @@ module Dominion
   end
 
   class Mine < Card
+    set :base
   end
   
   class Witch < Card
+    set :base
     type :action, :attack
     cost 5
     cards 2
@@ -236,6 +270,7 @@ module Dominion
   end
   
   class Adventurer < Card
+    set :base
   end
   
 
@@ -244,15 +279,19 @@ module Dominion
   #
   
   class Courtyard < Card
+    set :intrigue
   end
   
   class Pawn < Card
+    set :intrigue
   end
   
   class SecretChamber < Card
+    set :intrigue
   end
   
   class GreatHall < Card
+    set :intrigue
     type :action, :victory
     cost 3
     cards 1
@@ -261,63 +300,83 @@ module Dominion
   end
   
   class Masquerade < Card
+    set :intrigue
   end
   
   class ShantyTown < Card
+    set :intrigue
   end
   
   class Steward < Card
+    set :intrigue
   end
   
   class Swindler < Card
+    set :intrigue
   end
   
   class WishingWell < Card
+    set :intrigue
   end
   
   class Baron < Card
+    set :intrigue
   end
   
   class Bridge < Card
+    set :intrigue
   end
   
   class Conspirator < Card
+    set :intrigue
   end
   
   class Coppersmith < Card
+    set :intrigue
   end
   
   class Ironworks < Card
+    set :intrigue
   end
   
   class MiningVillage < Card
+    set :intrigue
   end
   
   class Scout < Card
+    set :intrigue
   end
   
   class Duke < Card
+    set :intrigue
   end
   
   class Minion < Card
+    set :intrigue
   end
   
   class Saboteur < Card
+    set :intrigue
   end
   
   class Torturer < Card
+    set :intrigue
   end
   
   class TradingPost < Card
+    set :intrigue
   end
   
   class Tribute < Card
+    set :intrigue
   end
   
   class Upgrade < Card
+    set :intrigue
   end
   
   class Harem < Card
+    set :intrigue
     type :treasure, :victory
     cost 6
     coins 2
@@ -325,6 +384,7 @@ module Dominion
   end
   
   class Nobles < Card
+    set :intrigue
   end
   
   
@@ -333,51 +393,67 @@ module Dominion
   #
   
   class Embargo < Card
+    set :seaside
   end
   
   class Haven < Card
+    set :seaside
   end
   
   class Lighthouse < Card
+    set :seaside
   end
   
   class NativeVillage < Card
+    set :seaside
   end
   
   class PearlDiver < Card
+    set :seaside
   end
   
   class Ambassador < Card
+    set :seaside
   end
   
   class FishingVillage < Card
+    set :seaside
   end
   
   class Lookout < Card
+    set :seaside
   end
   
   class Smugglers < Card
+    set :seaside
   end
   
   class Warehouse < Card
+    set :seaside
   end
   
   class Caravan < Card
+    set :seaside
   end
   
   class Cutpurse < Card
+    set :seaside
   end
   
   class Island < Card
+    set :seaside
   end
   
   class Navigator < Card
+    set :seaside
   end
   
   class PirateShip < Card
+    set :seaside
   end
   
   class Salvager < Card
+    set :seaside
     type :action
     cost 4
     
@@ -392,12 +468,15 @@ module Dominion
   end
   
   class SeaHag < Card
+    set :seaside
   end
   
   class TreasureMap < Card
+    set :seaside
   end
   
   class Bazaar < Card
+    set :seaside
     type :action
     cost 5
     cards 1
@@ -406,24 +485,31 @@ module Dominion
   end
   
   class Explorer < Card
+    set :seaside
   end
   
   class GhostShip < Card
+    set :seaside
   end
   
   class MerchantShip < Card
+    set :seaside
   end
   
   class Outpost < Card
+    set :seaside
   end
   
   class Tactician < Card
+    set :seaside
   end
   
   class Treasury < Card
+    set :seaside
   end
   
   class Wharf < Card
+    set :seaside
   end
   
   
@@ -432,30 +518,39 @@ module Dominion
   #
 
   class Herbalist < Card
+    set :alchemy
   end
   
   class Apprentice < Card
+    set :alchemy
   end
   
   class Transmute < Card
+    set :alchemy
   end
   
   class Vineyard < Card
+    set :alchemy
   end
   
   class Apothecary < Card
+    set :alchemy
   end
   
   class ScryingPool < Card
+    set :alchemy
   end
   
   class University < Card
+    set :alchemy
   end
   
   class Alchemist < Card
+    set :alchemy
   end
   
   class Familiar < Card
+    set :alchemy
     type :action, :attack
     cost 3
     potion true
@@ -470,12 +565,15 @@ module Dominion
   end
 
   class PhilosophersStone < Card
+    set :alchemy
   end
   
   class Golem < Card
+    set :alchemy
   end
   
   class Possession < Card
+    set :alchemy
   end
   
   
@@ -484,15 +582,19 @@ module Dominion
   #
 
   class Loan < Card
+    set :prosperity
   end
   
   class TradeRoute < Card
+    set :prosperity
   end
   
   class Watchtower < Card
+    set :prosperity
   end
   
   class Bishop < Card
+    set :prosperity
     type :action
     cost 4
     coins 1
@@ -509,6 +611,7 @@ module Dominion
   end
 
   class Monument < Card
+    set :prosperity
     type :action
     cost 4
     coins 2
@@ -519,12 +622,15 @@ module Dominion
   end
   
   class Quarry < Card
+    set :prosperity
   end
   
   class Talisman < Card
+    set :prosperity
   end
   
   class WorkersVillage < Card
+    set :prosperity
     type :action
     cost 4
     cards 1
@@ -533,18 +639,23 @@ module Dominion
   end
   
   class City < Card
+    set :prosperity
   end
   
   class Contraband < Card
+    set :prosperity
   end
   
   class CountingHouse < Card
+    set :prosperity
   end
   
   class Mint < Card
+    set :prosperity
   end
   
   class Mountebank < Card
+    set :prosperity
     type :action, :attack
     cost 5
     coins 2
@@ -566,21 +677,27 @@ module Dominion
   end
   
   class Rabble < Card
+    set :prosperity
   end
   
   class RoyalSeal < Card
+    set :prosperity
   end
   
   class Vault < Card
+    set :prosperity
   end
   
   class Venture < Card
+    set :prosperity
   end
   
   class Goons < Card
+    set :prosperity
   end
   
   class GrandMarket < Card
+    set :prosperity
     type :action
     cost 6
     cards 1
@@ -598,21 +715,27 @@ module Dominion
   end
 
   class Hoard < Card
+    set :prosperity
   end
   
   class Bank < Card
+    set :prosperity
   end
   
   class Expand < Card
+    set :prosperity
   end
   
   class Forge < Card
+    set :prosperity
   end
   
   class KingsCourt < Card
+    set :prosperity
   end
   
   class Peddler < Card
+    set :prosperity
     type :action
     cost 8    # 8* (see below)
     cards 1
@@ -635,45 +758,58 @@ module Dominion
   #
 
   class Hamlet < Card
+    set :cornucopia
   end
   
   class FarmingVillage < Card
+    set :cornucopia
   end
   
   class FortuneTeller < Card
+    set :cornucopia
   end
   
   class Menagerie < Card
+    set :cornucopia
   end
   
   class HorseTraders < Card
+    set :cornucopia
   end
   
   class Remake < Card
+    set :cornucopia
   end
   
   class Tournament < Card
+    set :cornucopia
   end
   
   class YoungWitch < Card
+    set :cornucopia
   end
   
   class Harvest < Card
+    set :cornucopia
   end
   
   class HornOfPlenty < Card
+    set :cornucopia
   end
   
   class HuntingParty < Card
+    set :cornucopia
   end
   
   class Jester < Card
+    set :cornucopia
   end
   
   class Fairgrounds < Card
+    set :cornucopia
     type :victory
     cost 6
-    vp :dynamic
+    vp 0      # dynamic (see below)
     
     def vp
       num_unique_cards = all_cards.map {|c| c.class }.uniq.size
@@ -687,13 +823,24 @@ module Dominion
   #
 
   class BlackMarket < Card
+    set :promo
     # Good luck...
   end
   
   class Envoy < Card
+    set :promo
   end
   
   class Stash < Card
+    set :promo
   end
   
+  class WalledVillage < Card
+    set :promo
+  end
+
+  class Governor < Card
+    set :promo
+  end
+
 end

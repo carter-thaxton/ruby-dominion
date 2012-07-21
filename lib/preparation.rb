@@ -7,7 +7,9 @@ module Dominion
     end
     
     def self.randomly_choose_if_colony_game(kingdom_cards, options = {})
-      false
+      num_prosperity_cards = kingdom_cards.count { |card| card.set == :prosperity }
+      odds = num_prosperity_cards.to_f / kingdom_cards.count
+      rand < odds
     end
     
     def self.initial_count_in_supply(card, num_players)

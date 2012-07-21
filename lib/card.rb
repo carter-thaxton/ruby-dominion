@@ -57,7 +57,7 @@ module Dominion
       end
 
       define_type_attrs :base, :action, :attack, :victory, :treasure, :curse, :reaction, :duration
-      define_class_attrs :cost, :potion, :cards, :actions, :coins, :buys, :vp
+      define_class_attrs :set, :cost, :potion, :cards, :actions, :coins, :buys, :vp
 
       public
 
