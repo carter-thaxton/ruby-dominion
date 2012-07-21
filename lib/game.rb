@@ -106,6 +106,11 @@ module Dominion
       players[player.position - 1 % num_players]
     end
     
+    def supply_counts
+      # counts instead of actual instances
+      supply.inject({}) {|h,v| h[v[0]] = v[1].count; h }
+    end
+
     def peek_from_supply(card_class)
       pile = @supply[card_class]
       pile && pile.first
@@ -191,8 +196,6 @@ module Dominion
       @colony_game = options[:colony_game?] || Preparation.randomly_choose_if_colony_game(@kingdom_cards)
       
       @supply = {}
-      @supply.extend PileSummary  # better to_s for supply
-      
       all_cards.each do |card|
         count = Preparation.initial_count_in_supply card, num_players
         pile = (1..count).collect { card.new self }
@@ -200,17 +203,6 @@ module Dominion
       end
     end
 
-  end
-  
-  # Is this not sick?  It makes the supply hash to_s display a count, rather than exploding the array
-  module PileSummary
-    def piles
-      inject({}) {|h,v| h[v[0]] = v[1].size; h }
-    end
-      
-    def inspect
-      piles
-    end
   end
   
 end
