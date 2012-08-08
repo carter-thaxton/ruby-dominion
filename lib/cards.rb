@@ -662,14 +662,12 @@ module Dominion
     
     def play_action
       other_players.each do |player|
-        player.reveal :type => Curse, :attack => true do |curse, attack_failed|
-          unless attack_failed
-            if curse
-              player.discard curse
-            else
-              player.gain Copper
-              player.gain Curse
-            end
+        player.reveal :type => Curse, :attack => true do |curse|
+          if curse
+            player.discard curse
+          else
+            player.gain Curse
+            player.gain Copper
           end
         end
       end

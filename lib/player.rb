@@ -286,7 +286,33 @@ module Dominion
       @choice_in_progress = nil
       response
     end
-    
+
+    def reveal(options = {})
+      attack_cond options[:attach] do
+        type = options[:type]
+        card = find_card_in_hand(type)
+        if card
+          if options[:required]
+            yield card
+          else
+            ask "Reveal #{card}" do |response|
+              yield card if response
+            end
+          end
+        end
+      end
+    end
+
+    def attack_cond(condition)
+      if condition
+        attack do
+          yield
+        end
+      else
+        yield
+      end
+    end
+
     def cards_in_play
       actions_in_play + treasures_in_play + durations_on_first_turn + durations_on_second_turn
     end
@@ -340,13 +366,19 @@ module Dominion
           else
             return find_card_in_hand(response)
           end
+        else
+          raise "Only cards may be chosen from hand"
         end
       end
-      
+
+      if @choice_in_progress[:type] == :bool && !@choice_in_progress[:multiple]
+        raise "Response must be true or false" unless response == true or response == false
+      end
+
       if @choice_in_progress[:multiple] && @choice_in_progress[:max]
         raise "At most #{@choice_in_progress[:max]} may be chosen" if response.size > @choice_in_progress[:max]
       end
-      
+
       if @choice_in_progress[:multiple] && @choice_in_progress[:min]
         raise "At least #{@choice_in_progress[:min]} must be chosen" if response.size < @choice_in_progress[:min]
       end
@@ -355,13 +387,13 @@ module Dominion
     end
     
     def find_card_in_hand(card, options = {})
-      set = options.fetch :set, hand
+      hand = options.fetch :hand, self.hand
       if card.is_a? Card
-        raise "#{card} is not in the player's hand" unless set.include?(card)
+        raise "#{card} is not in the player's hand" unless hand.include?(card)
       elsif is_card_class(card)
         # choose an instance from the player's hand of the given class
         card_class = card
-        card = set.find {|card| card.is_a? card_class}
+        card = hand.find {|card| card.is_a? card_class}
         if options[:required]
           raise "No card of type #{card_class} found in hand" unless card
         end
@@ -371,7 +403,7 @@ module Dominion
 
     def find_cards_in_hand(cards, options = {})
       tmp_hand = hand.dup
-      options[:set] = tmp_hand
+      options[:hand] = tmp_hand
       
       cards.collect do |card|
         card = find_card_in_hand(card, options)
