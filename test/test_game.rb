@@ -62,6 +62,24 @@ class TestSetup < Test::Unit::TestCase
     assert_equal 0, player.deck.size
     player.end_turn
   end
+
+  def test_choose_one_using_nobles
+    game = Game.new :num_players => 1, :kingdom_cards => [Nobles]
+    player = game.current_player
+
+    # choose actions
+    player.gain Nobles, :to => :hand
+    orig_hand_size = player.hand.size
+    player.play Nobles, :choice => :cards
+    assert_equal orig_hand_size + 2, player.hand.size
+    player.end_turn
+
+    # choose cards
+    player.gain Nobles, :to => :hand
+    player.play Nobles, :choice => :actions
+    assert_equal 2, player.actions_available
+    player.end_turn
+  end
   
   def test_choose_card_using_salvager
     game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Salvager]

@@ -23,7 +23,7 @@ class TestCards < Test::Unit::TestCase
     assert Village.kingdom?
     assert !Village.victory?
     
-    v = Village.new @game
+    v = Village.new
 
     assert_equal 2, v.actions
     assert_equal 1, v.cards
@@ -57,8 +57,8 @@ class TestCards < Test::Unit::TestCase
     @game.actions_in_play = Array.new 2
     assert_equal 4, p.cost
   end
-  
-  def test_cards
+
+  def test_get_all_cards
     all_cards = Dominion.all_cards
   end
 

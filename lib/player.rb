@@ -263,7 +263,16 @@ module Dominion
       options[:multiple] = true
       choose(options, &block)
     end
-    
+
+    def choose_one(messages, symbols, options = {}, &block)
+      options[:message] = 'Choose one: ' + messages.join(' or ')
+      options[:messages] = messages
+      options[:type] = :symbol
+      options[:multiple] = false
+      options[:restrict_to] = symbols
+      choose(options, &block)
+    end
+
     def choose(options, &block)
       @resume_block = block
       @choice_in_progress = options
@@ -354,14 +363,21 @@ module Dominion
     end
     
     def handle_response(response)
-      if @choice_in_progress[:multiple]
+      multiple = @choice_in_progress[:multiple]
+      type = @choice_in_progress[:type]
+      from = @choice_in_progress[:from]
+      max = @choice_in_progress[:max]
+      min = @choice_in_progress[:min]
+      restrict_to = @choice_in_progress[:restrict_to]
+
+      if multiple
         response = [response] unless response.is_a? Enumerable
       end
       
       # common operation of finding cards in hand by type
-      if @choice_in_progress[:from] == :hand
-        if @choice_in_progress[:type] == :card
-          if @choice_in_progress[:multiple]
+      if from == :hand
+        if type == :card
+          if multiple
             return find_cards_in_hand(response)
           else
             return find_card_in_hand(response)
@@ -371,16 +387,42 @@ module Dominion
         end
       end
 
-      if @choice_in_progress[:type] == :bool && !@choice_in_progress[:multiple]
-        raise "Response must be true or false" unless response == true or response == false
+      if type == :bool
+        if multiple
+          response.each do |r|
+            raise "Response must be an array of true or false values" unless r == true or r == false
+          end
+        else
+          raise "Response must be true or false" unless response == true or response == false
+        end
       end
 
-      if @choice_in_progress[:multiple] && @choice_in_progress[:max]
-        raise "At most #{@choice_in_progress[:max]} may be chosen" if response.size > @choice_in_progress[:max]
+      if restrict_to
+        if multiple
+          response.each do |r|
+            raise "Response must be an array of one of: " + restrict_to.join(', ') unless restrict_to.include?(r)
+          end
+        else
+          raise "Response must be one of: " + restrict_to.join(', ') unless restrict_to.include?(response)
+        end
       end
 
-      if @choice_in_progress[:multiple] && @choice_in_progress[:min]
-        raise "At least #{@choice_in_progress[:min]} must be chosen" if response.size < @choice_in_progress[:min]
+      if type == :symbole
+        if multiple
+          response.each do |r|
+            raise "Response must be an array of true or false values" unless r == true or r == false
+          end
+        else
+          raise "Response must be true or false" unless response == true or response == false
+        end
+      end
+
+      if multiple && max
+        raise "At most #{max} may be chosen" if response.size > max
+      end
+
+      if multiple && min
+        raise "At least #{min} must be chosen" if response.size < min
       end
 
       response

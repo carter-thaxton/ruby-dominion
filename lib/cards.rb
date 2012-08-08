@@ -385,6 +385,21 @@ module Dominion
   
   class Nobles < Card
     set :intrigue
+    type :action, :victory
+    cost 6
+    vp 2
+
+    def play_action
+      choose_one ["+2 actions", "+3 cards"], [:actions, :cards] do |choice|
+        if choice == :actions
+          add_actions 2
+        elsif choice == :cards
+          draw 3
+        else
+          raise "Invalid response: " + choice
+        end
+      end
+    end
   end
   
   
