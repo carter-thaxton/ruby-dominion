@@ -5,7 +5,7 @@ module Dominion
   class Player
     include Util
     
-    attr_accessor :identity, :strategy
+    attr_accessor :identity, :strategy, :attack_prevented
     
     attr_reader :game, :position,
       :deck, :discard_pile, :hand,
@@ -35,6 +35,7 @@ module Dominion
       @turn = 0
       @card_in_play = nil
       @choice_in_progress = nil
+      @attack_prevented = false
     end
     
     def prepare(options = {})
@@ -72,22 +73,23 @@ module Dominion
 
       move_to_phase :cleanup
       
-      @actions_in_play.each { |card| card.on_cleanup }
       @discard_pile += @actions_in_play
       @actions_in_play = []
 
-      @treasures_in_play.each { |card| card.on_cleanup }
       @discard_pile += @treasures_in_play
       @treasures_in_play = []
-      
-      @hand.each { |card| card.on_cleanup }
+
       @discard_pile += @hand
       @hand = []
-      
-      draw 5
-      move_to_phase :setup
+
+      # TODO: handle Outpost
+
       check_for_game_over
-      move_to_next_player if in_progress?
+      if in_progress?
+        draw 5
+        move_to_phase :setup
+        move_to_next_player
+      end
     end
     
     def add_actions(actions)
@@ -144,24 +146,33 @@ module Dominion
       hand.delete card
       @card_in_play = card
       @play_choice = options[:choice]
-      
-      if action_phase? && card.action?
-        @actions_available -= 1
-        draw card.cards
-        add_actions card.actions
-        add_coins card.coins
-        add_buys card.buys
-        card.play_action
-        @actions_in_play << card
-      elsif treasure_phase? && card.treasure?
-        add_coins card.coins
-        add_buys card.buys
-        card.play_treasure
-        @treasures_in_play << card
+
+      play_card = ->() do
+        if card.action?
+          @actions_in_play << card
+          @actions_available -= 1
+          draw card.cards
+          add_actions card.actions
+          add_coins card.coins
+          add_buys card.buys
+        elsif card.treasure?
+          @treasures_in_play << card
+          add_coins card.coins
+          add_buys card.buys
+        end
+
+        card.on_play do
+          @card_in_play = nil
+          @play_choice = nil
+        end
       end
-      
-      @card_in_play = nil
-      @play_choice = nil
+
+      if card.attack?
+        handle_attack_reactions card, &play_card
+      else
+        play_card.call
+      end
+
       card
     end
     
@@ -175,11 +186,27 @@ module Dominion
       card = find_card_in_hand card, :required => true
       hand.delete card
       game.trash_pile << card
+      card
+    end
+
+    def discard(card)
+      card = find_card_in_hand card, :required => true
+      hand.delete card
+      card.on_discard
+      discard_pile << card
+      card
+    end
+
+    def discard_hand
+      hand.dup.each do |card|
+        discard card
+      end
     end
     
     def gain(card_class, options = {})
+      return nil if options[:attack] && attack_prevented
+
       to = options.fetch :to, :discard
-      
       card = draw_from_supply(card_class, self)
       if card
         card.on_gain
@@ -192,7 +219,7 @@ module Dominion
           @hand << card
         end
       end
-      
+
       card
     end
     
@@ -297,28 +324,32 @@ module Dominion
     end
 
     def reveal(options = {})
-      attack_cond options[:attach] do
+      if options[:attack] && attack_prevented
+        yield nil
+      else
         type = options[:type]
         card = find_card_in_hand(type)
         if card
           if options[:required]
             yield card
           else
-            ask "Reveal #{card}" do |response|
-              yield card if response
+            ask "Reveal #{card}?", :reaction => options[:reaction] do |response|
+              if response
+                yield card
+              else
+                yield nil
+              end
             end
           end
         end
       end
     end
 
-    def attack_cond(condition)
-      if condition
-        attack do
-          yield
+    def react_to_attack
+      if !attack_prevented
+        if find_card_in_hand(Moat)
+
         end
-      else
-        yield
       end
     end
 
@@ -400,10 +431,10 @@ module Dominion
       if restrict_to
         if multiple
           response.each do |r|
-            raise "Response must be an array of one of: " + restrict_to.join(', ') unless restrict_to.include?(r)
+            raise "Response must be an array of one of: " + restrict_to.to_s unless restrict_to.include?(r)
           end
         else
-          raise "Response must be one of: " + restrict_to.join(', ') unless restrict_to.include?(response)
+          raise "Response must be one of: " + restrict_to.to_s unless restrict_to.include?(response)
         end
       end
 

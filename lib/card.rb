@@ -88,16 +88,16 @@ module Dominion
     attr_accessor :player
 
     # Hooks - empty by default
-    def play_action; end
-    def play_treasure; end
-    def on_setup_after_duration; end
-    def on_cleanup; end
-    def on_gain; end
-    def on_buy; end
-    def on_any_card_gained; end
-    def on_any_card_bought; end
+    def on_play; yield if block_given?; end                 # Lots...
+    def on_buy; yield if block_given?; end                  # Mint, Farmland, Noble Brigand
+    def on_gain; yield if block_given?; end                 # Cache, Border Village, Embassy, Duchy/Duchess, Ill-Gotten Gains, Inn, Mandarin, Nomad Camp
+    def on_discard; yield if block_given?; end              # Tunnel
+    def on_trash; yield if block_given?; end                # Dark Ages!!!
+    def on_any_card_bought; yield if block_given?; end      # Contraband (validation)
+    def on_any_card_gained; yield if block_given?; end      # Watchtower, Trader, Fool's Gold
+    def on_setup_after_duration; yield if block_given?; end # Wharf, Tactician, Merchant Ship, Lighthouse, Haven, Fishing Village, Caravan
 
-    # can be overridden in various cards, like GrandMarket
+    # can be overridden in various cards, like Grand Market
     def can_buy
       true
     end

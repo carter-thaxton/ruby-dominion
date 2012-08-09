@@ -106,16 +106,13 @@ This is as good a time as any to think through the various game states, and thei
 
 Hooks:
 
-- play_action         (called when this card is played as an action)
-- play_treasure       (called when this card is played as a treasure)
-
-- on_setup_after_duration     (called when this card is brought back into the hand after a duration)
-- on_cleanup                  (called when this card is cleaned up)
-
-- on_buy              (called when this card is bought)
-- on_gain             (called when this card is gained or bought)
-- on_any_card_bought  (called while this card is in play, and any card is gained)
-- on_any_card_gained  (called while this card is in play, and any card is gained or bought)
+- on_play                   (called when this card is played)
+- on_buy                    (called when this card is bought)
+- on_gain                   (called when this card is gained or bought)
+- on_discard                (called when this card is discarded)
+- on_trash                  (called when this card is trashed)
+- on_any_card_gained        (called when this card is in hand of any player, and any card is gained by any player)
+- on_setup_after_duration   (called when this card is brought back into the hand after a duration)
 
 The buy hooks are only called when the card is actually bought in the buy phase.
 The gain hooks are called both on buy and when the card is gained in other manners.
@@ -133,7 +130,7 @@ My design separates the treasure/buy phases, and works like this:
 
 See how easy it is when you just name things correctly?
 
-The action phase is when most action cards have an effect.  e.g. this is when a Village actually gives you +2 actions and +1 card.  The 'play_action' hook is called after the statically defined properties are resolved, e.g. +1 card/+1 action.
+The action phase is when most action cards have an effect.  e.g. this is when a Village actually gives you +2 actions and +1 card.  The 'on_play' hook is called after the statically defined properties are resolved, e.g. +1 card/+1 action.
 
 The treasure phase is when treasures are played.
 The 'play_treasure' hook is called when a treasure card is played, and after any statically defined properties are resolved, e.g. +1 coin for Copper.  Most simple treasures do not override the 'play_treasure' hook.
@@ -144,10 +141,9 @@ on_buy is called when a card is bought.  This is useful for validating the purch
 
 This should not be confused with on_any_card_bought, which is called on all cards in play any time a card is bought.  This is sometimes useful for validations of a purchase, such as Contraband.
 
-
 on_any_card_gained is useful for reactions, such as Watchtower.
 
-on_cleanup is called on cards in play when the buy phase is complete, as they are being discarded.  Duration cards played will not be cleaned up at this time, however.  Instead, they are left in the 'durations_on_first_turn' list, and are brought back into play on the following turn, and the 'on_setup_after_duration' hook is called.  At this time, the duration cards are moved to the 'durations_on_second_turn' list.  on_cleanup is called for these duration cards when they are truly cleaned-up and discarded from this second list.
+We'll need an on_shuffle in order to handle Stash.  But of course, that means that every draw can block.  I don't really like Stash anyway.  Maybe just skip it.  Same goes for Possession.  :)
 
 
 Reactions

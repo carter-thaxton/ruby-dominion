@@ -154,4 +154,27 @@ class TestSetup < Test::Unit::TestCase
     player.end_turn
   end
 
+  def test_attack_with_reactions_using_minion
+    game = Game.new :num_players => 3, :kingdom_cards => [Minion, Moat]
+    player = game.current_player
+    player2 = game.players[1]
+    player3 = game.players[2]
+
+    player.gain Minion, :to => :hand
+    player2.gain Moat, :to => :hand
+
+    player.play Minion
+    assert game.waiting_for_reactions?
+    assert player2.choice_in_progress       # reveal Moat?
+    assert !player3.choice_in_progress
+
+    player2.respond true
+    assert !game.waiting_for_reactions?
+
+    player.respond :cards
+    assert_equal 4, player.hand.size
+    assert_equal 5, player2.hand.size       # revealed Moat
+    assert_equal 4, player3.hand.size       # no Moat
+  end
+
 end

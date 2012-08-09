@@ -81,7 +81,7 @@ module Dominion
 
 
   #
-  # Dominion (Base Game)
+  # Base Game
   #
   
   class Cellar < Card
@@ -93,7 +93,7 @@ module Dominion
     type :action
     cost 2
     
-    def play_action
+    def on_play
       choose_cards "Choose up to 4 cards to trash", :from => :hand, :max => 4 do |cards|
         cards.each do |card|
           trash card
@@ -104,6 +104,8 @@ module Dominion
   
   class Moat < Card
     set :base
+    type :action, :reaction
+    cost 2
   end
   
   class Chancellor < Card
@@ -112,7 +114,7 @@ module Dominion
     cost 3
     coins 2
     
-    def play_action
+    def on_play
       ask "Immediately put deck into discard pile?" do |discard_deck|
         if discard_deck
           discard_pile.concat deck
@@ -148,7 +150,7 @@ module Dominion
     cost 3
     coins 2
 
-    def play_action
+    def on_play
       gain Silver, :to => :deck
       other_players.each do |player|
         player.reveal :type => :victory, :attack => true do |card|
@@ -175,7 +177,7 @@ module Dominion
     type :action
     cost 4
     
-    def play_action
+    def on_play
       copper = hand.find {|card| card.is_a? Copper}
       if copper
         trash copper
@@ -214,7 +216,7 @@ module Dominion
     cards 4
     buys 1
     
-    def play_action
+    def on_play
       other_players.each do |player|
         player.draw_one
       end
@@ -262,7 +264,7 @@ module Dominion
     cost 5
     cards 2
     
-    def play_action
+    def on_play
       other_players.each do |player|
         player.gain Curse, :attack => true
       end
@@ -275,7 +277,7 @@ module Dominion
   
 
   #
-  # Dominion: Intrigue
+  # Intrigue
   #
   
   class Courtyard < Card
@@ -288,6 +290,7 @@ module Dominion
   
   class SecretChamber < Card
     set :intrigue
+    type :action, :reaction
   end
   
   class GreatHall < Card
@@ -353,6 +356,26 @@ module Dominion
   
   class Minion < Card
     set :intrigue
+    type :action, :attack
+    cost 5
+
+    def on_play
+      choose_one ["+2", "Discard hand and draw 4"], [:coins, :discard] do |choice|
+        if choice == :coins
+          add_coins 2
+        elsif choice == :discard
+          discard_hand
+          draw 4
+
+          other_players.each do |player|
+            if player.hand_size > 4 && !player.attack_prevented?
+              player.discard_hand
+              player.draw 4
+            end
+          end
+        end
+      end
+    end
   end
   
   class Saboteur < Card
@@ -389,14 +412,12 @@ module Dominion
     cost 6
     vp 2
 
-    def play_action
+    def on_play
       choose_one ["+2 actions", "+3 cards"], [:actions, :cards] do |choice|
         if choice == :actions
           add_actions 2
         elsif choice == :cards
           draw 3
-        else
-          raise "Invalid response: " + choice
         end
       end
     end
@@ -417,6 +438,8 @@ module Dominion
   
   class Lighthouse < Card
     set :seaside
+    type :action, :duration
+    cost 2
   end
   
   class NativeVillage < Card
@@ -472,7 +495,7 @@ module Dominion
     type :action
     cost 4
     
-    def play_action
+    def on_play
       choose_card "Choose a card to trash", :from => :hand do |card|
         if card
           add_coins card.cost
@@ -572,7 +595,7 @@ module Dominion
     cards 1
     actions 1
     
-    def play_action
+    def on_play
       other_players.each do |player|
         player.gain Curse, :attack => true
       end
@@ -606,6 +629,8 @@ module Dominion
   
   class Watchtower < Card
     set :prosperity
+    type :action, :reaction
+    cost 3
   end
   
   class Bishop < Card
@@ -614,7 +639,7 @@ module Dominion
     cost 4
     coins 1
 
-    def play_action
+    def on_play
       add_vp_tokens 1
       choose_card "Choose a card to trash", :from => :hand do |card|
         if card
@@ -631,7 +656,7 @@ module Dominion
     cost 4
     coins 2
     
-    def play_action
+    def on_play
       add_vp_tokens 1
     end
   end
@@ -675,7 +700,7 @@ module Dominion
     cost 5
     coins 2
     
-    def play_action
+    def on_play
       other_players.each do |player|
         player.reveal :type => Curse, :attack => true do |curse|
           if curse
@@ -788,6 +813,8 @@ module Dominion
   
   class HorseTraders < Card
     set :cornucopia
+    type :action, :reaction
+    cost 4
   end
   
   class Remake < Card

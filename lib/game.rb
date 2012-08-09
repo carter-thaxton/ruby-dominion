@@ -127,6 +127,14 @@ module Dominion
       result
     end
     
+    def waiting_for_response?
+      players.any? { |player| player.choice_in_progress }
+    end
+
+    def waiting_for_reactions?
+      players.any? { |player| player.choice_in_progress && player.choice_in_progress[:reaction] }
+    end
+
     def check_for_game_over
       provinces_gone = supply[Province].empty?
       colonies_gone = (colony_game? && supply[Colony].empty?)
