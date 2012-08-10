@@ -209,8 +209,9 @@ module Dominion
     def trash(card_or_class)
       return if card_or_class.nil?
       card = resolve_card_or_class(card_or_class)
-      if hand.delete card
-        # TODO: better prevent double-trashing
+      if card
+        # TODO: prevent double-trashing for Throne Room / Feast
+        hand.delete card
         game.trash_pile << card
       end
       card
@@ -355,12 +356,17 @@ module Dominion
     end
 
     def choose_one(messages, symbols, options = {})
-      options[:message] = 'Choose one: ' + messages.join(' or ')
-      options[:messages] = messages
-      options[:type] = :symbol
-      options[:multiple] = false
-      options[:restrict_to] = symbols
-      choose(options)
+      if symbols.count > 1
+        options[:message] = 'Choose one: ' + messages.join(' or ')
+        options[:messages] = messages
+        options[:type] = :symbol
+        options[:multiple] = false
+        options[:restrict_to] = symbols
+        choose(options)
+      else
+        # Don't bother asking for zero or one choices
+        symbols.first
+      end
     end
 
     def choose(options)

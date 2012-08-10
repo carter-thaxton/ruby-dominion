@@ -136,17 +136,19 @@ class TestCards < Test::Unit::TestCase
     p1.gain Thief, :to => :hand
 
     p2.gain [Silver, Copper], :to => :deck
-    p3.gain [Estate, Duchy], :to => :deck
+    p3.gain [Copper, Duchy], :to => :deck
 
-    p1.strategy = MockStrategy.new([Silver, true])    # choose to gain Silver from p1
+    p1.strategy = MockStrategy.new([Silver, true, false])    # choose to gain Silver from p1, don't gain Copper from p2
     p1.play Thief
 
     assert_has_a Silver, p1.discard_pile
+    assert_has_no Copper, p1.discard_pile
     assert_has_no Silver, p2.deck
     assert_has_no Silver, p2.discard_pile
     assert_has_a Copper, p2.discard_pile
-    assert_has_a Estate, p3.discard_pile
+    assert_has_no Copper, p3.discard_pile
     assert_has_a Duchy, p3.discard_pile
+    assert_has_a Copper, game.trash_pile
   end
 
   def test_library

@@ -309,17 +309,13 @@ module Dominion
     end
 
     def pick_a_treasure(cards)
-      # Only ask if there is more than one type of treasure to choose from
       treasures = cards.select(&:treasure?)
+      return nil unless treasures.any?
+
       treasures_by_class = treasures.reduce({}) { |h,t| h[t.class] = t; h }
-      different_treasures = treasures_by_class.count > 1
-      if different_treasures
-        treasure_classes = treasures_by_class.keys
-        treasure_class = choose_one treasure_classes, treasure_classes
-        treasures_by_class[treasure_class]
-      else
-        treasures.first
-      end
+      treasure_classes = treasures_by_class.keys
+      treasure_class = choose_one treasure_classes, treasure_classes
+      treasures_by_class[treasure_class]
     end
   end
   
