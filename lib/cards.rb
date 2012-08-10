@@ -444,6 +444,14 @@ module Dominion
   
   class Courtyard < Card
     set :intrigue
+    type :action
+    cost 2
+    cards 2
+
+    def on_play
+      card = choose_card "Choose a card to put back on the deck", :from => :hand, :required => true
+      put_on_deck card
+    end
   end
   
   class Pawn < Card

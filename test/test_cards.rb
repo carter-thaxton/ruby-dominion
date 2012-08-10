@@ -223,7 +223,9 @@ class TestCards < Test::Unit::TestCase
     player.buy Mint
     player.end_turn
     assert_has_a Copper, game.trash_pile
+    assert_equal 5, game.trash_pile.size
 
+    assert_has_no Copper, player.hand
     assert_has_a Mint, player.hand
     assert_has_a Gold, player.hand
 
@@ -232,6 +234,21 @@ class TestCards < Test::Unit::TestCase
 
     assert_has_a Gold, player.hand
     assert_has_a Gold, player.discard_pile
+  end
+
+  def test_courtyard
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Courtyard]
+    player = game.current_player
+
+    player.gain [Courtyard, Estate, Estate], :to => :hand
+    player.gain [Gold, Silver], :to => :deck
+
+    player.strategy = MockStrategy.new([Gold])
+    player.play Courtyard
+
+    assert_has_a Gold, player.deck
+    assert_has_a Silver, player.hand
+    assert_has_a Estate, player.hand
   end
 
 end

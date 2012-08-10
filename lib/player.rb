@@ -57,7 +57,6 @@ module Dominion
     
     def cards_in_play
       actions_in_play + treasures_in_play + durations_on_first_turn + durations_on_second_turn
-      # TODO: set_aside
     end
     
     def all_cards
@@ -209,14 +208,17 @@ module Dominion
     def trash(cards_or_classes)
       return if cards_or_classes.nil?
       if cards_or_classes.is_a?(Enumerable)
-        cards_or_classes.each do |card_or_class|
+        cards_or_classes.dup.each do |card_or_class|
           trash(card_or_class)
         end
       else
         card = resolve_card_or_class(cards_or_classes)
         if card
-          # TODO: prevent double-trashing for Throne Room / Feast
+          # Delete instance from the various places cards can be
           hand.delete card
+          actions_in_play.delete card
+          treasures_in_play.delete card
+
           game.trash_pile << card
         end
         card
@@ -244,7 +246,7 @@ module Dominion
     def discard(cards_or_classes)
       return if cards_or_classes.nil?
       if cards_or_classes.is_a? Enumerable
-        cards_or_classes.each do |card_or_class|
+        cards_or_classes.dup.each do |card_or_class|
           discard card_or_class
         end
       else
@@ -259,9 +261,7 @@ module Dominion
     end
 
     def discard_hand
-      hand.dup.each do |card|
-        discard card
-      end
+      discard hand
     end
     
     def gain(cards_or_classes, options = {})
