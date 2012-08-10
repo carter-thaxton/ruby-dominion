@@ -2,16 +2,6 @@ require File.dirname(__FILE__) + '/common'
 
 class TestGame < Test::Unit::TestCase
 
-  class MockStrategy
-    def initialize(responses)
-      @responses = responses
-    end
-
-    def choose(player, options)
-      @responses.shift
-    end
-  end
-
   def test_basic_play
     game = Game.new :num_players => 1
     player = game.current_player
@@ -155,7 +145,7 @@ class TestGame < Test::Unit::TestCase
     player.end_turn
   end
 
-  def test_attack_with_reactions_using_minion
+  def test_attack_with_reactions_using_minion_and_moat
     game = Game.new :num_players => 3, :kingdom_cards => [Minion, Moat]
     player = game.current_player
     player2 = game.players[1]
