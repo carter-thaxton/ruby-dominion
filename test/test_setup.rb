@@ -2,6 +2,10 @@ require File.dirname(__FILE__) + '/common'
 
 class TestSetup < Test::Unit::TestCase
 
+  def test_get_all_cards
+    all_cards = Dominion.all_cards
+  end
+
   def test_initial_count_in_supply
     assert_equal 10, Preparation.initial_count_in_supply(Village, 2)
 

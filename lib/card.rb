@@ -69,6 +69,10 @@ module Dominion
         @type = args if args.length >= 1
         @type
       end
+
+      def is_type?(type)
+        self.type.include?(type)
+      end
       
       def defined?
         !@type.empty?

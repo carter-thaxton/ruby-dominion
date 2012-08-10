@@ -181,8 +181,17 @@ class TestCards < Test::Unit::TestCase
     assert_equal 5, player.hand.size
   end
 
-  def test_get_all_cards
-    all_cards = Dominion.all_cards
+  def test_mine
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Mine]
+    player = game.current_player
+
+    player.gain [Mine, Silver], :to => :hand
+
+    player.strategy = MockStrategy.new([Silver, Gold])
+    player.play Mine
+
+    assert_has_a Silver, game.trash_pile
+    assert_has_a Gold, player.hand
   end
 
 end

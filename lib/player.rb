@@ -495,6 +495,7 @@ module Dominion
       count = @choice_in_progress[:count]
       restrict_to = @choice_in_progress[:restrict_to]
       max_cost = @choice_in_progress[:max_cost]
+      card_type = @choice_in_progress[:card_type]
 
       if count
         min = max = count
@@ -536,7 +537,7 @@ module Dominion
             raise "Response must be an array of one of: " + restrict_to.to_s unless restrict_to.include?(r)
           end
         elsif type == :card
-          raise "Response must be one of: " + restrict_to.to_s unless restrict_to.include?(response.class)
+          raise "Response must be one of: " + restrict_to.to_s unless restrict_to.include?(response.card_class)
         else
           raise "Response must be one of: " + restrict_to.to_s unless restrict_to.include?(response)
         end
@@ -544,6 +545,10 @@ module Dominion
 
       if type == :card && max_cost
         raise "Card must cost no more than #{max_cost}, but #{response} costs #{response.cost}" if response.cost > max_cost
+      end
+
+      if type == :card && card_type
+        raise "Card must have type #{card_type}, but #{response} has type #{response.type}" unless response.is_type?(card_type)
       end
 
       if multiple && max
