@@ -391,10 +391,11 @@ module Dominion
 
     def on_play
       if hand.select(&:treasure?).any?
-        card = choose_card "Choose a card to trash", :from => :hand, :card_type => :treasure
+        card = choose_card "Choose a treasure to trash", :from => :hand, :card_type => :treasure
         if card
+          max_cost = card.cost + 3
+          new_card = choose_card "Choose a treasure from the supply costing up to #{max_cost}", :from => :supply, :card_type => :treasure, :max_cost => max_cost
           trash card
-          new_card = choose_card "Choose a replacement", :from => :supply, :card_type => :treasure, :max_cost => card.cost + 3
           gain new_card, :to => :hand
         end
       end
