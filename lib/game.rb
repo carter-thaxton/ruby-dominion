@@ -93,13 +93,14 @@ module Dominion
     def num_players
       @players.length
     end
-    
+
     def other_players
-      @players.reject { |p| p == current_player }
+      # Go around clockwise, starting with next player
+      @players.rotate(current_player.position + 1).take(num_players - 1)
     end
 
     def attacked_players
-      other_players.reject { |p| p.attack_prevented }
+      other_players.reject &:attack_prevented
     end
     
     def player_to_left
