@@ -50,7 +50,7 @@ class TestCards < Test::Unit::TestCase
     # play Feast
     player.gain Feast, :to => :hand
     player.play Feast, :choice => Duchy
-    assert_gained player, Duchy
+    assert_has_a Duchy, player.discard_pile
   end
 
   def test_gardens
@@ -98,10 +98,10 @@ class TestCards < Test::Unit::TestCase
     player.gain Remodel, :to => :hand
     player.gain Estate, :to => :hand
 
-    player.strategy = MockStrategy.new([Estate, Remodel])
+    player.strategy = MockStrategy.new([Estate, Silver])  # trash Estate, gain a Silver
     player.play Remodel
 
-    assert_gained player, Remodel
+    assert_has_a Silver, player.discard_pile
     assert_equal 0, player.hand.size
   end
 
@@ -111,12 +111,9 @@ class TestCards < Test::Unit::TestCase
     p2 = game.players[1]
 
     p1.gain Spy, :to => :hand
-    p1.gain Estate, :to => :deck
-    p1.gain Silver, :to => :deck
-    p1.gain Copper, :to => :deck
+    p1.gain [Copper, Silver, Estate], :to => :deck
 
-    p2.gain Estate, :to => :deck
-    p2.gain Silver, :to => :deck
+    p2.gain [Silver, Estate], :to => :deck
 
     p1.strategy = MockStrategy.new([:deck, :discard])   # deck for self, discard for p2
     p1.play Spy
@@ -128,6 +125,28 @@ class TestCards < Test::Unit::TestCase
 
     assert_has_a Estate, p2.deck
     assert_has_a Silver, p2.discard_pile
+  end
+
+  def test_thief
+    game = Game.new :num_players => 3, :no_cards => true, :kingdom_cards => [Thief]
+    p1 = game.players[0]
+    p2 = game.players[1]
+    p3 = game.players[2]
+
+    p1.gain Thief, :to => :hand
+
+    p2.gain [Silver, Copper], :to => :deck
+    p3.gain [Estate, Duchy], :to => :deck
+
+    p1.strategy = MockStrategy.new([Silver, true])    # choose to gain Silver from p1
+    p1.play Thief
+
+    assert_has_a Silver, p1.discard_pile
+    assert_has_no Silver, p2.deck
+    assert_has_no Silver, p2.discard_pile
+    assert_has_a Copper, p2.discard_pile
+    assert_has_a Estate, p3.discard_pile
+    assert_has_a Duchy, p3.discard_pile
   end
 
   def test_get_all_cards

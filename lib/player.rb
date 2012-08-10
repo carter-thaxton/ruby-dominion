@@ -249,24 +249,31 @@ module Dominion
       end
     end
     
-    def gain(card_or_class, options = {})
-      return if card_or_class.nil?
-      card_class = card_or_class.card_class
-      to = options.fetch :to, :discard
-      card = draw_from_supply(card_class, self)
-      if card
-        card.on_gain
-        case to
-        when :discard
-          @discard_pile << card
-        when :deck
-          @deck << card
-        when :hand
-          @hand << card
+    def gain(cards_or_classes, options = {})
+      return if cards_or_classes.nil?
+      if cards_or_classes.is_a?(Enumerable)
+        # Loop in reverse, so first goes on top of deck or discard
+        cards_or_classes.reverse.each do |card_or_class|
+          gain(card_or_class, options)
         end
+      else
+        card_class = cards_or_classes.card_class
+        to = options.fetch :to, :discard
+        card = draw_from_supply(card_class, self)
+        if card
+          card.on_gain
+          # TODO: handle gains that place this card somewhere else
+          case to
+          when :discard
+            @discard_pile << card
+          when :deck
+            @deck << card
+          when :hand
+            @hand << card
+          end
+        end
+        card
       end
-
-      card
     end
     
     def buy(card_or_class)
@@ -379,7 +386,11 @@ module Dominion
     end
 
     def reveal(card)
-      #puts "#{self} reveals a #{card}"
+      if card.is_a?(Enumerable)
+        log "#{self} reveals #{card.join(', ')}"
+      else
+        log "#{self} reveals a #{card}"
+      end
       card
     end
 

@@ -281,6 +281,46 @@ module Dominion
 
   class Thief < Card
     set :base
+    type :action, :attack
+    cost 4
+
+    def on_play
+      attacked_players.each do |player|
+        cards = reveal_two_cards_from_deck(player)
+        treasure = pick_a_treasure(cards)
+        if treasure
+          player.trash treasure
+          if ask "Gain a #{treasure}?"
+            gain treasure.class
+          end
+        end
+        remaining = cards.reject {|c| c == treasure}
+        player.discard remaining
+      end
+    end
+
+    def reveal_two_cards_from_deck(player)
+      cards = []
+      2.times do
+        card = player.draw_from_deck
+        cards << card if card
+      end
+      cards
+    end
+
+    def pick_a_treasure(cards)
+      # Only ask if there is more than one type of treasure to choose from
+      treasures = cards.select(&:treasure?)
+      treasures_by_class = treasures.reduce({}) { |h,t| h[t.class] = t; h }
+      different_treasures = treasures_by_class.count > 1
+      if different_treasures
+        treasure_classes = treasures_by_class.keys
+        treasure_class = choose_one treasure_classes, treasure_classes
+        treasures_by_class[treasure_class]
+      else
+        treasures.first
+      end
+    end
   end
   
   class ThroneRoom < Card

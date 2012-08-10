@@ -164,6 +164,10 @@ module Dominion
 
       player
     end
+
+    def log(message)
+      #puts message
+    end
     
     private
     
