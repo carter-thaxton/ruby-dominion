@@ -223,8 +223,6 @@ module Dominion
     end
     
     def gain(card_class, options = {})
-      return nil if options[:attack] && attack_prevented
-
       to = options.fetch :to, :discard
       card = draw_from_supply(card_class, self)
       if card
@@ -337,8 +335,6 @@ module Dominion
     end
     
     def reveal(options = {})
-      return nil if options[:attack] && attack_prevented
-
       type = options[:type]
       card = find_card_in_hand(type)
       if card

@@ -97,6 +97,10 @@ module Dominion
     def other_players
       @players.reject { |p| p == current_player }
     end
+
+    def attacked_players
+      other_players.reject { |p| p.attack_prevented }
+    end
     
     def player_to_left
       player_to_left_of current_player

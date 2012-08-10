@@ -180,16 +180,16 @@ Examples:
 - PlayerB has a Watchtower in hand, and a Lighthouse in play
 - When the Witch is played, before executing it, go through the other players, and ask to reveal any reactions
 - Don't bother asking about the Moat if attack_prevented is true (in this case because of Lighthouse, but it might be because Moat was already played.  This extra rule just makes reactions less annoying)
-- In the DSL, 'player.gain Curse, :attack => true' is called
 
-- There are four possible outcomes here:
-  1. Supply pile contains no Curses, no attack
-  2. reacts_to? :attack, Lighthouse available, PlayerB plays Lighthouse, attack is unsuccessful.
-  3. reacts_to? :attack, Lighthouse available, PlayerB does not play Lighthouse, reacts_to? :gain, Watchtower available, PlayerB plays Watchtower, Curse is trashed
-  4. reacts_to? :attack, Lighthouse available, PlayerB does not play Lighthouse, reacts_to? :gain, Watchtower available, PlayerB does not play Watchtower, Curse is gained by PlayerB from supply
+- There are five possible outcomes here:
+  1. PlayerB previously played Lighthouse, attack is unsuccessful, Curse stays in supply
+  2. PlayerB didn't play Lighthouse, PlayerB reveals Watchtower and chooses trash, Curse is trashed
+  3. PlayerB didn't play Lighthouse, PlayerB reveals Watchtower and chooses deck, Curse is gained to deck
+  4. PlayerB didn't play Lighthouse, PlayerB doesn't reveal Watchtower, Curse is gained to discard
+  5. Curse supply pile is empty - attack may still occur (so other reactions may still apply), but no Curse is gained
 
-Note that 2 and 3 are different, because a Curse is trashed in 3, but left in the supply in 2.
-I have no idea how I'm going to program a computer to make this choice intelligently.  :)
+Note that 1 and 2 are different, because a Curse is trashed in 2, but left in the supply in 1.
+If Moat and Watchtower are both in hand, you can choose which to reveal first.  I have no idea how I'm going to program a computer to make this choice intelligently.  :)
 
 
 Inversion of Control
@@ -209,7 +209,5 @@ call stack.
 Players need a proxy, so human vs simulator can be easily plugged in.  Every time the player has to make
 a choice, it can call out to the proxy.
 
-Addendum:  I found a simple way to handle this.  Just use blocks in the card code.
-If we really need to stash the call stack, we'll save the block as a variable in the game, and keep some state
-like waiting_for_response? or whatever.
+Addendum:  I found a better way to handle this.  Use fibers in the player strategy, so that the rest of the code uses straight up synchronous calling style.  Keeps it much cleaner.
 

@@ -158,8 +158,8 @@ module Dominion
 
     def on_play
       gain Silver, :to => :deck
-      other_players.each do |player|
-        card = player.reveal :type => :victory, :attack => true
+      attacked_players.each do |player|
+        card = player.reveal :type => :victory
         player.put card, :to => :deck if card
       end
     end
@@ -270,8 +270,8 @@ module Dominion
     cards 2
     
     def on_play
-      other_players.each do |player|
-        player.gain Curse, :attack => true
+      attacked_players.each do |player|
+        player.gain Curse
       end
     end
   end
@@ -598,8 +598,8 @@ module Dominion
     actions 1
     
     def on_play
-      other_players.each do |player|
-        player.gain Curse, :attack => true
+      attacked_players.each do |player|
+        player.gain Curse
       end
     end
   end
@@ -702,8 +702,8 @@ module Dominion
     coins 2
     
     def on_play
-      other_players.each do |player|
-        curse = player.reveal :type => Curse, :attack => true
+      attacked_players.each do |player|
+        curse = player.reveal :type => Curse
         if curse
           player.discard curse
         else
