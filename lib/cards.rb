@@ -104,9 +104,7 @@ module Dominion
     
     def on_play
       cards = choose_cards "Choose up to 4 cards to trash", :from => :hand, :max => 4
-      cards.each do |card|
-        trash card
-      end
+      trash cards
     end
   end
   
@@ -133,7 +131,7 @@ module Dominion
     def on_play
       discard_deck = ask "Immediately put deck into discard pile?"
       if discard_deck
-        discard_pile.concat deck
+        discard deck
         deck.clear
       end
     end
