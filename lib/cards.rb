@@ -850,6 +850,20 @@ module Dominion
   
   class Mint < Card
     set :prosperity
+    type :action
+    cost 5
+
+    def on_play
+      card = choose_card "Choose a treasure to gain a copy of", :from => :hand, :card_type => :treasure
+      if card
+        reveal card
+        gain card.class
+      end
+    end
+
+    def on_buy
+      trash treasures_in_play
+    end
   end
   
   class Mountebank < Card

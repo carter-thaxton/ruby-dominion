@@ -206,15 +206,21 @@ module Dominion
       treasure_cards.each { |card| play card }
     end
     
-    def trash(card_or_class)
-      return if card_or_class.nil?
-      card = resolve_card_or_class(card_or_class)
-      if card
-        # TODO: prevent double-trashing for Throne Room / Feast
-        hand.delete card
-        game.trash_pile << card
+    def trash(cards_or_classes)
+      return if cards_or_classes.nil?
+      if cards_or_classes.is_a?(Enumerable)
+        cards_or_classes.each do |card_or_class|
+          trash(card_or_class)
+        end
+      else
+        card = resolve_card_or_class(cards_or_classes)
+        if card
+          # TODO: prevent double-trashing for Throne Room / Feast
+          hand.delete card
+          game.trash_pile << card
+        end
+        card
       end
-      card
     end
 
     def put_on_deck(card_or_class)
@@ -427,7 +433,7 @@ module Dominion
           raise "No #{type} card found in hand" unless card
         end
       else
-        raise "Invalid card_or_class_or_type to find_card_in_hand: #{card_or_class}"
+        raise "Invalid card_or_class_or_type to find_card_in_hand: #{card_or_class_or_type}"
       end
       card
     end

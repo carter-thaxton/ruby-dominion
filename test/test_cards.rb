@@ -198,7 +198,7 @@ class TestCards < Test::Unit::TestCase
     game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Adventurer]
     player = game.current_player
 
-    player.gain [Adventurer], :to => :hand
+    player.gain Adventurer, :to => :hand
     player.gain [Silver, Estate, Estate, Estate, Copper, Gold, Duchy], :to => :deck
 
     player.play Adventurer
@@ -210,6 +210,28 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Gold, player.deck
     assert_has_a Duchy, player.deck
     assert_has_a Estate, player.discard_pile
+  end
+
+  def test_mint
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Mint]
+    player = game.current_player
+
+    player.gain [Copper, Copper, Copper, Copper, Copper], :to => :hand
+    player.gain [Gold], :to => :deck
+
+    player.play_all_treasures
+    player.buy Mint
+    player.end_turn
+    assert_has_a Copper, game.trash_pile
+
+    assert_has_a Mint, player.hand
+    assert_has_a Gold, player.hand
+
+    player.strategy = MockStrategy.new([Gold])
+    player.play Mint
+
+    assert_has_a Gold, player.hand
+    assert_has_a Gold, player.discard_pile
   end
 
 end
