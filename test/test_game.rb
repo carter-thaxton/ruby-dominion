@@ -1,6 +1,16 @@
 require File.dirname(__FILE__) + '/common'
 
-class TestSetup < Test::Unit::TestCase
+class TestGame < Test::Unit::TestCase
+
+  class MockStrategy
+    def initialize(responses)
+      @responses = responses
+    end
+
+    def choose(player, options)
+      @responses.shift
+    end
+  end
 
   def test_basic_play
     game = Game.new :num_players => 1
@@ -154,17 +164,12 @@ class TestSetup < Test::Unit::TestCase
     player.gain Minion, :to => :hand
     player2.gain Moat, :to => :hand
 
-    player.play Minion
-    assert game.waiting_for_reactions?
-    assert player2.choice_in_progress       # reveal Moat?
-    assert !player3.choice_in_progress
+    player2.strategy = MockStrategy.new([true])    # reveal Moat when attacked
 
-    player2.respond true
-    assert !game.waiting_for_reactions?
+    player.play Minion, :choice => :discard
 
-    player.respond :cards
     assert_equal 4, player.hand.size
-    assert_equal 5, player2.hand.size       # revealed Moat
+    assert_equal 6, player2.hand.size       # revealed Moat  (5 + Moat)
     assert_equal 4, player3.hand.size       # no Moat
   end
 

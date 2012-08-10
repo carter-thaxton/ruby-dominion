@@ -55,6 +55,23 @@ module Dominion
       game.current_player == self
     end
     
+    def cards_in_play
+      actions_in_play + treasures_in_play + durations_on_first_turn + durations_on_second_turn
+    end
+    
+    def all_cards
+      deck + discard_pile + hand + cards_in_play
+    end
+    
+    def total_victory_points
+      vp_from_cards = all_cards.inject(0) { |sum, card| sum + card.vp }
+      vp_from_cards + vp_tokens
+    end
+
+    def total_treasure
+      all_cards.inject(0) { |sum, card| sum + card.coins }
+    end
+
     def start_turn
       check_turn
       raise "Cannot start turn in #{phase} phase" unless setup_phase?
@@ -65,7 +82,7 @@ module Dominion
       @buys_available = 1
       move_to_phase :action
     end
-    
+
     def end_turn
       check_turn
       raise "Cannot end turn in #{phase} phase" unless action_phase? || treasure_phase? || buy_phase?
@@ -147,35 +164,37 @@ module Dominion
       @card_in_play = card
       @play_choice = options[:choice]
 
-      play_card = ->() do
-        if card.action?
-          @actions_in_play << card
-          @actions_available -= 1
-          draw card.cards
-          add_actions card.actions
-          add_coins card.coins
-          add_buys card.buys
-        elsif card.treasure?
-          @treasures_in_play << card
-          add_coins card.coins
-          add_buys card.buys
-        end
-
-        card.on_play do
-          @card_in_play = nil
-          @play_choice = nil
+      if card.attack?
+        other_players.each do |player|
+          player.react_to_attack
         end
       end
 
-      if card.attack?
-        handle_attack_reactions card, &play_card
-      else
-        play_card.call
+      if card.action?
+        @actions_in_play << card
+        @actions_available -= 1
+        draw card.cards
+        add_actions card.actions
+        add_coins card.coins
+        add_buys card.buys
+      elsif card.treasure?
+        @treasures_in_play << card
+        add_coins card.coins
+        add_buys card.buys
+      end
+
+      card.on_play
+
+      @card_in_play = nil
+      @play_choice = nil
+
+      players.each do |player|
+        player.attack_prevented = false
       end
 
       card
     end
-    
+
     def play_all_treasures
       check_turn
       treasure_cards = hand.find_all { |card| card.treasure? }
@@ -333,31 +352,41 @@ module Dominion
       end
     end
 
-    def react_to_attack
-      if !attack_prevented
-        if find_card_in_hand(Moat)
-
+    def find_card_in_hand(card, options = {})
+      hand = options.fetch :hand, self.hand
+      if card.is_a? Card
+        raise "#{card} is not in the player's hand" unless hand.include?(card)
+      elsif is_card_class(card)
+        # choose an instance from the player's hand of the given class
+        card_class = card
+        card = hand.find {|card| card.is_a? card_class}
+        if options[:required]
+          raise "No card of type #{card_class} found in hand" unless card
         end
+      end
+      card
+    end
+
+    def find_cards_in_hand(cards, options = {})
+      tmp_hand = hand.dup
+      options[:hand] = tmp_hand
+      
+      cards.collect do |card|
+        card = find_card_in_hand(card, options)
+        tmp_hand.delete card if card
+        card
       end
     end
 
-    def cards_in_play
-      actions_in_play + treasures_in_play + durations_on_first_turn + durations_on_second_turn
+    def react_to_attack
+      durations_on_second_turn.each do |card|
+        card.on_attack
+      end
+      hand.each do |card|
+        card.on_attack
+      end
     end
-    
-    def all_cards
-      deck + discard_pile + hand + cards_in_play
-    end
-    
-    def total_victory_points
-      vp_from_cards = all_cards.inject(0) { |sum, card| sum + card.vp }
-      vp_from_cards + vp_tokens
-    end
-    
-    def total_treasure
-      all_cards.inject(0) { |sum, card| sum + card.coins }
-    end
-    
+
     def name
       if identity.nil?
         "Player #{position + 1}"
@@ -448,32 +477,6 @@ module Dominion
 
       response
     end
-    
-    def find_card_in_hand(card, options = {})
-      hand = options.fetch :hand, self.hand
-      if card.is_a? Card
-        raise "#{card} is not in the player's hand" unless hand.include?(card)
-      elsif is_card_class(card)
-        # choose an instance from the player's hand of the given class
-        card_class = card
-        card = hand.find {|card| card.is_a? card_class}
-        if options[:required]
-          raise "No card of type #{card_class} found in hand" unless card
-        end
-      end
-      card
-    end
 
-    def find_cards_in_hand(cards, options = {})
-      tmp_hand = hand.dup
-      options[:hand] = tmp_hand
-      
-      cards.collect do |card|
-        card = find_card_in_hand(card, options)
-        tmp_hand.delete card if card
-        card
-      end
-    end
-    
   end
 end

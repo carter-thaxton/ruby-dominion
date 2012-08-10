@@ -2,12 +2,12 @@ require 'fiber'
 
 module Dominion
 
-  class ConsoleStrategy
+	class Console
   	@@fiber = nil
   	@@waiting_for_response = false
 
 	  def self.start_new_game
-			g = Game.new :strategy => :console
+			g = Game.new :strategy => ConsoleStrategy.new
 			p1 = g.players[0]
 			p2 = g.players[1]
 			f = Fiber.new do
@@ -21,12 +21,11 @@ module Dominion
 			f.resume
 		end
 
-    def choose(player, options)
-      puts "#{player}: #{player.card_in_play} - #{options[:message]}"
+	  def self.get_response
       @@waiting_for_response = true
       @@fiber = Fiber.current
       Fiber.yield
-    end
+	  end
 
     def self.waiting_for_response?
     	@@waiting_for_response
@@ -37,14 +36,21 @@ module Dominion
 	  	@@waiting_for_response = false
 	  	@@fiber.resume value
 	  end
-  end
+	end
 
   def waiting_for_response?
-  	ConsoleStrategy.waiting_for_response?
+  	Console.waiting_for_response?
   end
 
   def respond(value)
-  	ConsoleStrategy.respond(value)
+  	Console.respond(value)
+  end
+
+  class ConsoleStrategy
+    def choose(player, options)
+      puts "#{player}: #{player.card_in_play} - #{options[:message]}"
+      Console.get_response
+    end
   end
 
 end

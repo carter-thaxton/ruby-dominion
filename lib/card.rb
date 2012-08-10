@@ -66,10 +66,6 @@ module Dominion
         @type
       end
       
-      def to_s
-        (name.split '::').last
-      end
-      
       def defined?
         !@type.empty?
       end
@@ -77,8 +73,16 @@ module Dominion
       def kingdom?
         not base?
       end
+
+      def in_play?
+        @player && @player.cards_in_play.include?(self)
+      end
+
+      def to_s
+        (name.split '::').last
+      end
     end
-    
+
     def initialize(game = nil, player = nil)
       @game = game || Card::BASE_CONTEXT
       @player = player
@@ -88,14 +92,15 @@ module Dominion
     attr_accessor :player
 
     # Hooks - empty by default
-    def on_play; end                 # Lots...
-    def on_buy; end                  # Mint, Farmland, Noble Brigand
-    def on_gain; end                 # Cache, Border Village, Embassy, Duchy/Duchess, Ill-Gotten Gains, Inn, Mandarin, Nomad Camp
-    def on_discard; end              # Tunnel
-    def on_trash; end                # Dark Ages!!!
-    def on_any_card_bought; end      # Contraband (validation)
-    def on_any_card_gained; end      # Watchtower, Trader, Fool's Gold
-    def on_setup_after_duration; end # Wharf, Tactician, Merchant Ship, Lighthouse, Haven, Fishing Village, Caravan
+    def on_play; end                  # Lots...
+    def on_buy; end                   # Mint, Farmland, Noble Brigand
+    def on_gain; end                  # Cache, Border Village, Embassy, Duchy/Duchess, Ill-Gotten Gains, Inn, Mandarin, Nomad Camp
+    def on_discard; end               # Tunnel
+    def on_trash; end                 # Dark Ages!!!
+    def on_attack; end                # Moat, Lighthouse, Secret Chamber, Horse Traders
+    def on_any_card_bought; end       # Contraband (validation)
+    def on_any_card_gained; end       # Watchtower, Trader, Fool's Gold
+    def on_setup_after_duration; end  # Wharf, Tactician, Merchant Ship, Lighthouse, Haven, Fishing Village, Caravan
 
     # can be overridden in various cards, like Grand Market
     def can_buy

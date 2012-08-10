@@ -111,6 +111,7 @@ Hooks:
 - on_gain                   (called when this card is gained or bought)
 - on_discard                (called when this card is discarded)
 - on_trash                  (called when this card is trashed)
+- on_attack                 (called when this card is in hand of an attacked player)
 - on_any_card_gained        (called when this card is in hand of any player, and any card is gained by any player)
 - on_setup_after_duration   (called when this card is brought back into the hand after a duration)
 
@@ -149,19 +150,37 @@ We'll need an on_shuffle in order to handle Stash.  But of course, that means th
 Reactions
 =========
 
-do_reaction is interesting.  When an attack or other trigger for a reaction is played, we first go through all possible cards that could be played, calling the 'reacts_to?' method.  Then a choice is given to the player.  Finally, the do_reaction method is called.
+Reactions are interesting.  There are several kinds of reaction:
+- attack (Moat, Secret Chamber, Horse Traders)
+- self gain (Watchtower, Trader)
+- other's gain (Fool's Gold)
+- discard (Tunnel)
+
+Attack reactions are resolved as the card is played, before actually taking any action.  So, other players reveal Moat as an attack card is played, even if it's a Minion or Pirate Ship, and the player chooses to take the coins instead of attacking.
+
+Self gain reactions have the ability to change where the card goes (Watchtower), and what card is gained (Trader).
+
+Fool's Gold has to monitor the gains of other player's cards, to offer a choice to be trashed for a Gold when another player gains a Province.
+
+Reactions are designed to be idempotent:
+- Moat - Doesn't matter how many times you play it.  It stops the attack.
+- Watchtower - You can only pick one: trash or deck (you can also choose not reveal it) 
+- Secret Chamber is the most complex.  You can play it in response to an attack, find a Moat among the next two cards, then play the Moat, and prevent the attack.  Then play the Secret Chamber again, and put the Moat back on your deck.  Wow.
+- Horse Traders is set aside when it's played as a reaction, so you can't play it more than once
+- Tunnel leaves the hand, as well
+- Fool's Gold is trashed, so it's no longer in hand
+
+Trader and Watchtower can be combined, to gain a Silver, and put it on your deck
+Isotropic continues to ask about reactions until you say 'no', due to the stuff about Secret Chamber.  We can probably do better than that, and only ask about the Moat if you haven't already revealed it.  Maybe only repeatedly ask when there's a Secret Chamber in play, too.
+
 
 Examples:
 
 - PlayerA plays a Witch during their action phase
 - PlayerB has a Watchtower in hand, and a Lighthouse in play
+- When the Witch is played, before executing it, go through the other players, and ask to reveal any reactions
+- Don't bother asking about the Moat if attack_prevented is true (in this case because of Lighthouse, but it might be because Moat was already played.  This extra rule just makes reactions less annoying)
 - In the DSL, 'player.gain Curse, :attack => true' is called
-- This causes two hooks to be called on the player:
-  - reacts_to? :attack
-  - reacts_to? :gain
-- In turn, the player calls reacts_to? on each card in their hand, or in their durations_on_first_turn
-- For each card that may cause a reaction, e.g. Watchtower, Lighthouse, the player is given a choice
-- If the player actually chooses to react, then the do_reaction method is called on that card
 
 - There are four possible outcomes here:
   1. Supply pile contains no Curses, no attack

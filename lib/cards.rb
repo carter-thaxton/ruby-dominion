@@ -105,6 +105,14 @@ module Dominion
     set :base
     type :action, :reaction
     cost 2
+
+    def on_attack
+      if !player.attack_prevented
+        if ask "Reveal Moat?"
+          player.attack_prevented = true
+        end
+      end
+    end
   end
   
   class Chancellor < Card
@@ -365,7 +373,7 @@ module Dominion
         draw 4
 
         other_players.each do |player|
-          if player.hand_size > 4 && !player.attack_prevented?
+          if player.hand.size > 4 && !player.attack_prevented
             player.discard_hand
             player.draw 4
           end
