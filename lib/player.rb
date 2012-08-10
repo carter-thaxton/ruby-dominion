@@ -270,76 +270,64 @@ module Dominion
       end
     end
     
-    def ask(message, options = {}, &block)
+    def ask(message, options = {})
       options[:message] = message
       options[:type] = :bool
       options[:multiple] = false
-      choose(options, &block)
+      choose(options)
     end
     
-    def choose_card(message, options = {}, &block)
+    def choose_card(message, options = {})
       options[:message] = message
       options[:type] = :card
       options[:multiple] = false
-      choose(options, &block)
+      choose(options)
     end
     
-    def choose_cards(message, options = {}, &block)
+    def choose_cards(message, options = {})
       options[:message] = message
       options[:type] = :card
       options[:multiple] = true
-      choose(options, &block)
+      choose(options)
     end
 
-    def choose_one(messages, symbols, options = {}, &block)
+    def choose_one(messages, symbols, options = {})
       options[:message] = 'Choose one: ' + messages.join(' or ')
       options[:messages] = messages
       options[:type] = :symbol
       options[:multiple] = false
       options[:restrict_to] = symbols
-      choose(options, &block)
+      choose(options)
     end
 
-    def choose(options, &block)
-      @resume_block = block
+    def choose(options)
       @choice_in_progress = options
-      
-      # use choice if given in call to play
+
+      # use choice if given directly in call to play
       # otherwise defer to strategy if available
-      if @play_choice
-        respond(@play_choice)
+      response = if @play_choice
+        handle_response(@play_choice)
       elsif @strategy
-        @strategy.choose self, @card_in_play, options
+        handle_response(@strategy.choose(self, options))
+      else
+        nil
       end
-    end
-    
-    def respond(response)
-      raise "Cannot respond unless waiting for choice" unless @choice_in_progress
-      response = handle_response(response)
-      
-      @resume_block.call(response)
-      @resume_block = nil
+
       @choice_in_progress = nil
       response
     end
-
+    
     def reveal(options = {})
-      if options[:attack] && attack_prevented
-        yield nil
-      else
-        type = options[:type]
-        card = find_card_in_hand(type)
-        if card
-          if options[:required]
-            yield card
-          else
-            ask "Reveal #{card}?", :reaction => options[:reaction] do |response|
-              if response
-                yield card
-              else
-                yield nil
-              end
-            end
+      return nil if options[:attack] && attack_prevented
+
+      type = options[:type]
+      card = find_card_in_hand(type)
+      if card
+        if options[:required]
+          card
+        else
+          if ask "Reveal #{card}?", :reaction => options[:reaction]
+            card
           end
         end
       end
@@ -394,6 +382,8 @@ module Dominion
     end
     
     def handle_response(response)
+      raise "Cannot handle response unless waiting for choice" unless @choice_in_progress
+
       multiple = @choice_in_progress[:multiple]
       type = @choice_in_progress[:type]
       from = @choice_in_progress[:from]

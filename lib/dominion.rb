@@ -4,8 +4,8 @@ require 'card'
 require 'cards'
 require 'game'
 require 'player'
-require 'player_strategy'
 require 'preparation'
 require 'util'
+require 'console_strategy'
 
 include Dominion

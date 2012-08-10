@@ -94,10 +94,9 @@ module Dominion
     cost 2
     
     def on_play
-      choose_cards "Choose up to 4 cards to trash", :from => :hand, :max => 4 do |cards|
-        cards.each do |card|
-          trash card
-        end
+      cards = choose_cards "Choose up to 4 cards to trash", :from => :hand, :max => 4
+      cards.each do |card|
+        trash card
       end
     end
   end
@@ -115,11 +114,10 @@ module Dominion
     coins 2
     
     def on_play
-      ask "Immediately put deck into discard pile?" do |discard_deck|
-        if discard_deck
-          discard_pile.concat deck
-          deck.clear
-        end
+      discard_deck = ask "Immediately put deck into discard pile?"
+      if discard_deck
+        discard_pile.concat deck
+        deck.clear
       end
     end
   end
@@ -153,9 +151,8 @@ module Dominion
     def on_play
       gain Silver, :to => :deck
       other_players.each do |player|
-        player.reveal :type => :victory, :attack => true do |card|
-          player.put card, :to => :deck if card
-        end
+        card = player.reveal :type => :victory, :attack => true
+        player.put card, :to => :deck if card
       end
     end
   end
@@ -360,18 +357,17 @@ module Dominion
     cost 5
 
     def on_play
-      choose_one ["+2", "Discard hand and draw 4"], [:coins, :discard] do |choice|
-        if choice == :coins
-          add_coins 2
-        elsif choice == :discard
-          discard_hand
-          draw 4
+      choice = choose_one ["+2", "Discard hand and draw 4"], [:coins, :discard]
+      if choice == :coins
+        add_coins 2
+      elsif choice == :discard
+        discard_hand
+        draw 4
 
-          other_players.each do |player|
-            if player.hand_size > 4 && !player.attack_prevented?
-              player.discard_hand
-              player.draw 4
-            end
+        other_players.each do |player|
+          if player.hand_size > 4 && !player.attack_prevented?
+            player.discard_hand
+            player.draw 4
           end
         end
       end
@@ -413,12 +409,11 @@ module Dominion
     vp 2
 
     def on_play
-      choose_one ["+2 actions", "+3 cards"], [:actions, :cards] do |choice|
-        if choice == :actions
-          add_actions 2
-        elsif choice == :cards
-          draw 3
-        end
+      choice = choose_one ["+2 actions", "+3 cards"], [:actions, :cards]
+      if choice == :actions
+        add_actions 2
+      elsif choice == :cards
+        draw 3
       end
     end
   end
@@ -496,11 +491,10 @@ module Dominion
     cost 4
     
     def on_play
-      choose_card "Choose a card to trash", :from => :hand do |card|
-        if card
-          add_coins card.cost
-          trash card
-        end
+      card = choose_card "Choose a card to trash", :from => :hand
+      if card
+        add_coins card.cost
+        trash card
       end
     end
   end
@@ -641,11 +635,10 @@ module Dominion
 
     def on_play
       add_vp_tokens 1
-      choose_card "Choose a card to trash", :from => :hand do |card|
-        if card
-          add_vp_tokens (card.cost / 2).floor
-          trash card
-        end
+      card = choose_card "Choose a card to trash", :from => :hand
+      if card
+        add_vp_tokens (card.cost / 2).floor
+        trash card
       end
     end
   end
@@ -702,13 +695,12 @@ module Dominion
     
     def on_play
       other_players.each do |player|
-        player.reveal :type => Curse, :attack => true do |curse|
-          if curse
-            player.discard curse
-          else
-            player.gain Curse
-            player.gain Copper
-          end
+        curse = player.reveal :type => Curse, :attack => true
+        if curse
+          player.discard curse
+        else
+          player.gain Curse
+          player.gain Copper
         end
       end
     end
