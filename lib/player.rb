@@ -210,13 +210,19 @@ module Dominion
       card
     end
 
-    def discard(card_or_class)
-      card = resolve_card_or_class(card_or_class)
-      card.on_discard
-      if hand.delete card
-        discard_pile << card
+    def discard(cards_or_classes)
+      if cards_or_classes.is_a? Enumerable
+        cards_or_classes.each do |card_or_class|
+          discard card_or_class
+        end
+      else
+        card = resolve_card_or_class(cards_or_classes)
+        card.on_discard
+        if hand.delete card
+          discard_pile << card
+        end
+        card
       end
-      card
     end
 
     def discard_hand
@@ -436,8 +442,13 @@ module Dominion
       from = @choice_in_progress[:from]
       max = @choice_in_progress[:max]
       min = @choice_in_progress[:min]
+      count = @choice_in_progress[:count]
       restrict_to = @choice_in_progress[:restrict_to]
       max_cost = @choice_in_progress[:max_cost]
+
+      if count
+        min = max = count
+      end
 
       if multiple
         response = [response] unless response.is_a? Enumerable

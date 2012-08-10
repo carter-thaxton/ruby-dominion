@@ -69,6 +69,28 @@ class TestCards < Test::Unit::TestCase
     assert_equal 21, player.total_victory_points
   end
 
+  def test_militia
+    game = Game.new :num_players => 3, :no_cards => true, :kingdom_cards => [Militia]
+    p1 = game.players[0]
+    p2 = game.players[1]
+    p3 = game.players[2]
+
+    p1.gain Militia, :to => :hand
+    5.times do
+      p2.gain Copper, :to => :hand
+    end
+    3.times do
+      p3.gain Copper, :to => :hand
+    end
+
+    p2.strategy = MockStrategy.new([[Copper, Copper]])
+
+    p1.play Militia
+
+    assert_equal 3, p2.hand.size
+    assert_equal 3, p3.hand.size
+  end
+
   def test_get_all_cards
     all_cards = Dominion.all_cards
   end

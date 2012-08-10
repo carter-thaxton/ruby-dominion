@@ -92,9 +92,7 @@ module Dominion
 
     def on_play
       cards = choose_cards "Choose any number of cards to discard", :from => :hand
-      cards.each do |card|
-        discard card
-      end
+      discard cards
       draw cards.count
     end
   end
@@ -207,6 +205,20 @@ module Dominion
   
   class Militia < Card
     set :base
+    type :action, :attack
+    cost 4
+    coins 2
+
+    def on_play
+      attacked_players.each do |player|
+        hand_size = player.hand.size
+        if hand_size > 3
+          count = hand_size - 3
+          cards = player.choose_cards "Discard #{count} cards", :from => :hand, :count => count
+          player.discard cards
+        end
+      end
+    end
   end
   
   class Moneylender < Card
