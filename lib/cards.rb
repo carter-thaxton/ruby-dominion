@@ -129,9 +129,8 @@ module Dominion
     coins 2
     
     def on_play
-      discard_deck = ask "Immediately put deck into discard pile?"
-      if discard_deck
-        discard deck
+      if ask "Immediately put deck into discard pile?"
+        discard_pile.concat deck
         deck.clear
       end
     end
