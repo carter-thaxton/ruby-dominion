@@ -61,6 +61,10 @@ module Dominion
 
       public
 
+      def card_class
+        self
+      end
+
       def type(*args)
         @type = args if args.length >= 1
         @type
@@ -72,10 +76,6 @@ module Dominion
       
       def kingdom?
         not base?
-      end
-
-      def in_play?
-        @player && @player.cards_in_play.include?(self)
       end
 
       def to_s
@@ -102,14 +102,22 @@ module Dominion
     def on_any_card_gained; end       # Watchtower, Trader, Fool's Gold
     def on_setup_after_duration; end  # Wharf, Tactician, Merchant Ship, Lighthouse, Haven, Fishing Village, Caravan
 
+    def card_class
+      self.class
+    end
+
+    # type is an alias for class, defined by object, so method_missing won't get called
+    def type
+      self.class.type
+    end
+
     # can be overridden in various cards, like Grand Market
     def can_buy
       true
     end
     
-    # type is an alias for class, defined by object, so method_missing won't get called
-    def type
-      self.class.type
+    def in_play?
+      @player && @player.cards_in_play.include?(self)
     end
 
     def method_missing(method, *args, &block)

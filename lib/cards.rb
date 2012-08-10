@@ -159,7 +159,7 @@ module Dominion
     def on_play
       gain Silver, :to => :deck
       attacked_players.each do |player|
-        card = player.reveal :type => :victory
+        card = player.reveal :victory
         player.put card, :to => :deck if card
       end
     end
@@ -167,6 +167,14 @@ module Dominion
 
   class Feast < Card
     set :base
+    type :action
+    cost 4
+
+    def on_play
+      card = choose_card "Choose a card to gain", :from => :supply, :max_cost => 5, :required => true
+      gain card.class if card
+      trash self
+    end
   end
   
   class Gardens < Card
@@ -703,7 +711,7 @@ module Dominion
     
     def on_play
       attacked_players.each do |player|
-        curse = player.reveal :type => Curse
+        curse = player.reveal Curse
         if curse
           player.discard curse
         else

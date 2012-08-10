@@ -43,6 +43,16 @@ class TestCards < Test::Unit::TestCase
     assert_equal 4, p.cost
   end
 
+  def test_feast
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Feast]
+    player = game.current_player
+    
+    # play Feast
+    player.gain Feast, :to => :hand
+    player.play Feast, :choice => Duchy
+    assert player.discard_pile.first.is_a?(Duchy), "Expected Duchy to be gained"
+  end
+
   def test_get_all_cards
     all_cards = Dominion.all_cards
   end

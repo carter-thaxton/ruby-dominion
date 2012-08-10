@@ -144,10 +144,9 @@ module Dominion
       card
     end
     
-    def play(card, options = {})
+    def play(card_or_class, options = {})
       check_turn
-      
-      card = find_card_in_hand card, :required => true
+      card = resolve_card_or_class(card_or_class)
 
       raise "#{card} is not a valid card" unless card.is_a? Card
       raise "#{card} is not the player's own card!" unless card.player == self
@@ -201,18 +200,20 @@ module Dominion
       treasure_cards.each { |card| play card }
     end
     
-    def trash(card)
-      card = find_card_in_hand card, :required => true
-      hand.delete card
-      game.trash_pile << card
+    def trash(card_or_class)
+      card = resolve_card_or_class(card_or_class)
+      if hand.delete card
+        game.trash_pile << card
+      end
       card
     end
 
-    def discard(card)
-      card = find_card_in_hand card, :required => true
-      hand.delete card
+    def discard(card_or_class)
+      card = resolve_card_or_class(card_or_class)
       card.on_discard
-      discard_pile << card
+      if hand.delete card
+        discard_pile << card
+      end
       card
     end
 
@@ -243,7 +244,7 @@ module Dominion
     def buy(card_class)
       check_turn
       can_buy card_class, :throw_exception => true
-      
+
       move_to_phase :buy if action_phase? || treasure_phase?  # automatically move to buy phase
       
       card = gain(card_class)
@@ -334,41 +335,49 @@ module Dominion
       response
     end
     
-    def reveal(options = {})
-      type = options[:type]
-      card = find_card_in_hand(type)
+    def reveal(card_or_class_or_type)
+      card = find_card_in_hand(card_or_class_or_type)
       if card
         if options[:required]
           card
         else
-          if ask "Reveal #{card}?", :reaction => options[:reaction]
+          if ask "Reveal #{card}?"
             card
           end
         end
       end
     end
 
-    def find_card_in_hand(card, options = {})
+    def find_card_in_hand(card_or_class_or_type, options = {})
       hand = options.fetch :hand, self.hand
-      if card.is_a? Card
+      if card_or_class_or_type.is_a? Card
+        card = card_or_class_or_type
         raise "#{card} is not in the player's hand" unless hand.include?(card)
-      elsif is_card_class(card)
+      elsif is_card_class(card_or_class_or_type)
         # choose an instance from the player's hand of the given class
-        card_class = card
+        card_class = card_or_class_or_type
         card = hand.find {|card| card.is_a? card_class}
         if options[:required]
-          raise "No card of type #{card_class} found in hand" unless card
+          raise "No #{card_class} card found in hand" unless card
         end
+      elsif card_or_class_or_type.is_a? Symbol
+        type = card_or_class_or_type
+        card = hand.find {|card| card.type == type}
+        if options[:required]
+          raise "No #{type} card found in hand" unless card
+        end
+      else
+        raise "Invalid card_or_class_or_type to find_card_in_hand: #{card_or_class}"
       end
       card
     end
 
-    def find_cards_in_hand(cards, options = {})
+    def find_cards_in_hand(cards_or_classes, options = {})
       tmp_hand = hand.dup
       options[:hand] = tmp_hand
       
-      cards.collect do |card|
-        card = find_card_in_hand(card, options)
+      cards_or_classes.collect do |card_or_class|
+        card = find_card_in_hand(card_or_class, options)
         tmp_hand.delete card if card
         card
       end
@@ -405,6 +414,15 @@ module Dominion
       raise "It is not #{name}'s turn" unless current_player?
       raise "Cannot play while choice in progress" if @choice_in_progress
     end
+
+    def resolve_card_or_class(card_or_class)
+      result = if card_or_class.is_a? Card
+        card_or_class
+      else
+        find_card_in_hand card_or_class, :required => true
+      end
+      result
+    end
     
     def handle_response(response)
       raise "Cannot handle response unless waiting for choice" unless @choice_in_progress
@@ -415,21 +433,25 @@ module Dominion
       max = @choice_in_progress[:max]
       min = @choice_in_progress[:min]
       restrict_to = @choice_in_progress[:restrict_to]
+      max_cost = @choice_in_progress[:max_cost]
 
       if multiple
         response = [response] unless response.is_a? Enumerable
       end
       
       # common operation of finding cards in hand by type
-      if from == :hand
-        if type == :card
+      if type == :card
+        if from == :hand
           if multiple
-            return find_cards_in_hand(response)
+            response = find_cards_in_hand(response)
           else
-            return find_card_in_hand(response)
+            response = find_card_in_hand(response)
           end
+        elsif from == :supply
+          raise "Cannot choose multiple cards from supply" if multiple
+          response = peek_from_supply(response)
         else
-          raise "Only cards may be chosen from hand"
+          raise "Cards must be chosen from hand or supply"
         end
       end
 
@@ -448,19 +470,15 @@ module Dominion
           response.each do |r|
             raise "Response must be an array of one of: " + restrict_to.to_s unless restrict_to.include?(r)
           end
+        elsif type == :card
+          raise "Response must be one of: " + restrict_to.to_s unless restrict_to.include?(response.class)
         else
           raise "Response must be one of: " + restrict_to.to_s unless restrict_to.include?(response)
         end
       end
 
-      if type == :symbole
-        if multiple
-          response.each do |r|
-            raise "Response must be an array of true or false values" unless r == true or r == false
-          end
-        else
-          raise "Response must be true or false" unless response == true or response == false
-        end
+      if type == :card && max_cost
+        raise "Card must cost no more than #{max_cost}, but #{response} costs #{response.cost}" if response.cost > max_cost
       end
 
       if multiple && max
