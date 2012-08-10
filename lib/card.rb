@@ -70,10 +70,6 @@ module Dominion
         @type
       end
 
-      def is_type?(type)
-        self.type.include?(type)
-      end
-      
       def defined?
         !@type.empty?
       end

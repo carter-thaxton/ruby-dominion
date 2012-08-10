@@ -416,6 +416,24 @@ module Dominion
   
   class Adventurer < Card
     set :base
+    type :action
+    cost 6
+
+    def on_play
+      treasures = []
+      set_aside = []
+      while treasures.count < 2
+        card = draw_from_deck
+        break unless card
+        if card.treasure?
+          treasures << card
+        else
+          set_aside << card
+        end
+      end
+      put_in_hand treasures
+      discard set_aside
+    end
   end
   
 

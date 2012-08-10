@@ -548,7 +548,7 @@ module Dominion
       end
 
       if type == :card && card_type
-        raise "Card must have type #{card_type}, but #{response} has type #{response.type}" unless response.is_type?(card_type)
+        raise "Card must have type #{card_type}, but #{response} has type #{response.type}" unless response.type.include?(card_type)
       end
 
       if multiple && max

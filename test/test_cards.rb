@@ -194,5 +194,23 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Gold, player.hand
   end
 
+  def test_adventurer
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Adventurer]
+    player = game.current_player
+
+    player.gain [Adventurer], :to => :hand
+    player.gain [Silver, Estate, Estate, Estate, Copper, Gold, Duchy], :to => :deck
+
+    player.play Adventurer
+
+    assert_has_a Silver, player.hand
+    assert_has_a Copper, player.hand
+    assert_has_no Gold, player.hand
+    assert_has_no Estate, player.hand
+    assert_has_a Gold, player.deck
+    assert_has_a Duchy, player.deck
+    assert_has_a Estate, player.discard_pile
+  end
+
 end
 
