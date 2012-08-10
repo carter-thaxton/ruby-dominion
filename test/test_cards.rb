@@ -149,6 +149,36 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Duchy, p3.discard_pile
   end
 
+  def test_library
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Library, Village]
+    player = game.current_player
+
+    player.gain [Library, Estate, Estate, Estate, Estate], :to => :hand
+    player.gain [Copper, Village, Copper, Library, Copper, Silver, Silver], :to => :deck
+
+    player.strategy = MockStrategy.new([true, false])    # set aside the Village, but not the second Library
+    player.play Library
+
+    assert_equal 7, player.hand.size
+    assert_has_a Copper, player.hand
+    assert_has_a Library, player.hand
+    assert_has_a Village, player.discard_pile
+    assert_has_a Silver, player.deck
+    assert_has_no Silver, player.hand
+  end
+
+  def test_library_with_small_deck
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Library, Village]
+    player = game.current_player
+
+    player.gain [Library, Estate, Estate, Estate, Estate], :to => :hand
+    player.gain [Copper], :to => :deck
+
+    player.play Library
+
+    assert_equal 5, player.hand.size
+  end
+
   def test_get_all_cards
     all_cards = Dominion.all_cards
   end

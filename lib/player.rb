@@ -137,7 +137,7 @@ module Dominion
     
     def draw_to_hand
       card = draw_from_deck
-      @hand << card if card
+      put_in_hand card
       card
     end
 
@@ -224,6 +224,14 @@ module Dominion
         deck.unshift card
       end
       card
+    end
+
+    def put_in_hand(cards)
+      return if cards.nil?
+      cards = [cards] unless cards.is_a?(Enumerable)
+      cards.each do |card|
+        @hand << card
+      end
     end
 
     def discard(cards_or_classes)

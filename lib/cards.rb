@@ -336,7 +336,7 @@ module Dominion
     
     def on_play
       other_players.each do |player|
-        player.draw_one
+        player.draw
       end
     end
   end
@@ -360,6 +360,22 @@ module Dominion
   
   class Library < Card
     set :base
+    type :action
+    cost 5
+
+    def on_play
+      set_aside = []
+      while hand.size < 7
+        card = draw_from_deck
+        break if !card
+        if card.action? && ask("Set aside #{card}?")
+          set_aside << card
+        else
+          put_in_hand card
+        end
+      end
+      discard set_aside
+    end
   end
   
   class Market < Card
