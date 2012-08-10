@@ -6,6 +6,21 @@ module Dominion
   	@@fiber = nil
   	@@waiting_for_response = false
 
+	  def self.start_new_game
+			g = Game.new :strategy => :console
+			p1 = g.players[0]
+			p2 = g.players[1]
+			f = Fiber.new do
+				puts "Welcome to Dominion\n  g - game\n  p1 - player 1\n  p2 - player 2\n"
+				Pry.quiet = true
+				Pry.prompt = proc { '> ' }
+				Pry.start binding
+				puts "Bye!"
+				exit
+			end
+			f.resume
+		end
+
     def choose(player, options)
       puts "#{player}: #{player.card_in_play} - #{options[:message]}"
       @@waiting_for_response = true
