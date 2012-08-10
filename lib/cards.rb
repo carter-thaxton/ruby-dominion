@@ -86,6 +86,17 @@ module Dominion
   
   class Cellar < Card
     set :base
+    type :action
+    cost 2
+    actions 1
+
+    def on_play
+      cards = choose_cards "Choose any number of cards to discard", :from => :hand
+      cards.each do |card|
+        discard card
+      end
+      draw cards.count
+    end
   end
   
   class Chapel < Card
@@ -148,6 +159,13 @@ module Dominion
   
   class Workshop < Card
     set :base
+    type :action
+    cost 3
+
+    def on_play
+      card = choose_card "Choose a card to gain", :from => :supply, :max_cost => 4, :required => true
+      gain card if card
+    end
   end
   
   class Bureaucrat < Card
@@ -172,13 +190,19 @@ module Dominion
 
     def on_play
       card = choose_card "Choose a card to gain", :from => :supply, :max_cost => 5, :required => true
-      gain card.class if card
+      gain card if card
       trash self
     end
   end
   
   class Gardens < Card
     set :base
+    type :victory
+    cost 4
+
+    def vp
+      all_cards.count / 10
+    end
   end
   
   class Militia < Card

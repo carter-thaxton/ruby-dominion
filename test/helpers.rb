@@ -20,3 +20,7 @@ class MockStrategy
   end
 end
 
+def assert_gained(player, card_class)
+	assert player.discard_pile.first.is_a?(card_class), "Expected discard pile to contain a #{card_class}"
+end
+

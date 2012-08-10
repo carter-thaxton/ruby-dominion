@@ -57,10 +57,12 @@ module Dominion
     
     def cards_in_play
       actions_in_play + treasures_in_play + durations_on_first_turn + durations_on_second_turn
+      # TODO: set_aside
     end
     
     def all_cards
       deck + discard_pile + hand + cards_in_play
+      # TODO: mats
     end
     
     def total_victory_points
@@ -223,7 +225,8 @@ module Dominion
       end
     end
     
-    def gain(card_class, options = {})
+    def gain(card_or_class, options = {})
+      card_class = card_or_class.card_class
       to = options.fetch :to, :discard
       card = draw_from_supply(card_class, self)
       if card
@@ -241,8 +244,9 @@ module Dominion
       card
     end
     
-    def buy(card_class)
+    def buy(card_or_class)
       check_turn
+      card_class = card_or_class.card_class
       can_buy card_class, :throw_exception => true
 
       move_to_phase :buy if action_phase? || treasure_phase?  # automatically move to buy phase

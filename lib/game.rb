@@ -14,7 +14,7 @@ module Dominion
 
       prepare(options) unless options[:no_prepare]
     end
-    
+
     def prepare(options = {})
       # Create players, then prepare supply, because supply depends on number of players
       # Then prepare the initial decks/hands for the players, drawing from the supply

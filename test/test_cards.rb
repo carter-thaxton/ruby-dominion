@@ -50,7 +50,23 @@ class TestCards < Test::Unit::TestCase
     # play Feast
     player.gain Feast, :to => :hand
     player.play Feast, :choice => Duchy
-    assert player.discard_pile.first.is_a?(Duchy), "Expected Duchy to be gained"
+    assert_gained player, Duchy
+  end
+
+  def test_gardens
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Gardens]
+    player = game.current_player
+    
+    7.times do
+      player.gain Gardens
+    end
+
+    31.times do
+      player.gain Copper
+    end
+
+    # 38 cards -> 3 pts per Gardens * 7 Gardens = 21 VP
+    assert_equal 21, player.total_victory_points
   end
 
   def test_get_all_cards
