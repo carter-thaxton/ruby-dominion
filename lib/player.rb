@@ -132,18 +132,22 @@ module Dominion
     end
     
     def draw(count = 1)
-      (1..count).select { draw_one }
+      (1..count).select { draw_to_hand }
     end
     
-    def draw_one
+    def draw_to_hand
+      card = draw_from_deck
+      @hand << card if card
+      card
+    end
+
+    def draw_from_deck
       if @deck.empty?
         @deck = @discard_pile
         @discard_pile = []
         @deck.shuffle!
       end
-      card = @deck.pop
-      @hand << card if card
-      card
+      @deck.pop
     end
     
     def play(card_or_class, options = {})
@@ -203,22 +207,36 @@ module Dominion
     end
     
     def trash(card_or_class)
+      return if card_or_class.nil?
       card = resolve_card_or_class(card_or_class)
       if hand.delete card
+        # TODO: better prevent double-trashing
         game.trash_pile << card
       end
       card
     end
 
+    def put_on_deck(card_or_class)
+      return if card_or_class.nil?
+      card = resolve_card_or_class(card_or_class)
+      if card
+        hand.delete card
+        deck.unshift card
+      end
+      card
+    end
+
     def discard(cards_or_classes)
+      return if cards_or_classes.nil?
       if cards_or_classes.is_a? Enumerable
         cards_or_classes.each do |card_or_class|
           discard card_or_class
         end
       else
         card = resolve_card_or_class(cards_or_classes)
-        card.on_discard
-        if hand.delete card
+        if card
+          card.on_discard
+          hand.delete card
           discard_pile << card
         end
         card
@@ -232,6 +250,7 @@ module Dominion
     end
     
     def gain(card_or_class, options = {})
+      return if card_or_class.nil?
       card_class = card_or_class.card_class
       to = options.fetch :to, :discard
       card = draw_from_supply(card_class, self)
@@ -251,6 +270,7 @@ module Dominion
     end
     
     def buy(card_or_class)
+      return if card_or_class.nil?
       check_turn
       card_class = card_or_class.card_class
       can_buy card_class, :throw_exception => true
@@ -345,17 +365,22 @@ module Dominion
       response
     end
     
-    def reveal(card_or_class_or_type)
+    def reveal_from_hand(card_or_class_or_type)
       card = find_card_in_hand(card_or_class_or_type)
       if card
         if options[:required]
-          card
+          reveal card
         else
           if ask "Reveal #{card}?"
-            card
+            reveal card
           end
         end
       end
+    end
+
+    def reveal(card)
+      #puts "#{self} reveals a #{card}"
+      card
     end
 
     def find_card_in_hand(card_or_class_or_type, options = {})

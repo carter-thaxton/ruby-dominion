@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/common'
 
 class TestCards < Test::Unit::TestCase
 
-  def test_simple_card
+  def test_village
     assert Village.action?
     assert Village.kingdom?
     assert !Village.victory?
@@ -89,6 +89,45 @@ class TestCards < Test::Unit::TestCase
 
     assert_equal 3, p2.hand.size
     assert_equal 3, p3.hand.size
+  end
+
+  def test_remodel
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Remodel]
+    player = game.current_player
+
+    player.gain Remodel, :to => :hand
+    player.gain Estate, :to => :hand
+
+    player.strategy = MockStrategy.new([Estate, Remodel])
+    player.play Remodel
+
+    assert_gained player, Remodel
+    assert_equal 0, player.hand.size
+  end
+
+  def test_spy
+    game = Game.new :num_players => 2, :no_cards => true, :kingdom_cards => [Spy]
+    p1 = game.players[0]
+    p2 = game.players[1]
+
+    p1.gain Spy, :to => :hand
+    p1.gain Estate, :to => :deck
+    p1.gain Silver, :to => :deck
+    p1.gain Copper, :to => :deck
+
+    p2.gain Estate, :to => :deck
+    p2.gain Silver, :to => :deck
+
+    p1.strategy = MockStrategy.new([:deck, :discard])   # deck for self, discard for p2
+    p1.play Spy
+
+    assert_has_a Copper, p1.hand
+    assert_has_a Silver, p1.deck
+    assert_has_a Estate, p1.deck
+    assert p1.discard_pile.empty?
+
+    assert_has_a Estate, p2.deck
+    assert_has_a Silver, p2.discard_pile
   end
 
   def test_get_all_cards

@@ -162,7 +162,7 @@ module Dominion
 
     def on_play
       card = choose_card "Choose a card to gain", :from => :supply, :max_cost => 4, :required => true
-      gain card if card
+      gain card
     end
   end
   
@@ -175,7 +175,7 @@ module Dominion
     def on_play
       gain Silver, :to => :deck
       attacked_players.each do |player|
-        card = player.reveal :victory
+        card = player.reveal_from_hand :victory
         player.put card, :to => :deck if card
       end
     end
@@ -188,7 +188,7 @@ module Dominion
 
     def on_play
       card = choose_card "Choose a card to gain", :from => :supply, :max_cost => 5, :required => true
-      gain card if card
+      gain card
       trash self
     end
   end
@@ -237,6 +237,18 @@ module Dominion
   
   class Remodel < Card
     set :base
+    type :action
+    cost 4
+
+    def on_play
+      card = choose_card "Choose a card to remodel", :from => :hand, :required => true
+      if card
+        max_cost = card.cost + 2
+        new_card = choose_card "Choose a card from the supply costing up to #{max_cost}", :from => :supply, :max_cost => max_cost
+        trash card
+        gain new_card
+      end
+    end
   end
   
   class Smithy < Card
@@ -248,8 +260,25 @@ module Dominion
 
   class Spy < Card
     set :base
-  end
-  
+    type :action, :attack
+    cost 4
+    cards 1
+    actions 1
+
+    def on_play
+      ([current_player] + attacked_players).each do |player|
+        card = player.draw_from_deck
+        player.reveal card
+        choice = choose_one ["Discard", "Put it back"], [:discard, :deck]
+        if choice == :discard
+          player.discard card
+        elsif choice == :deck
+          player.put_on_deck card
+        end
+      end
+    end
+  end  
+
   class Thief < Card
     set :base
   end
@@ -416,8 +445,8 @@ module Dominion
         discard_hand
         draw 4
 
-        other_players.each do |player|
-          if player.hand.size > 4 && !player.attack_prevented
+        attacked_players.each do |player|
+          if player.hand.size > 4
             player.discard_hand
             player.draw 4
           end
@@ -747,7 +776,7 @@ module Dominion
     
     def on_play
       attacked_players.each do |player|
-        curse = player.reveal Curse
+        curse = player.reveal_from_hand Curse
         if curse
           player.discard curse
         else
