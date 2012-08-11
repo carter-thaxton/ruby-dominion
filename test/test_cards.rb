@@ -251,5 +251,57 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Estate, player.hand
   end
 
+  def test_pawn
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Pawn]
+    player = game.current_player
+
+    player.gain [Pawn], :to => :hand
+    player.gain [Estate, Copper], :to => :deck
+
+    player.strategy = MockStrategy.new([[:card, :action]])
+    player.play Pawn
+
+    assert_has_a Estate, player.hand
+    assert_has_a Copper, player.deck
+    assert_equal 1, player.actions_available
+    assert_equal 1, player.buys_available
+    assert_equal 0, player.coins_available
+    player.end_turn
+
+    player.gain [Pawn], :to => :hand
+    player.strategy = MockStrategy.new([[:buy, :coin]])
+    player.play Pawn
+
+    assert_equal 0, player.actions_available
+    assert_equal 2, player.buys_available
+    assert_equal 1, player.coins_available
+  end
+
+  def test_steward
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Steward]
+    player = game.current_player
+
+    player.gain [Steward, Silver, Estate, Copper], :to => :hand
+
+    player.strategy = MockStrategy.new([:trash, [Estate, Copper]])
+    player.play Steward
+
+    assert_has_a Silver, player.hand
+    assert_has_no Estate, player.hand
+    assert_has_no Copper, player.hand
+    assert_has_a Estate, game.trash_pile
+    assert_has_a Copper, game.trash_pile
+    assert_equal 0, player.actions_available
+    assert_equal 0, player.coins_available
+    player.end_turn
+
+    player.gain Steward, :to => :hand
+    player.strategy = MockStrategy.new([:coins])
+    player.play Steward
+
+    assert_equal 0, player.actions_available
+    assert_equal 2, player.coins_available
+  end
+
 end
 

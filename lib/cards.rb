@@ -453,6 +453,24 @@ module Dominion
   
   class Pawn < Card
     set :intrigue
+    type :action
+    cost 2
+
+    def on_play
+      choices = choose_two ["+1 card", "+1 action", "+$1", "+1 buy"], [:card, :action, :coin, :buy]
+      if choices.include?(:card)
+        draw 1
+      end
+      if choices.include?(:action)
+        add_actions 1
+      end
+      if choices.include?(:coin)
+        add_coins 1
+      end
+      if choices.include?(:buy)
+        add_buys 1
+      end
+    end
   end
   
   class SecretChamber < Card
@@ -479,6 +497,20 @@ module Dominion
   
   class Steward < Card
     set :intrigue
+    type :action
+    cost 3
+
+    def on_play
+      choice = choose_one ["+2 cards", "+$2", "Trash 2 cards"], [:cards, :coins, :trash]
+      if choice == :cards
+        draw 2
+      elsif choice == :coins
+        add_coins 2
+      elsif choice == :trash
+        cards = choose_cards "Choose 2 cards to trash", :from => :hand, :count => 2, :required => true
+        trash cards
+      end
+    end
   end
   
   class Swindler < Card

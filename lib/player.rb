@@ -368,11 +368,23 @@ module Dominion
         options[:type] = :symbol
         options[:multiple] = false
         options[:restrict_to] = symbols
+        options[:required] = true
         choose(options)
       else
         # Don't bother asking for zero or one choices
         symbols.first
       end
+    end
+
+    def choose_two(messages, symbols, options = {})
+      options[:message] = 'Choose two: ' + messages.join(' or ')
+      options[:messages] = messages
+      options[:type] = :symbol
+      options[:multiple] = true
+      options[:restrict_to] = symbols
+      options[:unique] = true
+      options[:count] = 2
+      choose(options)
     end
 
     def choose(options)
@@ -500,6 +512,7 @@ module Dominion
       min = @choice_in_progress[:min]
       count = @choice_in_progress[:count]
       restrict_to = @choice_in_progress[:restrict_to]
+      unique = @choice_in_progress[:unique]
       max_cost = @choice_in_progress[:max_cost]
       card_type = @choice_in_progress[:card_type]
 
@@ -563,6 +576,10 @@ module Dominion
 
       if multiple && min
         raise "At least #{min} must be chosen" if response.size < min
+      end
+
+      if multiple && unique
+        raise "Choices must be unique" if response.uniq != response
       end
 
       response
