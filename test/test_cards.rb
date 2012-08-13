@@ -359,5 +359,19 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Silver, player.hand
     assert_has_no Duchy, player.hand
   end
+
+  def test_hoard
+    game = Game.new :num_players => 2, :no_cards => true, :kingdom_cards => [Hoard]
+    p1 = game.current_player
+    p2 = game.players[1]
+
+    p1.gain [Hoard, Silver, Copper], :to => :hand
+    p2.gain [Hoard, Silver, Copper], :to => :hand
+
+    p1.play_all_treasures
+    p1.buy Duchy
+    assert_has_a Gold, p1.discard_pile
+    assert_has_no Gold, p2.discard_pile
+  end
 end
 

@@ -110,6 +110,14 @@ module Dominion
     def player_to_left_of(player)
       players[player.position - 1 % num_players]
     end
+
+    def all_players_cards
+       players.each do |player|
+        (player.cards_in_play + player.hand).each do |card|
+          yield card, player
+        end
+      end
+    end
     
     def supply_counts
       # counts instead of actual instances

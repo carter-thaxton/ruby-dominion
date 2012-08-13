@@ -93,9 +93,11 @@ module Dominion
       move_to_phase :cleanup
       
       @discard_pile += @actions_in_play
+      @actions_in_play.each { |c| c.on_cleanup }
       @actions_in_play = []
 
       @discard_pile += @treasures_in_play
+      @treasures_in_play.each { |c| c.on_cleanup }
       @treasures_in_play = []
 
       @discard_pile += @hand
@@ -277,8 +279,14 @@ module Dominion
         to = options.fetch :to, :discard
         card = draw_from_supply(card_class, self)
         if card
+          # TODO: handle gains that place this card somewhere else, or that gain something else instead
           card.on_gain
-          # TODO: handle gains that place this card somewhere else
+
+          # Hook for any card gained
+          all_players_cards do |c|
+            c.on_any_card_gained(card, self)
+          end
+
           case to
           when :discard
             @discard_pile << card
@@ -302,6 +310,12 @@ module Dominion
       
       card = gain(card_class)
       card.on_buy
+
+      # Hook for any card bought
+      all_players_cards do |c|
+        c.on_any_card_bought(card, self)
+      end
+
       @coins_available -= card.cost
       @buys_available -= 1
       

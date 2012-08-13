@@ -98,9 +98,10 @@ module Dominion
     def on_discard; end               # Tunnel
     def on_trash; end                 # Dark Ages!!!
     def on_attack; end                # Moat, Lighthouse, Secret Chamber, Horse Traders
-    def on_any_card_bought; end       # Contraband (validation)
-    def on_any_card_gained; end       # Watchtower, Trader, Fool's Gold
     def on_setup_after_duration; end  # Wharf, Tactician, Merchant Ship, Lighthouse, Haven, Fishing Village, Caravan
+    def on_cleanup; end               # Outpost
+    def on_any_card_bought(card, player); end       # Contraband (validation)
+    def on_any_card_gained(card, player); end       # Watchtower, Trader, Fool's Gold, Hoard
 
     def card_class
       self.class
@@ -117,7 +118,7 @@ module Dominion
     end
     
     def in_play?
-      @player && @player.cards_in_play.include?(self)
+      @player && @player == current_player && @player.cards_in_play.include?(self)
     end
 
     def method_missing(method, *args, &block)

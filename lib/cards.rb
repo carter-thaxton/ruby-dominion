@@ -556,6 +556,16 @@ module Dominion
   
   class Conspirator < Card
     set :intrigue
+    type :action
+    cost 4
+    coins 2
+
+    def on_play
+      if actions_in_play.count >= 3
+        draw 1
+        add_actions 1
+      end
+    end
   end
   
   class Coppersmith < Card
@@ -993,6 +1003,15 @@ module Dominion
 
   class Hoard < Card
     set :prosperity
+    type :treasure
+    cost 6
+    coins 2
+
+    def on_any_card_bought(card, player)
+      if in_play? && card.victory?
+        gain Gold
+      end
+    end
   end
   
   class Bank < Card
