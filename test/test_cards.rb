@@ -324,5 +324,21 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Silver, player.hand
   end
 
+  def test_duke
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Duke]
+    player = game.current_player
+    
+    4.times do
+      player.gain Duchy
+    end
+
+    2.times do
+      player.gain Duke
+    end
+
+    # 4 * 3 VP per Duchy + 2 * 4 VP per Duke = 20 VP
+    assert_equal 20, player.total_victory_points
+  end
+
 end
 

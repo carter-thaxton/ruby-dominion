@@ -559,6 +559,12 @@ module Dominion
   
   class Duke < Card
     set :intrigue
+    type :victory
+    cost 5
+
+    def vp
+      all_cards.count {|c| c.is_a?(Duchy)}
+    end
   end
   
   class Minion < Card
@@ -1065,7 +1071,6 @@ module Dominion
     set :cornucopia
     type :victory
     cost 6
-    vp 0      # dynamic (see below)
     
     def vp
       num_unique_cards = all_cards.map {|c| c.class }.uniq.size
