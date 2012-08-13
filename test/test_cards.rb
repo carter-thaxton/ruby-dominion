@@ -373,5 +373,18 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Gold, p1.discard_pile
     assert_has_no Gold, p2.discard_pile
   end
+
+  def test_bank
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Bank]
+    player = game.current_player
+
+    player.gain [Bank, Bank, Copper, Copper], :to => :hand
+
+    player.play Copper
+    player.play Copper
+    player.play Bank
+    player.play Bank
+    assert_equal 9, player.coins_available
+  end
 end
 

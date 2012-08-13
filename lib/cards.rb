@@ -1016,6 +1016,12 @@ module Dominion
   
   class Bank < Card
     set :prosperity
+    type :treasure
+    cost 7
+
+    def coins
+      treasures_in_play.count
+    end
   end
   
   class Expand < Card
