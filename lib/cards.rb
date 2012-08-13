@@ -493,8 +493,16 @@ module Dominion
   
   class ShantyTown < Card
     set :intrigue
+    type :action
+    cost 3
+    actions 2
+
+    def on_play
+      reveal hand
+      draw 2 if hand.none? &:action?
+    end
   end
-  
+
   class Steward < Card
     set :intrigue
     type :action

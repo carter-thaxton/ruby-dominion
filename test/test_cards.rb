@@ -303,5 +303,26 @@ class TestCards < Test::Unit::TestCase
     assert_equal 2, player.coins_available
   end
 
+  def test_shanty_town
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [ShantyTown]
+    player = game.current_player
+
+    player.gain [ShantyTown, ShantyTown, Estate, Copper], :to => :hand
+    player.gain [Silver, Silver, Duchy], :to => :deck
+
+    assert_equal 1, player.actions_available
+    assert_equal 4, player.hand.size
+
+    player.play ShantyTown
+    assert_equal 2, player.actions_available
+    assert_equal 3, player.hand.size
+    assert_has_no Silver, player.hand
+
+    player.play ShantyTown
+    assert_equal 3, player.actions_available
+    assert_equal 4, player.hand.size
+    assert_has_a Silver, player.hand
+  end
+
 end
 
