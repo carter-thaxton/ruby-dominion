@@ -231,7 +231,7 @@ module Dominion
       card = resolve_card_or_class(card_or_class)
       if card
         hand.delete card
-        deck.unshift card
+        deck << card
       end
       card
     end

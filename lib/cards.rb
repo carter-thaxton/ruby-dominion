@@ -527,6 +527,23 @@ module Dominion
   
   class WishingWell < Card
     set :intrigue
+    type :action
+    cost 3
+    cards 1
+    actions 1
+
+    def on_play
+      choice = choose_card "Wish for a card", :from => :supply, :required => true
+      card = draw_from_deck
+      if card
+        reveal card
+        if card.is_a?(choice.card_class)
+          put_in_hand card
+        else
+          put_on_deck card
+        end
+      end
+    end
   end
   
   class Baron < Card

@@ -340,5 +340,24 @@ class TestCards < Test::Unit::TestCase
     assert_equal 20, player.total_victory_points
   end
 
+  def test_wishing_well
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [WishingWell]
+    player = game.current_player
+
+    player.gain [WishingWell, WishingWell], :to => :hand
+    player.gain [Copper, Estate, Silver, Duchy], :to => :deck
+
+    player.play WishingWell, :choice => Gold
+    assert_equal 2, player.hand.size
+    assert_has_a Copper, player.hand
+    assert_has_no Gold, player.hand
+    assert_has_no Estate, player.hand
+
+    player.play WishingWell, :choice => Silver
+    assert_equal 3, player.hand.size
+    assert_has_a Estate, player.hand
+    assert_has_a Silver, player.hand
+    assert_has_no Duchy, player.hand
+  end
 end
 
