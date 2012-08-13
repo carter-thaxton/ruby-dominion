@@ -475,7 +475,7 @@ module Dominion
   
   class SecretChamber < Card
     set :intrigue
-    type :action, :reaction
+#    type :action, :reaction
   end
   
   class GreatHall < Card
@@ -676,8 +676,6 @@ module Dominion
   
   class Lighthouse < Card
     set :seaside
-    type :action, :duration
-    cost 2
   end
   
   class NativeVillage < Card
@@ -866,7 +864,7 @@ module Dominion
   
   class Watchtower < Card
     set :prosperity
-    type :action, :reaction
+#    type :action, :reaction
     cost 3
   end
   
@@ -1077,7 +1075,7 @@ module Dominion
   
   class HorseTraders < Card
     set :cornucopia
-    type :action, :reaction
+#    type :action, :reaction
     cost 4
   end
   
