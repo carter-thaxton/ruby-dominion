@@ -49,7 +49,9 @@ module Dominion
       choose(options)
     end
 
-    def choose(options)
+    def choose(options = {})
+    	options[:player] = self
+    	options[:card] = @card_in_play
       @choice_in_progress = options
 
       # use choice if given directly in call to play
@@ -57,7 +59,7 @@ module Dominion
       response = if @play_choice
         handle_response(@play_choice)
       elsif @strategy
-        handle_response(@strategy.choose(self, options))
+        handle_response(@strategy.choose(options))
       else
         nil
       end

@@ -39,8 +39,8 @@ module Dominion
 	end
 
   class ConsoleStrategy
-    def choose(player, options)
-      puts "#{player}: #{player.card_in_play} - #{options[:message]}"
+    def choose(options)
+      puts "#{options[:player]}: #{options[:card]} - #{options[:message]}"
       Console.get_response
     end
   end

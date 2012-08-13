@@ -25,10 +25,10 @@ module Dominion
       @deck = []
       @discard_pile = []
       @hand = []
-      @actions_in_play = []
-      @treasures_in_play = []
-      @durations_on_first_turn = []
-      @durations_on_second_turn = []
+      @actions_in_play = Set.new
+      @treasures_in_play = Set.new
+      @durations_on_first_turn = Set.new
+      @durations_on_second_turn = Set.new
       @actions_available = 0
       @coins_available = 0
       @buys_available = 0
@@ -61,7 +61,7 @@ module Dominion
     end
     
     def all_cards
-      deck + discard_pile + hand + cards_in_play
+      cards_in_play + deck + discard_pile + hand
       # TODO: mats
     end
     
@@ -92,13 +92,13 @@ module Dominion
 
       move_to_phase :cleanup
       
-      @discard_pile += @actions_in_play
+      @discard_pile += @actions_in_play.to_a
       @actions_in_play.each { |c| c.on_cleanup }
-      @actions_in_play = []
+      @actions_in_play = Set.new
 
-      @discard_pile += @treasures_in_play
+      @discard_pile += @treasures_in_play.to_a
       @treasures_in_play.each { |c| c.on_cleanup }
-      @treasures_in_play = []
+      @treasures_in_play = Set.new
 
       @discard_pile += @hand
       @hand = []

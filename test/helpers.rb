@@ -15,7 +15,7 @@ class MockStrategy
     @responses = responses
   end
 
-  def choose(player, options)
+  def choose(options)
     @responses.shift
   end
 end
