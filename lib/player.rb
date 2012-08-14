@@ -14,7 +14,7 @@ module Dominion
       :actions_in_play, :treasures_in_play,
       :durations_on_first_turn, :durations_on_second_turn,
       :actions_available, :coins_available, :buys_available,
-      :vp_tokens, :pirate_ship_tokens,
+      :actions_played, :vp_tokens, :pirate_ship_tokens,
       :turn, :card_in_play
     
     def initialize(game, position, identity, strategy)
@@ -33,6 +33,7 @@ module Dominion
       @coins_available = 0
       @buys_available = 0
       @vp_tokens = 0
+      @actions_played = 0
       @pirate_ship_tokens = 0
       @turn = 0
       @card_in_play = nil
@@ -80,6 +81,7 @@ module Dominion
 
       @turn += 1
       @actions_available = 1
+      @actions_played = 0
       @coins_available = 0
       @buys_available = 1
       move_to_phase :action
@@ -162,12 +164,12 @@ module Dominion
       
       raise "#{card} is not playable" unless card.action? || card.treasure?
       raise "#{card} is an action card, but currently in #{phase} phase" if card.action? && !action_phase?
-      raise "#{card} is an action card, but there are no more actions available" if card.action? && actions_available <= 0
+      raise "#{card} is an action card, but there are no more actions available" if card.action? && actions_available <= 0 unless options[:played_by_card]
       
       move_to_phase :treasure if action_phase? && card.treasure?   # automatically move to treasure phase
       raise "#{card} is a treasure card, but currently in #{phase} phase" if card.treasure? && !treasure_phase?
 
-      hand.delete card
+      hand.delete card unless options[:played_by_card]
       @card_in_play = card
       @play_choice = options[:choice]
 
@@ -179,16 +181,16 @@ module Dominion
 
       if card.action?
         @actions_in_play << card
-        @actions_available -= 1
-        draw card.cards
-        add_actions card.actions
-        add_coins card.coins
-        add_buys card.buys
+        @actions_available -= 1 unless options[:played_by_card]
+        @actions_played += 1
       elsif card.treasure?
         @treasures_in_play << card
-        add_coins card.coins
-        add_buys card.buys
       end
+
+      draw card.cards
+      add_actions card.actions
+      add_coins card.coins
+      add_buys card.buys
 
       card.on_play
 

@@ -318,6 +318,17 @@ module Dominion
   
   class ThroneRoom < Card
     set :base
+    type :action
+    cost 4
+
+    def on_play
+      card = choose_card "Choose a card to play twice", :from => :hand, :required => true
+      if card
+        2.times do
+          play card, :played_by_card => self
+        end
+      end
+    end
   end
   
   class CouncilRoom < Card
@@ -561,7 +572,7 @@ module Dominion
     coins 2
 
     def on_play
-      if actions_in_play.count >= 3
+      if actions_played >= 3
         draw 1
         add_actions 1
       end
@@ -1032,6 +1043,17 @@ module Dominion
   
   class KingsCourt < Card
     set :prosperity
+    type :action
+    cost 7
+
+    def on_play
+      card = choose_card "Choose a card to play thrice", :from => :hand, :required => false
+      if card
+        3.times do
+          play card, :played_by_card => self
+        end
+      end
+    end
   end
   
   class Peddler < Card

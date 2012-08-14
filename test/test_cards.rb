@@ -386,5 +386,21 @@ class TestCards < Test::Unit::TestCase
     player.play Bank
     assert_equal 9, player.coins_available
   end
+
+  def test_throne_room_kings_court
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [ThroneRoom, KingsCourt, Monument]
+    player = game.current_player
+    
+    player.gain [ThroneRoom, KingsCourt, Monument, Monument], :to => :hand
+
+    player.strategy = MockStrategy.new([KingsCourt, Monument, Monument])
+
+    player.play ThroneRoom
+
+    assert_equal 12, player.coins_available
+    assert_equal 6, player.vp_tokens
+    assert_equal 0, player.actions_available
+  end
+
 end
 
