@@ -176,7 +176,7 @@ module Dominion
     def log(message)
       #puts message
     end
-    
+
     private
     
     def create_players(options)

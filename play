@@ -1,1 +1,1 @@
-pry -I lib -r dominion -e 'Console.start_new_game;'
+pry -I lib -r dominion -e 'Console.play_game;'

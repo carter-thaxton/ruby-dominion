@@ -6,7 +6,7 @@ module Dominion
   	@@fiber = nil
   	@@waiting_for_response = false
 
-	  def self.start_new_game(options = {})
+	  def self.play_game(options = {})
 			g = Game.new options.merge(:strategy => ConsoleStrategy.new)
 			p1 = g.players[0]
 			p2 = g.players[1]
@@ -18,7 +18,10 @@ module Dominion
 				puts "Bye!"
 				exit
 			end
-			f.resume
+			loop do
+				f.resume
+				Pry.start binding
+			end
 		end
 
 	  def self.get_response
