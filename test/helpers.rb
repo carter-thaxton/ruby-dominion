@@ -22,10 +22,10 @@ end
 
 def assert_has_a(card_class, list)
 	has = list.any? { |c| c.is_a?(card_class) }
-	assert has, "Expected list to contain a #{card_class}: #{list}"
+	assert has, "Expected list to contain a #{card_class}: #{list.to_a}"
 end
 
 def assert_has_no(card_class, list)
 	has = list.any? { |c| c.is_a?(card_class) }
-	assert !has, "Expected list to not contain a #{card_class}: #{list}"
+	assert !has, "Expected list to not contain a #{card_class}: #{list.to_a}"
 end

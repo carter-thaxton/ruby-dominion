@@ -89,7 +89,7 @@ module Dominion
     end
     
     attr_reader :game
-    attr_accessor :player
+    attr_accessor :player, :played_by
 
     # Hooks - empty by default
     def on_play; end                  # Lots...
@@ -119,6 +119,10 @@ module Dominion
     
     def in_play?
       @player && @player == current_player && @player.cards_in_play.include?(self)
+    end
+
+    def in_hand?
+      @player && @player.hand.include?(self)
     end
 
     def method_missing(method, *args, &block)

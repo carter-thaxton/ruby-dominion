@@ -12,7 +12,7 @@ module Dominion
     attr_reader :game, :position,
       :deck, :discard_pile, :hand,
       :actions_in_play, :treasures_in_play,
-      :durations_on_first_turn, :durations_on_second_turn,
+      :in_play_from_previous_turn,
       :actions_available, :coins_available, :buys_available,
       :actions_played, :vp_tokens, :pirate_ship_tokens,
       :turn, :card_in_play
@@ -27,8 +27,7 @@ module Dominion
       @hand = []
       @actions_in_play = Set.new
       @treasures_in_play = Set.new
-      @durations_on_first_turn = Set.new
-      @durations_on_second_turn = Set.new
+      @in_play_from_previous_turn = Set.new
       @actions_available = 0
       @coins_available = 0
       @buys_available = 0
@@ -58,7 +57,7 @@ module Dominion
     end
     
     def cards_in_play
-      actions_in_play + treasures_in_play + durations_on_first_turn + durations_on_second_turn
+      actions_in_play + treasures_in_play + in_play_from_previous_turn
     end
     
     def all_cards
@@ -80,10 +79,15 @@ module Dominion
       raise "Cannot start turn in #{phase} phase" unless setup_phase?
 
       @turn += 1
-      @actions_available = 1
       @actions_played = 0
+      @actions_available = 1
       @coins_available = 0
       @buys_available = 1
+
+      @in_play_from_previous_turn.each do |card|
+        card.on_setup_after_duration
+      end
+
       move_to_phase :action
     end
 
@@ -94,12 +98,17 @@ module Dominion
 
       move_to_phase :cleanup
       
-      @discard_pile += @actions_in_play.to_a
-      @actions_in_play.each { |c| c.on_cleanup }
-      @actions_in_play = Set.new
+      durations_to_keep, actions_to_discard = @actions_in_play.partition &:duration?
+      to_discard = actions_to_discard + @treasures_in_play.to_a + @in_play_from_previous_turn.to_a
 
-      @discard_pile += @treasures_in_play.to_a
-      @treasures_in_play.each { |c| c.on_cleanup }
+      to_discard.each do |c|
+        c.on_cleanup
+        c.played_by = nil
+      end
+
+      @discard_pile += to_discard
+      @in_play_from_previous_turn = Set.new(durations_to_keep)
+      @actions_in_play = Set.new
       @treasures_in_play = Set.new
 
       @discard_pile += @hand
@@ -172,6 +181,7 @@ module Dominion
       hand.delete card unless options[:played_by_card]
       @card_in_play = card
       @play_choice = options[:choice]
+      card.played_by = options[:played_by_card]
 
       if card.attack?
         other_players.each do |player|
@@ -415,10 +425,10 @@ module Dominion
     end
 
     def react_to_attack
-      durations_on_second_turn.each do |card|
+      cards_in_play.dup.each do |card|
         card.on_attack
       end
-      hand.each do |card|
+      hand.dup.each do |card|
         card.on_attack
       end
     end

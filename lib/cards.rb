@@ -114,7 +114,7 @@ module Dominion
     cost 2
 
     def on_attack
-      if !player.attack_prevented
+      if in_hand? && !player.attack_prevented
         if ask "Reveal Moat?"
           player.attack_prevented = true
         end
@@ -703,6 +703,15 @@ module Dominion
   
   class FishingVillage < Card
     set :seaside
+    type :action, :duration
+    cost 3
+    actions 2
+    coins 1
+
+    def on_setup_after_duration
+      add_actions 1
+      add_coins 1
+    end
   end
   
   class Lookout < Card
