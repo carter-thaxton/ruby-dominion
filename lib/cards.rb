@@ -112,6 +112,7 @@ module Dominion
     set :base
     type :action, :reaction
     cost 2
+    cards 2
 
     def on_attack
       if in_hand? && !player.attack_prevented
