@@ -688,6 +688,20 @@ module Dominion
   
   class Lighthouse < Card
     set :seaside
+    type :action, :duration
+    cost 2
+    actions 1
+    coins 1
+
+    def on_setup_after_duration
+      add_coins 1
+    end
+
+    def on_attack
+      if in_play?
+        player.attack_prevented = true
+      end
+    end
   end
   
   class NativeVillage < Card

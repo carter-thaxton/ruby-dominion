@@ -200,4 +200,23 @@ class TestGame < Test::Unit::TestCase
     assert_equal 3, player.actions_in_play_from_previous_turn.count
   end
 
+  def test_attack_with_witch_and_lighthouse
+    game = Game.new :num_players => 3, :kingdom_cards => [Witch, Lighthouse]
+    p1 = game.current_player
+    p2 = game.players[1]
+    p3 = game.players[2]
+
+    p1.gain Lighthouse, :to => :hand
+    p1.play Lighthouse
+    p1.end_turn
+    assert_has_a Lighthouse, p1.actions_in_play_from_previous_turn
+
+    p2.gain Witch, :to => :hand
+    p2.play Witch
+
+    assert_has_no Curse, p1.discard_pile
+    assert_has_no Curse, p2.discard_pile
+    assert_has_a Curse, p3.discard_pile
+  end
+
 end

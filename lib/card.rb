@@ -119,7 +119,7 @@ module Dominion
     end
     
     def in_play?
-      @player && @player == current_player && @player.cards_in_play.include?(self)
+      @player && @player.cards_in_play.include?(self)
     end
 
     def in_hand?
