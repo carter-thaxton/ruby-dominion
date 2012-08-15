@@ -493,6 +493,26 @@ module Dominion
   
   class Masquerade < Card
     set :intrigue
+    type :action
+    cost 3
+    cards 2
+
+    def on_play
+      # choose cards
+      cards = players.map do |player|
+        card = player.choose_card "Choose a card to pass to #{player_to_left_of(player)}", :from => :hand, :required => :true
+        player.hand.delete card
+      end
+
+      # pass to next player
+      players.rotate.zip(cards) do |player, card|
+        player.put_in_hand card
+      end
+
+      # optionally trash a card
+      card = choose_card "Choose a card to trash", :from => :hand
+      trash card if card
+    end
   end
   
   class ShantyTown < Card

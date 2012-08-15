@@ -592,5 +592,32 @@ class TestCards < Test::Unit::TestCase
     assert_equal 1, p1.actions_available
   end
 
+  def test_masquerade
+    game = Game.new :num_players => 3, :no_cards => true, :kingdom_cards => [Masquerade]
+    p1 = game.players[0]
+    p2 = game.players[1]
+    p3 = game.players[2]
+
+    p1.gain Masquerade, :to => :hand
+    p1.gain [Estate, Duchy], :to => :deck
+
+    p2.gain Silver, :to => :hand
+    p3.gain Copper, :to => :hand
+
+    p1.strategy = respond_with Estate, Copper       # pass Estate, trash Copper received from p3
+    p2.strategy = respond_with Silver
+    p3.strategy = respond_with Copper
+
+    p1.play Masquerade
+
+    assert_has_a Copper, game.trash_pile
+    assert_has_a Duchy, p1.hand
+    assert_has_no Estate, p1.hand
+    assert_has_no Copper, p1.hand
+    assert_has_a Estate, p2.hand
+    assert_has_no Silver, p2.hand
+    assert_has_a Silver, p3.hand
+    assert_has_no Copper, p3.hand
+  end
 end
 
