@@ -619,5 +619,24 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Silver, p3.hand
     assert_has_no Copper, p3.hand
   end
+
+  def test_swindler
+    game = Game.new :num_players => 3, :no_cards => true, :kingdom_cards => [Swindler]
+    p1 = game.players[0]
+    p2 = game.players[1]
+    p3 = game.players[2]
+
+    p1.gain Swindler, :to => :hand
+    p2.gain Copper, :to => :deck
+    p3.gain Silver, :to => :deck
+
+    p1.strategy = respond_with Curse
+    p1.play Swindler
+
+    assert_equal 2, p1.coins_available
+    assert_has_a Copper, game.trash_pile
+    assert_has_a Curse, p2.discard_pile
+    assert_has_a Silver, p3.deck
+  end
 end
 

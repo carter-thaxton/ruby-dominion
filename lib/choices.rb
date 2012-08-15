@@ -82,10 +82,16 @@ module Dominion
       restrict_to = @choice_in_progress[:restrict_to]
       unique = @choice_in_progress[:unique]
       max_cost = @choice_in_progress[:max_cost]
+      min_cost = @choice_in_progress[:min_cost]
+      cost = @choice_in_progress[:cost]
       card_type = @choice_in_progress[:card_type]
 
       if count
         min = max = count
+      end
+
+      if cost
+        max_cost = min_cost = cost
       end
 
       if multiple
@@ -133,6 +139,10 @@ module Dominion
       if type == :card && response
         if max_cost
           raise "Card must cost no more than #{max_cost}, but #{response} costs #{response.cost}" if response.cost > max_cost
+        end
+
+        if min_cost
+          raise "Card must cost no less than #{min_cost}, but #{response} costs #{response.cost}" if response.cost < min_cost
         end
 
         if card_type

@@ -547,6 +547,18 @@ module Dominion
   
   class Swindler < Card
     set :intrigue
+    type :action, :attack
+    cost 3
+    coins 2
+
+    def on_play
+      card = player_to_left.draw_from_deck
+      if card
+        new_card = choose_card "Choose a replacement costing #{card.cost}", :from => :supply, :required => true, :cost => card.cost
+        trash card
+        player_to_left.gain new_card
+      end
+    end
   end
   
   class WishingWell < Card

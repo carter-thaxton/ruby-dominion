@@ -1,4 +1,5 @@
 require 'util'
+require 'set'
 require 'choices'
 
 module Dominion
@@ -54,6 +55,10 @@ module Dominion
 
     def current_player?
       game.current_player == self
+    end
+    
+    def player_to_left
+      game.player_to_left_of self
     end
     
     def cards_in_play

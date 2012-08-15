@@ -104,12 +104,8 @@ module Dominion
       other_players.reject &:attack_prevented
     end
     
-    def player_to_left
-      player_to_left_of current_player
-    end
-    
     def player_to_left_of(player)
-      players[player.position - 1 % num_players]
+      players[(player.position + 1) % num_players]
     end
 
     def all_players_cards
