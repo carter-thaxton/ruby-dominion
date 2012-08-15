@@ -383,7 +383,7 @@ module Dominion
       end
     end
     
-    def reveal_from_hand(card_or_class_or_type)
+    def reveal_from_hand(card_or_class_or_type, options = {})
       card = find_card_in_hand(card_or_class_or_type)
       if card
         if options[:required]
@@ -393,6 +393,9 @@ module Dominion
             reveal card
           end
         end
+      elsif options[:required]
+        reveal hand
+        nil
       end
     end
 

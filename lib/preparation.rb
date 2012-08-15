@@ -11,6 +11,13 @@ module Dominion
       odds = num_prosperity_cards.to_f / kingdom_cards.count
       rand < odds
     end
+
+    def self.randomly_choose_bane_card(kingdom_cards, options = {})
+      candidates = Dominion.all_defined_kingdom_cards.select { |card|
+        !kingdom_cards.include?(card) && (card.cost == 2 || card.cost == 3) && !card.potion
+      }
+      candidates.shuffle.first
+    end
     
     def self.initial_count_in_supply(card, num_players)
       result = case

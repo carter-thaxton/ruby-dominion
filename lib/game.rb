@@ -6,6 +6,7 @@ module Dominion
     def initialize(options = {})
       @kingdom_cards = []
       @colony_game = false
+      @bane_card = nil
       @players = []
       @current_player = nil
       @phase = :prepare
@@ -27,7 +28,7 @@ module Dominion
       current_player.start_turn
     end
     
-    attr_reader :phase, :kingdom_cards, :players, :current_player, :supply, :trash_pile
+    attr_reader :phase, :kingdom_cards, :bane_card, :players, :current_player, :supply, :trash_pile
     
     def move_to_phase(phase)
       @phase = phase
@@ -210,10 +211,15 @@ module Dominion
     def prepare_supply(options)
       @kingdom_cards = options.fetch :kingdom_cards, Preparation.randomly_choose_kingdom(options)
       @colony_game = options.fetch :colony_game?, Preparation.randomly_choose_if_colony_game(@kingdom_cards, options)
-      
+
+      if @kingdom_cards.include?(YoungWitch)
+        @bane_card = Preparation.randomly_choose_bane_card(@kingdom_cards, options)
+        @kingdom_cards << @bane_card
+      end
+
       @supply = {}
       all_cards.each do |card|
-        count = Preparation.initial_count_in_supply card, num_players
+        count = Preparation.initial_count_in_supply(card, num_players)
         pile = (1..count).collect { card.new self }
         @supply[card] = pile
       end

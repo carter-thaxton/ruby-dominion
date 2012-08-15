@@ -440,5 +440,35 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Silver, player.hand
     assert_equal 6, player.hand.size
   end
+
+  def test_young_witch
+    game = Game.new :num_players => 4, :no_cards => true, :kingdom_cards => [YoungWitch, Moat]
+    p1 = game.players[0]
+    p2 = game.players[1]
+    p3 = game.players[2]
+    p4 = game.players[3]
+
+    assert game.bane_card, "Game should have a bane card when playing with Young Witch"
+
+    p1.gain [YoungWitch, Copper, Copper], :to => :hand
+    p1.gain [Estate, Estate, Silver], :to => :deck
+
+    p2.gain game.bane_card, :to => :hand
+    p4.gain Moat, :to => :hand
+
+    p1.strategy = MockStrategy.new([Estate, Estate])
+    p2.strategy = MockStrategy.new([true])
+    p4.strategy = MockStrategy.new([true])
+    p1.play YoungWitch
+
+    assert_has_a Copper, p1.hand
+    assert_has_a Estate, p1.discard_pile
+    assert_has_a Silver, p1.deck
+    assert_has_no Silver, p1.hand
+
+    assert_has_no Curse, p2.discard_pile
+    assert_has_a Curse, p3.discard_pile
+    assert_has_no Curse, p4.discard_pile
+  end
 end
 

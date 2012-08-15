@@ -172,7 +172,7 @@ module Dominion
     def on_play
       gain Silver, :to => :deck
       attacked_players.each do |player|
-        card = player.reveal_from_hand :victory
+        card = player.reveal_from_hand :victory, :required => true
         player.put card, :to => :deck if card
       end
     end
@@ -1174,7 +1174,23 @@ module Dominion
   end
   
   class YoungWitch < Card
+    # see preparation.rb for extra rules about bane card
     set :cornucopia
+    type :action, :attack
+    cost 4
+    cards 2
+
+    def on_play
+      cards = choose_cards "Choose two cards to discard", :from => :hand, :required => true
+      discard cards
+
+      attacked_players.each do |player|
+        bane = player.reveal_from_hand bane_card
+        unless bane
+          player.gain Curse
+        end
+      end
+    end
   end
   
   class Harvest < Card

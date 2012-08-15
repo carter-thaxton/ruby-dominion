@@ -77,5 +77,13 @@ class TestSetup < Test::Unit::TestCase
       assert player.discard_pile.empty?
     end
   end
+
+  def test_bane_card
+    game = Game.new :kingdom_cards => [YoungWitch]
+    assert game.bane_card, "Bane card should be present when Young Witch is in kingdom"
+    assert game.kingdom_cards.include?(game.bane_card), "Bane should should be part of kingdom cards"
+    assert_equal 2, game.kingdom_cards.count, "Bane card should be in addition to other kingdom cards"
+    assert game.supply[game.bane_card], "Bane card should be part of supply"
+  end
   
 end
