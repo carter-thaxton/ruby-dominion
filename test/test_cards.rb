@@ -638,5 +638,26 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Curse, p2.discard_pile
     assert_has_a Silver, p3.deck
   end
+
+  def test_saboteur
+    game = Game.new :num_players => 3, :no_cards => true, :kingdom_cards => [Saboteur]
+    p1 = game.players[0]
+    p2 = game.players[1]
+    p3 = game.players[2]
+
+    p1.gain Saboteur, :to => :hand
+    p2.gain [Copper, Estate, Copper, Saboteur, Silver], :to => :deck
+    p3.gain [Copper, Estate, Copper, Estate], :to => :deck
+
+    p2.strategy = respond_with Silver   # trash Saboteur, gain Silver
+    p1.play Saboteur
+
+    assert_has_no Saboteur, p2.all_cards
+    assert_has_a Silver, p2.discard_pile
+    
+    assert p3.deck.empty?, "#{p3}'s deck should be empty"
+    assert_has_count Copper, p3.discard_pile, 2
+    assert_has_count Estate, p3.discard_pile, 2
+  end
 end
 

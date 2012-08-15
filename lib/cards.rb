@@ -690,6 +690,27 @@ module Dominion
   
   class Saboteur < Card
     set :intrigue
+    type :action, :attack
+    cost 5
+
+    def on_play
+      attacked_players.each do |player|
+        set_aside = []
+        loop do
+          card = player.draw_from_deck
+          break unless card
+          if card.cost < 3
+            set_aside << card
+          else
+            max_cost = card.cost - 2
+            new_card = player.choose_card "Choose a card to replace #{card} costing up to #{max_cost}", :from => :supply, :max_cost => max_cost
+            player.gain new_card
+            break
+          end
+        end
+        player.discard set_aside
+      end
+    end
   end
   
   class Torturer < Card
