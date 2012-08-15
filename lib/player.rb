@@ -384,6 +384,15 @@ module Dominion
       end
     end
     
+    def reveal_cards_from_deck(num_cards)
+      cards = []
+      num_cards.times do
+        card = draw_from_deck
+        cards << card if card
+      end
+      reveal cards
+    end
+
     def reveal_from_hand(card_or_class_or_type, options = {})
       card = find_card_in_hand(card_or_class_or_type)
       if card

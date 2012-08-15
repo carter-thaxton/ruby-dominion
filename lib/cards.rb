@@ -284,7 +284,7 @@ module Dominion
 
     def on_play
       attacked_players.each do |player|
-        cards = reveal_two_cards_from_deck(player)
+        cards = player.reveal_cards_from_deck(2)
         treasure = pick_a_treasure(cards)
         if treasure
           player.trash treasure
@@ -295,15 +295,6 @@ module Dominion
         remaining = cards.reject {|c| c == treasure}
         player.discard remaining
       end
-    end
-
-    def reveal_two_cards_from_deck(player)
-      cards = []
-      2.times do
-        card = player.draw_from_deck
-        cards << card if card
-      end
-      cards
     end
 
     def pick_a_treasure(cards)
@@ -704,6 +695,19 @@ module Dominion
   
   class Tribute < Card
     set :intrigue
+    type :action
+    cost 5
+
+    def on_play
+      cards = player_to_left.reveal_cards_from_deck(2)
+      unique_cards = cards.map(&:card_class).uniq
+      unique_cards.each do |card|
+        add_actions 2 if card.action?
+        add_coins 2 if card.treasure?
+        draw 2 if card.victory?
+      end
+      player_to_left.discard cards
+    end
   end
   
   class Upgrade < Card

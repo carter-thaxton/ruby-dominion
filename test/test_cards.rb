@@ -560,5 +560,37 @@ class TestCards < Test::Unit::TestCase
     assert_has_no Silver, player.hand
     assert_has_no Estate, player.hand
   end
+
+  def test_tribute
+    game = Game.new :num_players => 2, :no_cards => true, :kingdom_cards => [Tribute, GreatHall]
+    p1 = game.players[0]
+    p2 = game.players[1]
+
+    p1.gain [Tribute], :to => :hand
+    p1.gain [Estate] * 10, :to => :deck
+
+    p2.gain [Copper, Estate, Copper, GreatHall, Estate, Estate], :to => :deck
+
+    p1.play Tribute
+
+    assert_has_count Estate, p1.hand, 2
+    assert_equal 2, p1.coins_available
+    assert_equal 0, p1.actions_available
+
+    p1.add_actions 1
+    p1.gain Tribute, :to => :hand
+    p1.play Tribute
+
+    assert_has_count Estate, p1.hand, 4
+    assert_equal 4, p1.coins_available
+    assert_equal 2, p1.actions_available
+
+    p1.gain Tribute, :to => :hand
+    p1.play Tribute
+    assert_has_count Estate, p1.hand, 6
+    assert_equal 4, p1.coins_available
+    assert_equal 1, p1.actions_available
+  end
+
 end
 
