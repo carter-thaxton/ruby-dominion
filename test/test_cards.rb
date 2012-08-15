@@ -50,6 +50,8 @@ class TestCards < Test::Unit::TestCase
     player.gain Feast, :to => :hand
     player.play Feast, :choice => Duchy
     assert_has_a Duchy, player.discard_pile
+
+    assert_card_ownership game
   end
 
   def test_throne_room_feast
@@ -61,6 +63,8 @@ class TestCards < Test::Unit::TestCase
     player.play ThroneRoom
     assert_has_count Duchy, player.discard_pile, 2
     assert_has_count Feast, game.trash_pile, 1
+
+    assert_card_ownership game
   end
 
   def test_gardens
@@ -77,6 +81,8 @@ class TestCards < Test::Unit::TestCase
 
     # 38 cards -> 3 pts per Gardens * 7 Gardens = 21 VP
     assert_equal 21, player.total_victory_points
+
+    assert_card_ownership game
   end
 
   def test_militia
@@ -99,6 +105,8 @@ class TestCards < Test::Unit::TestCase
 
     assert_equal 3, p2.hand.size
     assert_equal 3, p3.hand.size
+
+    assert_card_ownership game
   end
 
   def test_remodel
@@ -112,6 +120,8 @@ class TestCards < Test::Unit::TestCase
 
     assert_has_a Silver, player.discard_pile
     assert_equal 0, player.hand.size
+
+    assert_card_ownership game
   end
 
   def test_remake
@@ -125,6 +135,8 @@ class TestCards < Test::Unit::TestCase
 
     assert_has_a Silver, player.discard_pile
     assert_equal 0, player.hand.size
+
+    assert_card_ownership game
   end
 
   def test_upgrade
@@ -141,6 +153,8 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Silver, player.discard_pile
     assert_equal 0, player.hand.size
     assert_equal 1, player.actions_available
+
+    assert_card_ownership game
   end
 
   def test_spy
@@ -163,6 +177,8 @@ class TestCards < Test::Unit::TestCase
 
     assert_has_a Estate, p2.deck
     assert_has_a Silver, p2.discard_pile
+
+    assert_card_ownership game
   end
 
   def test_thief
@@ -187,6 +203,8 @@ class TestCards < Test::Unit::TestCase
     assert_has_no Copper, p3.discard_pile
     assert_has_a Duchy, p3.discard_pile
     assert_has_a Copper, game.trash_pile
+
+    assert_card_ownership game
   end
 
   def test_library
@@ -205,6 +223,8 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Village, player.discard_pile
     assert_has_a Silver, player.deck
     assert_has_no Silver, player.hand
+
+    assert_card_ownership game
   end
 
   def test_library_with_small_deck
@@ -217,6 +237,8 @@ class TestCards < Test::Unit::TestCase
     player.play Library
 
     assert_equal 5, player.hand.size
+
+    assert_card_ownership game
   end
 
   def test_mine
@@ -230,6 +252,8 @@ class TestCards < Test::Unit::TestCase
 
     assert_has_a Silver, game.trash_pile
     assert_has_a Gold, player.hand
+
+    assert_card_ownership game
   end
 
   def test_adventurer
@@ -248,6 +272,8 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Gold, player.deck
     assert_has_a Duchy, player.deck
     assert_has_a Estate, player.discard_pile
+
+    assert_card_ownership game
   end
 
   def test_mint
@@ -272,6 +298,8 @@ class TestCards < Test::Unit::TestCase
 
     assert_has_a Gold, player.hand
     assert_has_a Gold, player.discard_pile
+
+    assert_card_ownership game
   end
 
   def test_courtyard
@@ -287,6 +315,8 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Gold, player.deck
     assert_has_a Silver, player.hand
     assert_has_a Estate, player.hand
+
+    assert_card_ownership game
   end
 
   def test_pawn
@@ -313,6 +343,8 @@ class TestCards < Test::Unit::TestCase
     assert_equal 0, player.actions_available
     assert_equal 2, player.buys_available
     assert_equal 1, player.coins_available
+
+    assert_card_ownership game
   end
 
   def test_steward
@@ -339,6 +371,8 @@ class TestCards < Test::Unit::TestCase
 
     assert_equal 0, player.actions_available
     assert_equal 2, player.coins_available
+
+    assert_card_ownership game
   end
 
   def test_shanty_town
@@ -360,6 +394,8 @@ class TestCards < Test::Unit::TestCase
     assert_equal 3, player.actions_available
     assert_equal 4, player.hand.size
     assert_has_a Silver, player.hand
+
+    assert_card_ownership game
   end
 
   def test_duke
@@ -376,6 +412,8 @@ class TestCards < Test::Unit::TestCase
 
     # 4 * 3 VP per Duchy + 2 * 4 VP per Duke = 20 VP
     assert_equal 20, player.total_victory_points
+
+    assert_card_ownership game
   end
 
   def test_wishing_well
@@ -396,6 +434,8 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Estate, player.hand
     assert_has_a Silver, player.hand
     assert_has_no Duchy, player.hand
+
+    assert_card_ownership game
   end
 
   def test_hoard
@@ -410,6 +450,8 @@ class TestCards < Test::Unit::TestCase
     p1.buy Duchy
     assert_has_a Gold, p1.discard_pile
     assert_has_no Gold, p2.discard_pile
+
+    assert_card_ownership game
   end
 
   def test_bank
@@ -423,6 +465,8 @@ class TestCards < Test::Unit::TestCase
     player.play Bank
     player.play Bank
     assert_equal 9, player.coins_available
+
+    assert_card_ownership game
   end
 
   def test_throne_room_kings_court
@@ -438,6 +482,8 @@ class TestCards < Test::Unit::TestCase
     assert_equal 12, player.coins_available
     assert_equal 6, player.vp_tokens
     assert_equal 0, player.actions_available
+
+    assert_card_ownership game
   end
 
   def test_fishing_village
@@ -456,6 +502,8 @@ class TestCards < Test::Unit::TestCase
     assert_equal 0, player.hand.size
     assert_equal 2, player.actions_available
     assert_equal 1, player.coins_available
+
+    assert_card_ownership game
   end
 
   def test_haven
@@ -477,6 +525,8 @@ class TestCards < Test::Unit::TestCase
     assert_has_no Haven, player.hand
     assert_has_a Silver, player.hand
     assert_equal 6, player.hand.size
+
+    assert_card_ownership game
   end
 
   def test_young_witch
@@ -507,6 +557,8 @@ class TestCards < Test::Unit::TestCase
     assert_has_no Curse, p2.discard_pile
     assert_has_a Curse, p3.discard_pile
     assert_has_no Curse, p4.discard_pile
+
+    assert_card_ownership game
   end
 
   def test_baron
@@ -523,6 +575,8 @@ class TestCards < Test::Unit::TestCase
     assert_equal 0, player.coins_available
     player.end_turn
     assert_has_count Estate, player.all_cards, 2
+
+    assert_card_ownership game
   end
 
   def test_torturer
@@ -541,6 +595,8 @@ class TestCards < Test::Unit::TestCase
     assert_has_count Copper, p1.hand, 9
     assert_equal 2, p2.hand.size
     assert_has_a Curse, p2.hand
+
+    assert_card_ownership game
   end
 
   def test_trading_post
@@ -551,6 +607,7 @@ class TestCards < Test::Unit::TestCase
     player.play TradingPost, :choice => [Estate, Estate]
     assert_has_no Estate, player.hand
     assert_has_a Silver, player.hand
+    assert_card_ownership game
 
     game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [TradingPost]
     player = game.current_player
@@ -559,6 +616,7 @@ class TestCards < Test::Unit::TestCase
     player.play TradingPost, :choice => [Estate, nil]
     assert_has_no Silver, player.hand
     assert_has_no Estate, player.hand
+    assert_card_ownership game
   end
 
   def test_tribute
@@ -590,6 +648,8 @@ class TestCards < Test::Unit::TestCase
     assert_has_count Estate, p1.hand, 6
     assert_equal 4, p1.coins_available
     assert_equal 1, p1.actions_available
+
+    assert_card_ownership game
   end
 
   def test_masquerade
@@ -618,6 +678,8 @@ class TestCards < Test::Unit::TestCase
     assert_has_no Silver, p2.hand
     assert_has_a Silver, p3.hand
     assert_has_no Copper, p3.hand
+
+    assert_card_ownership game
   end
 
   def test_swindler
@@ -637,6 +699,8 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Copper, game.trash_pile
     assert_has_a Curse, p2.discard_pile
     assert_has_a Silver, p3.deck
+
+    assert_card_ownership game
   end
 
   def test_saboteur
@@ -658,6 +722,8 @@ class TestCards < Test::Unit::TestCase
     assert p3.deck.empty?, "#{p3}'s deck should be empty"
     assert_has_count Copper, p3.discard_pile, 2
     assert_has_count Estate, p3.discard_pile, 2
+
+    assert_card_ownership game
   end
 
   def test_pearl_diver
@@ -678,6 +744,32 @@ class TestCards < Test::Unit::TestCase
 
     player.draw
     assert_has_a Duchy, player.hand
+
+    assert_card_ownership game
+  end
+
+  def test_ambassador
+    game = Game.new :num_players => 3, :no_cards => true, :kingdom_cards => [Ambassador, Moat]
+    p1 = game.players[0]
+    p2 = game.players[1]
+    p3 = game.players[2]
+
+    p1.gain [Ambassador, Estate, Estate, Copper], :to => :hand
+    p3.gain Moat, :to => :hand
+
+    estates_in_supply = game.supply_counts[Estate]
+
+    p3.strategy = respond_with true       # reveal Moat
+    p1.strategy = respond_with Estate, 2    # return two Estates
+    p1.play Ambassador
+
+    assert_has_no Estate, p1.hand
+    assert_has_a Estate, p2.discard_pile
+    assert_has_no Estate, p3.discard_pile
+
+    assert_equal estates_in_supply + 1, game.supply_counts[Estate]      # 2 returned, 1 gained by p2
+
+    assert_card_ownership game
   end
 end
 

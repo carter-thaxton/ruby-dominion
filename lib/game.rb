@@ -136,6 +136,23 @@ module Dominion
       result.player = player
       result
     end
+
+    def return_to_supply(card)
+      raise "#{card} must be a card instance" unless card.is_a?(Card)
+      if card.player
+        card.player.hand.delete card
+        card.player = nil
+      end
+      @supply[card.class].unshift(card)
+    end
+
+    def give_card_to_player(card, player)
+      if card.player
+        card.player.hand.delete card
+      end
+      card.player = player
+      player.put_in_hand card
+    end
     
     def check_for_game_over
       provinces_gone = supply[Province].empty?

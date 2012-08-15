@@ -187,22 +187,25 @@ module Dominion
     def play(card_or_class, options = {})
       check_turn
       card = resolve_card_or_class(card_or_class)
+      played_by_card = options[:played_by_card]
 
       raise "#{card} is not a valid card" unless card.is_a? Card
-      raise "#{card} is not the player's own card!" unless card.player == self
-      raise "#{card} is not a card in hand" unless hand.include?(card) || options[:played_by_card]
+      raise "#{card} is not the player's own card!" unless card.player == self || played_by_card
+      raise "#{card} is not a card in hand" unless hand.include?(card) || played_by_card
       
       raise "#{card} is not playable" unless card.action? || card.treasure?
       raise "#{card} is an action card, but currently in #{phase} phase" if card.action? && !action_phase?
-      raise "#{card} is an action card, but there are no more actions available" if card.action? && actions_available <= 0 unless options[:played_by_card]
+      raise "#{card} is an action card, but there are no more actions available" if card.action? && actions_available <= 0 unless played_by_card
       
       move_to_phase :treasure if action_phase? && card.treasure?   # automatically move to treasure phase
       raise "#{card} is a treasure card, but currently in #{phase} phase" if card.treasure? && !treasure_phase?
 
+      card.player = played_by_card.player if played_by_card
+      card.played_by = played_by_card
       hand.delete card
+
       @card_in_play = card
       @play_choice = options[:choice]
-      card.played_by = options[:played_by_card]
 
       if card.attack?
         other_players.each do |player|
@@ -212,7 +215,7 @@ module Dominion
 
       if card.action?
         @actions_in_play << card
-        @actions_available -= 1 unless options[:played_by_card]
+        @actions_available -= 1 unless played_by_card
         @actions_played += 1
       elsif card.treasure?
         @treasures_in_play << card
@@ -256,6 +259,7 @@ module Dominion
           treasures_in_play.delete card
 
           # Add to trash it unless it's already there (e.g. Throne Room + Feast)
+          card.player = nil
           game.trash_pile << card unless game.trash_pile.include?(card)
         end
         card
@@ -300,7 +304,7 @@ module Dominion
     def discard_hand
       discard hand
     end
-    
+
     def gain(cards_or_classes, options = {})
       return if cards_or_classes.nil?
       if cards_or_classes.is_a?(Enumerable)

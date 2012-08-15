@@ -501,12 +501,11 @@ module Dominion
       # choose cards
       cards = players.map do |player|
         card = player.choose_card "Choose a card to pass to #{player_to_left_of(player)}", :from => :hand, :required => :true
-        player.hand.delete card
       end
 
       # pass to next player
       players.rotate.zip(cards) do |player, card|
-        player.put_in_hand card
+        give_card_to_player(card, player)
       end
 
       # optionally trash a card
@@ -873,6 +872,28 @@ module Dominion
   
   class Ambassador < Card
     set :seaside
+    type :action, :attack
+    cost 3
+
+    def on_play
+      card = choose_card "Choose a card to return to the supply", :from => :hand, :required => true
+      if card
+        card_class = card.card_class
+        count = hand.count {|c| c.is_a?(card_class)}
+        if count < 2
+          count = choose_one ["None", "One"], [0, 1], :message => "Return how many?"
+        else
+          count = choose_one ["None", "One", "Two"], [0, 1, 2], :message => "Return how many?"
+        end
+        count.times do
+          return_to_supply(find_card_in_hand(card_class))
+        end
+
+        attacked_players.each do |player|
+          player.gain card_class
+        end
+      end
+    end
   end
   
   class FishingVillage < Card
