@@ -1,6 +1,6 @@
 module Dominion
-	module Choices
-		attr_reader :choice_in_progress
+  module Choices
+    attr_reader :choice_in_progress
 
     def ask(message, options = {})
       options[:message] = message
@@ -50,8 +50,8 @@ module Dominion
     end
 
     def choose(options = {})
-    	options[:player] = self
-    	options[:card] = @card_in_play
+      options[:player] = self
+      options[:card] = @card_in_play
       @choice_in_progress = options
 
       # use choice if given directly in call to play
@@ -131,32 +131,32 @@ module Dominion
       end
 
       if type == :card && response
-	      if max_cost
-	        raise "Card must cost no more than #{max_cost}, but #{response} costs #{response.cost}" if response.cost > max_cost
-	      end
+        if max_cost
+          raise "Card must cost no more than #{max_cost}, but #{response} costs #{response.cost}" if response.cost > max_cost
+        end
 
-	      if card_type
-	        raise "Card must have type #{card_type}, but #{response} has type #{response.type}" unless response.type.include?(card_type)
-	      end
-	    end
+        if card_type
+          raise "Card must have type #{card_type}, but #{response} has type #{response.type}" unless response.type.include?(card_type)
+        end
+      end
 
-	    if multiple
-	      if max
-	        raise "At most #{max} may be chosen" if response.size > max
-	      end
+      if multiple
+        if max
+          raise "At most #{max} may be chosen" if response.size > max
+        end
 
-	      if min
-	        raise "At least #{min} must be chosen" if response.size < min
-	      end
+        if min
+          raise "At least #{min} must be chosen" if response.size < min
+        end
 
-	      if unique
-	        raise "Choices must be unique" if response.uniq != response
-	      end
+        if unique
+          raise "Choices must be unique" if response.uniq != response
+        end
 
-	      if type == :card
-		      response = response.select {|card| card}	# filter out any nulls
-		    end
-	    end
+        if type == :card
+          response = response.select {|card| card}  # filter out any nulls
+        end
+      end
 
       response
     end

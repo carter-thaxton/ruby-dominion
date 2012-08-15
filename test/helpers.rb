@@ -33,8 +33,8 @@ def respond_with(*args)
 end
 
 def assert_has_a(card_class, list)
-	has = list.any? { |c| c.is_a?(card_class) }
-	assert has, "Expected list to contain a #{card_class}: #{list.to_a}"
+  has = list.any? { |c| c.is_a?(card_class) }
+  assert has, "Expected list to contain a #{card_class}: #{list.to_a}"
 end
 
 def assert_has_count(card_class, list, expected_count)
@@ -43,6 +43,6 @@ def assert_has_count(card_class, list, expected_count)
 end
 
 def assert_has_no(card_class, list)
-	has = list.any? { |c| c.is_a?(card_class) }
-	assert !has, "Expected list to not contain a #{card_class}: #{list.to_a}"
+  has = list.any? { |c| c.is_a?(card_class) }
+  assert !has, "Expected list to not contain a #{card_class}: #{list.to_a}"
 end
