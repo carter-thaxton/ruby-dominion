@@ -757,6 +757,14 @@ module Dominion
   
   class Caravan < Card
     set :seaside
+    type :action, :duration
+    cost 4
+    actions 1
+    coins 1
+
+    def on_setup_after_duration
+      draw
+    end
   end
   
   class Cutpurse < Card
@@ -816,6 +824,13 @@ module Dominion
   
   class MerchantShip < Card
     set :seaside
+    type :action, :duration
+    cost 5
+    coins 2
+
+    def on_setup_after_duration
+      add_coins 2
+    end
   end
   
   class Outpost < Card
@@ -832,6 +847,15 @@ module Dominion
   
   class Wharf < Card
     set :seaside
+    type :action, :duration
+    cost 5
+    cards 2
+    buys 1
+
+    def on_setup_after_duration
+      draw 2
+      add_buys 1
+    end
   end
   
   
