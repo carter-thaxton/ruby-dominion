@@ -856,6 +856,19 @@ module Dominion
   
   class PearlDiver < Card
     set :seaside
+    type :action
+    cost 2
+    cards 1
+    actions 1
+
+    def on_play
+      card = deck.first
+      if card
+        if ask "Move #{card} to top of deck?"
+          put_on_deck(deck.shift)
+        end
+      end
+    end
   end
   
   class Ambassador < Card

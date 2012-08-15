@@ -654,10 +654,30 @@ class TestCards < Test::Unit::TestCase
 
     assert_has_no Saboteur, p2.all_cards
     assert_has_a Silver, p2.discard_pile
-    
+
     assert p3.deck.empty?, "#{p3}'s deck should be empty"
     assert_has_count Copper, p3.discard_pile, 2
     assert_has_count Estate, p3.discard_pile, 2
+  end
+
+  def test_pearl_diver
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [PearlDiver]
+    player = game.current_player
+
+    player.gain [PearlDiver, PearlDiver], :to => :hand
+    player.gain [Copper, Duchy, Estate, Estate, Silver], :to => :deck
+
+    player.play PearlDiver, :choice => true
+    player.play PearlDiver, :choice => false
+
+    assert_has_a Copper, player.hand
+    assert_has_a Silver, player.hand
+    assert_has_no Duchy, player.hand
+
+    assert_equal 1, player.actions_available
+
+    player.draw
+    assert_has_a Duchy, player.hand
   end
 end
 
