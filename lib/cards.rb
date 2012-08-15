@@ -647,6 +647,20 @@ module Dominion
   
   class Upgrade < Card
     set :intrigue
+    type :action
+    cost 5
+    cards 1
+    actions 1
+
+    def on_play
+      card = choose_card "Choose a card to upgrade", :from => :hand, :required => true
+      if card
+        max_cost = card.cost + 1
+        new_card = choose_card "Choose a card from the supply costing up to #{max_cost}", :from => :supply, :max_cost => max_cost
+        trash card
+        gain new_card
+      end
+    end
   end
   
   class Harem < Card

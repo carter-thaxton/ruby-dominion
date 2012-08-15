@@ -117,6 +117,22 @@ class TestCards < Test::Unit::TestCase
     assert_equal 0, player.hand.size
   end
 
+  def test_upgrade
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Upgrade]
+    player = game.current_player
+
+    player.gain [Upgrade, Upgrade], :to => :hand
+    player.gain [Estate, Copper], :to => :deck
+
+    player.strategy = MockStrategy.new([Estate, Silver, Copper])  # trash Estate, gain a Silver, trash Copper (no replacement)
+    player.play Upgrade
+    player.play Upgrade
+
+    assert_has_a Silver, player.discard_pile
+    assert_equal 0, player.hand.size
+    assert_equal 1, player.actions_available
+  end
+
   def test_spy
     game = Game.new :num_players => 2, :no_cards => true, :kingdom_cards => [Spy]
     p1 = game.players[0]
