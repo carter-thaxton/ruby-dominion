@@ -419,5 +419,26 @@ class TestCards < Test::Unit::TestCase
     assert_equal 2, player.actions_available
     assert_equal 1, player.coins_available
   end
+
+  def test_haven
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Haven]
+    player = game.current_player
+    
+    player.gain [Haven, Copper], :to => :hand
+    player.gain [Silver, Estate, Estate, Estate, Estate, Estate, Estate], :to => :deck
+    player.play Haven, :choice => Silver
+    assert_equal 1, player.actions_available
+    assert_has_no Silver, player.hand
+    assert_has_no Silver, player.deck
+    assert_has_no Silver, player.discard_pile
+    player.play_all_treasures
+    assert_equal 1, player.coins_available
+    player.end_turn
+
+    assert_has_a Haven, player.actions_in_play_from_previous_turn
+    assert_has_no Haven, player.hand
+    assert_has_a Silver, player.hand
+    assert_equal 6, player.hand.size
+  end
 end
 

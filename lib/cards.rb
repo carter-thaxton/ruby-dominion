@@ -684,6 +684,20 @@ module Dominion
   
   class Haven < Card
     set :seaside
+    type :action, :duration
+    cost 2
+    actions 1
+    cards 1
+
+    def on_play
+      @set_aside_card = choose_card "Choose a card to set aside for next turn", :from => :hand, :required => true
+      hand.delete @set_aside_card
+    end
+
+    def on_setup_after_duration
+      hand << @set_aside_card
+      @set_aside_card = nil
+    end
   end
   
   class Lighthouse < Card
