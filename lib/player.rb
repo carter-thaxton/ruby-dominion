@@ -250,7 +250,8 @@ module Dominion
           actions_in_play.delete card
           treasures_in_play.delete card
 
-          game.trash_pile << card
+          # Add to trash it unless it's already there (e.g. Throne Room + Feast)
+          game.trash_pile << card unless game.trash_pile.include?(card)
         end
         card
       end

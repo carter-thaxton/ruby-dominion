@@ -47,10 +47,20 @@ class TestCards < Test::Unit::TestCase
     game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Feast]
     player = game.current_player
     
-    # play Feast
     player.gain Feast, :to => :hand
     player.play Feast, :choice => Duchy
     assert_has_a Duchy, player.discard_pile
+  end
+
+  def test_throne_room_feast
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Feast, ThroneRoom]
+    player = game.current_player
+    
+    player.gain [ThroneRoom, Feast], :to => :hand
+    player.strategy = respond_with Feast, Duchy, Duchy
+    player.play ThroneRoom
+    assert_has_count Duchy, player.discard_pile, 2
+    assert_has_count Feast, game.trash_pile, 1
   end
 
   def test_gardens
