@@ -411,7 +411,9 @@ module Dominion
 
     def find_card_in_hand(card_or_class_or_type, options = {})
       hand = options.fetch :hand, self.hand
-      if card_or_class_or_type.is_a? Card
+      if card_or_class_or_type.nil?
+        nil
+      elsif card_or_class_or_type.is_a? Card
         card = card_or_class_or_type
         raise "#{card} is not in the player's hand" unless hand.include?(card)
       elsif is_card_class(card_or_class_or_type)

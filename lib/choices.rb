@@ -140,17 +140,23 @@ module Dominion
 	      end
 	    end
 
-      if multiple && max
-        raise "At most #{max} may be chosen" if response.size > max
-      end
+	    if multiple
+	      if max
+	        raise "At most #{max} may be chosen" if response.size > max
+	      end
 
-      if multiple && min
-        raise "At least #{min} must be chosen" if response.size < min
-      end
+	      if min
+	        raise "At least #{min} must be chosen" if response.size < min
+	      end
 
-      if multiple && unique
-        raise "Choices must be unique" if response.uniq != response
-      end
+	      if unique
+	        raise "Choices must be unique" if response.uniq != response
+	      end
+
+	      if type == :card
+		      response = response.select {|card| card}	# filter out any nulls
+		    end
+	    end
 
       response
     end

@@ -690,6 +690,16 @@ module Dominion
   
   class TradingPost < Card
     set :intrigue
+    type :action
+    cost 5
+
+    def on_play
+      cards = choose_cards "Choose two cards to trash", :from => :hand, :count => 2, :required => true
+      trash cards
+      if cards.count == 2
+        gain Silver, :to => :hand
+      end
+    end
   end
   
   class Tribute < Card

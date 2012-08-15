@@ -542,5 +542,23 @@ class TestCards < Test::Unit::TestCase
     assert_equal 2, p2.hand.size
     assert_has_a Curse, p2.hand
   end
+
+  def test_trading_post
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [TradingPost]
+    player = game.current_player
+    
+    player.gain [TradingPost, Estate, Estate, Copper], :to => :hand
+    player.play TradingPost, :choice => [Estate, Estate]
+    assert_has_no Estate, player.hand
+    assert_has_a Silver, player.hand
+
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [TradingPost]
+    player = game.current_player
+    
+    player.gain [TradingPost, Estate], :to => :hand
+    player.play TradingPost, :choice => [Estate, nil]
+    assert_has_no Silver, player.hand
+    assert_has_no Estate, player.hand
+  end
 end
 
