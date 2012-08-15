@@ -163,4 +163,41 @@ class TestGame < Test::Unit::TestCase
     assert_equal 4, player3.hand.size       # no Moat
   end
 
+  def test_durations_with_throne_room_and_kings_court
+    # TR, KC(2), [FV(3), FV(3)], FV, KC, M(3)
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [ThroneRoom, KingsCourt, FishingVillage, Monument]
+    player = game.current_player
+
+    player.gain [FishingVillage, FishingVillage, FishingVillage, ThroneRoom, KingsCourt, KingsCourt, Monument], :to => :hand
+    player.strategy = MockStrategy.new([KingsCourt, FishingVillage, FishingVillage, Monument])
+    player.play ThroneRoom
+    player.play FishingVillage
+    player.play KingsCourt
+    assert player.strategy.done?, "Strategy not entirely played: #{player.strategy}"
+
+    assert_equal 2*3*1 + 1 + 3*2, player.coins_available
+    assert_equal 2*3*2 + 2 - 2, player.actions_available
+    player.end_turn
+    assert_equal 2*3*1 + 1, player.coins_available
+    assert_equal 2*3*1 + 1 + 1, player.actions_available
+    assert_equal 4, player.actions_in_play_from_previous_turn.count
+
+    # KC, TR(3), KC(2), [M(3), M(3)], M(2), FV(2), FV
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [ThroneRoom, KingsCourt, FishingVillage, Monument]
+    player = game.current_player
+
+    player.gain [FishingVillage, FishingVillage, FishingVillage, ThroneRoom, KingsCourt, KingsCourt, Monument, Monument, Monument], :to => :hand
+    player.strategy = MockStrategy.new([ThroneRoom, KingsCourt, Monument, Monument, Monument, FishingVillage])
+    player.play KingsCourt
+    player.play FishingVillage
+    assert player.strategy.done?, "Strategy not entirely played: #{player.strategy}"
+
+    assert_equal 2*3*2 + 2*2 + 2*1 + 1, player.coins_available
+    assert_equal 2*1*2 + 2 - 1, player.actions_available
+    player.end_turn
+    assert_equal 2*1*1 + 1, player.coins_available
+    assert_equal 1 + 2*1*1 + 1, player.actions_available
+    assert_equal 3, player.actions_in_play_from_previous_turn.count
+  end
+
 end

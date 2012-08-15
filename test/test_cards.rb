@@ -414,7 +414,7 @@ class TestCards < Test::Unit::TestCase
 
     player.end_turn
 
-    assert_has_a FishingVillage, player.in_play_from_previous_turn
+    assert_has_a FishingVillage, player.actions_in_play_from_previous_turn
     assert_equal 0, player.hand.size
     assert_equal 2, player.actions_available
     assert_equal 1, player.coins_available

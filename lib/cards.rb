@@ -320,6 +320,7 @@ module Dominion
     set :base
     type :action
     cost 4
+    multiplier 2
 
     def on_play
       card = choose_card "Choose a card to play twice", :from => :hand, :required => true
@@ -863,6 +864,7 @@ module Dominion
   
   class Golem < Card
     set :alchemy
+    multiplier 1
   end
   
   class Possession < Card
@@ -1054,6 +1056,7 @@ module Dominion
     set :prosperity
     type :action
     cost 7
+    multiplier 3
 
     def on_play
       card = choose_card "Choose a card to play thrice", :from => :hand, :required => false

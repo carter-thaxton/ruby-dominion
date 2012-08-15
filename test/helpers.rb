@@ -18,6 +18,14 @@ class MockStrategy
   def choose(options)
     @responses.shift
   end
+
+  def done?
+    @responses.empty?
+  end
+
+  def to_s
+    @responses.to_s
+  end
 end
 
 def assert_has_a(card_class, list)

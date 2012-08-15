@@ -51,13 +51,14 @@ module Dominion
           @coins = 0
           @buys = 0
           @vp = 0
+          @multiplier = 0
         end
         
         Dominion.all_cards << subclass
       end
 
       define_type_attrs :base, :action, :attack, :victory, :treasure, :curse, :reaction, :duration
-      define_class_attrs :set, :cost, :potion, :cards, :actions, :coins, :buys, :vp
+      define_class_attrs :set, :cost, :potion, :cards, :actions, :coins, :buys, :vp, :multiplier
 
       public
 

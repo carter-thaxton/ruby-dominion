@@ -12,7 +12,7 @@ module Dominion
     attr_reader :game, :position,
       :deck, :discard_pile, :hand,
       :actions_in_play, :treasures_in_play,
-      :in_play_from_previous_turn,
+      :actions_in_play_from_previous_turn,
       :actions_available, :coins_available, :buys_available,
       :actions_played, :vp_tokens, :pirate_ship_tokens,
       :turn, :card_in_play
@@ -27,7 +27,7 @@ module Dominion
       @hand = []
       @actions_in_play = Set.new
       @treasures_in_play = Set.new
-      @in_play_from_previous_turn = Set.new
+      @actions_in_play_from_previous_turn = Set.new
       @actions_available = 0
       @coins_available = 0
       @buys_available = 0
@@ -57,7 +57,7 @@ module Dominion
     end
     
     def cards_in_play
-      actions_in_play + treasures_in_play + in_play_from_previous_turn
+      actions_in_play + treasures_in_play + actions_in_play_from_previous_turn
     end
     
     def all_cards
@@ -84,8 +84,15 @@ module Dominion
       @coins_available = 0
       @buys_available = 1
 
-      @in_play_from_previous_turn.each do |card|
-        card.on_setup_after_duration
+      # Play duration cards again, accounting for Throne Room and King's Court
+      @actions_in_play_from_previous_turn.each do |card|
+        if card.played_by
+          card.played_by.multiplier.times do
+            card.on_setup_after_duration
+          end
+        else
+          card.on_setup_after_duration
+        end
       end
 
       move_to_phase :action
@@ -97,9 +104,18 @@ module Dominion
       raise "Cannot end turn while choice in progress" if choice_in_progress
 
       move_to_phase :cleanup
-      
-      durations_to_keep, actions_to_discard = @actions_in_play.partition &:duration?
-      to_discard = actions_to_discard + @treasures_in_play.to_a + @in_play_from_previous_turn.to_a
+
+      # keep durations and any Throne Rooms or King's Courts that directly played those durations
+      actions_to_keep = Set.new
+      @actions_in_play.each do |card|
+        if card.duration?
+          actions_to_keep << card
+          actions_to_keep << card.played_by if card.played_by && card.played_by.multiplier > 1
+        end
+      end
+
+      actions_to_discard = @actions_in_play - actions_to_keep
+      to_discard = actions_to_discard.to_a + @treasures_in_play.to_a + @actions_in_play_from_previous_turn.to_a
 
       to_discard.each do |c|
         c.on_cleanup
@@ -107,7 +123,7 @@ module Dominion
       end
 
       @discard_pile += to_discard
-      @in_play_from_previous_turn = Set.new(durations_to_keep)
+      @actions_in_play_from_previous_turn = Set.new(actions_to_keep)
       @actions_in_play = Set.new
       @treasures_in_play = Set.new
 
@@ -162,14 +178,14 @@ module Dominion
       end
       @deck.pop
     end
-    
+
     def play(card_or_class, options = {})
       check_turn
       card = resolve_card_or_class(card_or_class)
 
       raise "#{card} is not a valid card" unless card.is_a? Card
       raise "#{card} is not the player's own card!" unless card.player == self
-      raise "#{card} is not a card in hand" unless hand.include? card
+      raise "#{card} is not a card in hand" unless hand.include?(card) || options[:played_by_card]
       
       raise "#{card} is not playable" unless card.action? || card.treasure?
       raise "#{card} is an action card, but currently in #{phase} phase" if card.action? && !action_phase?
@@ -178,7 +194,7 @@ module Dominion
       move_to_phase :treasure if action_phase? && card.treasure?   # automatically move to treasure phase
       raise "#{card} is a treasure card, but currently in #{phase} phase" if card.treasure? && !treasure_phase?
 
-      hand.delete card unless options[:played_by_card]
+      hand.delete card
       @card_in_play = card
       @play_choice = options[:choice]
       card.played_by = options[:played_by_card]
