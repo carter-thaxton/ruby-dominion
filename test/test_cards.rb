@@ -508,5 +508,21 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Curse, p3.discard_pile
     assert_has_no Curse, p4.discard_pile
   end
+
+  def test_baron
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Baron]
+    player = game.current_player
+    
+    player.gain [Baron, Estate], :to => :hand
+    player.play Baron, :choice => true
+    assert_equal 4, player.coins_available
+    player.end_turn
+    assert_has_count Estate, player.all_cards, 1
+
+    player.play Baron, :choice => false
+    assert_equal 0, player.coins_available
+    player.end_turn
+    assert_has_count Estate, player.all_cards, 2
+  end
 end
 

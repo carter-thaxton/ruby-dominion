@@ -14,6 +14,10 @@ module Dominion
     all_defined_cards.select {|card| card.kingdom? }
   end
   
+  def self.all_undefined_cards
+    all_cards - all_defined_cards
+  end
+
   class Card
     # Game context used for cards when unassociated with a context
     BASE_CONTEXT = Game.new :no_prepare => true

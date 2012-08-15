@@ -560,6 +560,19 @@ module Dominion
   
   class Baron < Card
     set :intrigue
+    type :action
+    cost 4
+    buys 1
+
+    def on_play
+      estate = reveal_from_hand Estate
+      if estate
+        discard estate
+        add_coins 4
+      else
+        gain Estate
+      end
+    end
   end
   
   class Bridge < Card
@@ -1112,6 +1125,18 @@ module Dominion
   
   class Expand < Card
     set :prosperity
+    type :action
+    cost 7
+
+    def on_play
+      card = choose_card "Choose a card to expand", :from => :hand, :required => true
+      if card
+        max_cost = card.cost + 3
+        new_card = choose_card "Choose a card from the supply costing up to #{max_cost}", :from => :supply, :max_cost => max_cost
+        trash card
+        gain new_card
+      end
+    end
   end
   
   class Forge < Card
