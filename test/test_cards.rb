@@ -539,8 +539,8 @@ class TestCards < Test::Unit::TestCase
     p1.play KingsCourt, :choice => Torturer
 
     assert_has_count Copper, p1.hand, 9
-    assert_equal 1, p2.hand.size
-    assert_has_a Curse, p2.discard_pile
+    assert_equal 2, p2.hand.size
+    assert_has_a Curse, p2.hand
   end
 end
 

@@ -225,7 +225,7 @@ module Dominion
     cost 4
     
     def on_play
-      copper = hand.find {|card| card.is_a? Copper}
+      copper = find_card_in_hand Copper
       if copper
         trash copper
         add_coins 3
@@ -677,9 +677,9 @@ module Dominion
 
     def on_play
       attacked_players.each do |player|
-        choice = player.choose_one ["Gain a curse", "Discard 2 cards"], [:curse, :discard]
+        choice = player.choose_one ["Gain a curse in hand", "Discard 2 cards"], [:curse, :discard]
         if choice == :curse
-          player.gain Curse
+          player.gain Curse, :to => :hand
         elsif choice == :discard
           cards = player.choose_cards "Discard 2 cards", :from => :hand, :count => 2
           player.discard cards
