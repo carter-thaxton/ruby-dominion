@@ -83,7 +83,7 @@ class TestCards < Test::Unit::TestCase
       p3.gain Copper, :to => :hand
     end
 
-    p2.strategy = MockStrategy.new([[Copper, Copper]])
+    p2.strategy = respond_with [Copper, Copper]
 
     p1.play Militia
 
@@ -97,7 +97,7 @@ class TestCards < Test::Unit::TestCase
 
     player.gain [Remodel, Estate], :to => :hand
 
-    player.strategy = MockStrategy.new([Estate, Silver])  # trash Estate, gain a Silver
+    player.strategy = respond_with Estate, Silver  # trash Estate, gain a Silver
     player.play Remodel
 
     assert_has_a Silver, player.discard_pile
@@ -110,7 +110,7 @@ class TestCards < Test::Unit::TestCase
 
     player.gain [Remake, Estate, Copper], :to => :hand
 
-    player.strategy = MockStrategy.new([Estate, Silver, Copper])  # trash Estate, gain a Silver, trash Copper (no replacement)
+    player.strategy = respond_with Estate, Silver, Copper  # trash Estate, gain a Silver, trash Copper (no replacement)
     player.play Remake
 
     assert_has_a Silver, player.discard_pile
@@ -124,7 +124,7 @@ class TestCards < Test::Unit::TestCase
     player.gain [Upgrade, Upgrade], :to => :hand
     player.gain [Estate, Copper], :to => :deck
 
-    player.strategy = MockStrategy.new([Estate, Silver, Copper])  # trash Estate, gain a Silver, trash Copper (no replacement)
+    player.strategy = respond_with Estate, Silver, Copper  # trash Estate, gain a Silver, trash Copper (no replacement)
     player.play Upgrade
     player.play Upgrade
 
@@ -143,7 +143,7 @@ class TestCards < Test::Unit::TestCase
 
     p2.gain [Silver, Estate], :to => :deck
 
-    p1.strategy = MockStrategy.new([:deck, :discard])   # deck for self, discard for p2
+    p1.strategy = respond_with :deck, :discard   # deck for self, discard for p2
     p1.play Spy
 
     assert_has_a Copper, p1.hand
@@ -166,7 +166,7 @@ class TestCards < Test::Unit::TestCase
     p2.gain [Silver, Copper], :to => :deck
     p3.gain [Copper, Duchy], :to => :deck
 
-    p1.strategy = MockStrategy.new([Silver, true, false])    # choose to gain Silver from p1, don't gain Copper from p2
+    p1.strategy = respond_with Silver, true, false    # choose to gain Silver from p1, don't gain Copper from p2
     p1.play Thief
 
     assert_has_a Silver, p1.discard_pile
@@ -186,7 +186,7 @@ class TestCards < Test::Unit::TestCase
     player.gain [Library, Estate, Estate, Estate, Estate], :to => :hand
     player.gain [Copper, Village, Copper, Library, Copper, Silver, Silver], :to => :deck
 
-    player.strategy = MockStrategy.new([true, false])    # set aside the Village, but not the second Library
+    player.strategy = respond_with true, false    # set aside the Village, but not the second Library
     player.play Library
 
     assert_equal 7, player.hand.size
@@ -215,7 +215,7 @@ class TestCards < Test::Unit::TestCase
 
     player.gain [Mine, Silver], :to => :hand
 
-    player.strategy = MockStrategy.new([Silver, Gold])
+    player.strategy = respond_with Silver, Gold
     player.play Mine
 
     assert_has_a Silver, game.trash_pile
@@ -257,7 +257,7 @@ class TestCards < Test::Unit::TestCase
     assert_has_a Mint, player.hand
     assert_has_a Gold, player.hand
 
-    player.strategy = MockStrategy.new([Gold])
+    player.strategy = respond_with Gold
     player.play Mint
 
     assert_has_a Gold, player.hand
@@ -271,7 +271,7 @@ class TestCards < Test::Unit::TestCase
     player.gain [Courtyard, Estate, Estate], :to => :hand
     player.gain [Gold, Silver], :to => :deck
 
-    player.strategy = MockStrategy.new([Gold])
+    player.strategy = respond_with Gold
     player.play Courtyard
 
     assert_has_a Gold, player.deck
@@ -283,10 +283,10 @@ class TestCards < Test::Unit::TestCase
     game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Pawn]
     player = game.current_player
 
-    player.gain [Pawn], :to => :hand
+    player.gain Pawn, :to => :hand
     player.gain [Estate, Copper], :to => :deck
 
-    player.strategy = MockStrategy.new([[:card, :action]])
+    player.strategy = respond_with [:card, :action]
     player.play Pawn
 
     assert_has_a Estate, player.hand
@@ -296,8 +296,8 @@ class TestCards < Test::Unit::TestCase
     assert_equal 0, player.coins_available
     player.end_turn
 
-    player.gain [Pawn], :to => :hand
-    player.strategy = MockStrategy.new([[:buy, :coin]])
+    player.gain Pawn, :to => :hand
+    player.strategy = respond_with [:buy, :coin]
     player.play Pawn
 
     assert_equal 0, player.actions_available
@@ -311,7 +311,7 @@ class TestCards < Test::Unit::TestCase
 
     player.gain [Steward, Silver, Estate, Copper], :to => :hand
 
-    player.strategy = MockStrategy.new([:trash, [Estate, Copper]])
+    player.strategy = respond_with :trash, [Estate, Copper]
     player.play Steward
 
     assert_has_a Silver, player.hand
@@ -324,7 +324,7 @@ class TestCards < Test::Unit::TestCase
     player.end_turn
 
     player.gain Steward, :to => :hand
-    player.strategy = MockStrategy.new([:coins])
+    player.strategy = respond_with :coins
     player.play Steward
 
     assert_equal 0, player.actions_available
@@ -421,7 +421,7 @@ class TestCards < Test::Unit::TestCase
     
     player.gain [ThroneRoom, KingsCourt, Monument, Monument], :to => :hand
 
-    player.strategy = MockStrategy.new([KingsCourt, Monument, Monument])
+    player.strategy = respond_with KingsCourt, Monument, Monument
 
     player.play ThroneRoom
 
@@ -484,9 +484,9 @@ class TestCards < Test::Unit::TestCase
     p2.gain game.bane_card, :to => :hand
     p4.gain Moat, :to => :hand
 
-    p1.strategy = MockStrategy.new([Estate, Estate])
-    p2.strategy = MockStrategy.new([true])
-    p4.strategy = MockStrategy.new([true])
+    p1.strategy = respond_with Estate, Estate
+    p2.strategy = respond_with true
+    p4.strategy = respond_with true
     p1.play YoungWitch
 
     assert_has_a Copper, p1.hand
