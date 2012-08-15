@@ -1167,6 +1167,20 @@ module Dominion
   
   class Remake < Card
     set :cornucopia
+    type :action
+    cost 4
+
+    def on_play
+      2.times do
+        card = choose_card "Choose a card to remake", :from => :hand, :required => true
+        if card
+          max_cost = card.cost + 1
+          new_card = choose_card "Choose a card from the supply costing up to #{max_cost}", :from => :supply, :max_cost => max_cost
+          trash card
+          gain new_card
+        end
+      end
+    end
   end
   
   class Tournament < Card

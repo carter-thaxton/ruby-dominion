@@ -130,13 +130,15 @@ module Dominion
         end
       end
 
-      if type == :card && max_cost
-        raise "Card must cost no more than #{max_cost}, but #{response} costs #{response.cost}" if response.cost > max_cost
-      end
+      if type == :card && response
+	      if max_cost
+	        raise "Card must cost no more than #{max_cost}, but #{response} costs #{response.cost}" if response.cost > max_cost
+	      end
 
-      if type == :card && card_type
-        raise "Card must have type #{card_type}, but #{response} has type #{response.type}" unless response.type.include?(card_type)
-      end
+	      if card_type
+	        raise "Card must have type #{card_type}, but #{response} has type #{response.type}" unless response.type.include?(card_type)
+	      end
+	    end
 
       if multiple && max
         raise "At most #{max} may be chosen" if response.size > max

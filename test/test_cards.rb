@@ -95,11 +95,23 @@ class TestCards < Test::Unit::TestCase
     game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Remodel]
     player = game.current_player
 
-    player.gain Remodel, :to => :hand
-    player.gain Estate, :to => :hand
+    player.gain [Remodel, Estate], :to => :hand
 
     player.strategy = MockStrategy.new([Estate, Silver])  # trash Estate, gain a Silver
     player.play Remodel
+
+    assert_has_a Silver, player.discard_pile
+    assert_equal 0, player.hand.size
+  end
+
+  def test_remake
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Remake]
+    player = game.current_player
+
+    player.gain [Remake, Estate, Copper], :to => :hand
+
+    player.strategy = MockStrategy.new([Estate, Silver, Copper])  # trash Estate, gain a Silver, trash Copper (no replacement)
+    player.play Remake
 
     assert_has_a Silver, player.discard_pile
     assert_equal 0, player.hand.size
