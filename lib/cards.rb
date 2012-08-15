@@ -599,10 +599,32 @@ module Dominion
   
   class Ironworks < Card
     set :intrigue
+    type :action
+    cost 4
+
+    def on_play
+      card = choose_card "Choose a card to gain", :from => :supply, :max_cost => 4, :required => true
+      if card
+        add_actions 1 if card.action?
+        add_coins 1 if card.treasure?
+        draw 1 if card.victory?
+      end
+    end
   end
   
   class MiningVillage < Card
     set :intrigue
+    type :action
+    cost 4
+    cards 1
+    actions 2
+
+    def on_play
+      if ask "Trash this for $2?"
+        add_coins 2
+        trash self
+      end
+    end
   end
   
   class Scout < Card
@@ -648,6 +670,21 @@ module Dominion
   
   class Torturer < Card
     set :intrigue
+    type :action, :attack
+    cost 5
+    cards 3
+
+    def on_play
+      attacked_players.each do |player|
+        choice = player.choose_one ["Gain a curse", "Discard 2 cards"], [:curse, :discard]
+        if choice == :curse
+          player.gain Curse
+        elsif choice == :discard
+          cards = player.choose_cards "Discard 2 cards", :from => :hand, :count => 2
+          player.discard cards
+        end
+      end
+    end
   end
   
   class TradingPost < Card

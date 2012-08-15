@@ -524,5 +524,23 @@ class TestCards < Test::Unit::TestCase
     player.end_turn
     assert_has_count Estate, player.all_cards, 2
   end
+
+  def test_torturer
+    game = Game.new :num_players => 2, :no_cards => true, :kingdom_cards => [Torturer, KingsCourt]
+    p1 = game.players[0]
+    p2 = game.players[1]
+
+    p1.gain [KingsCourt, Torturer], :to => :hand
+    p1.gain [Copper] * 9, :to => :deck
+
+    p2.gain [Estate] * 5, :to => :hand
+    p2.strategy = respond_with :curse, :discard, [Estate, Estate], :discard, [Estate, Estate]
+
+    p1.play KingsCourt, :choice => Torturer
+
+    assert_has_count Copper, p1.hand, 9
+    assert_equal 1, p2.hand.size
+    assert_has_a Curse, p2.discard_pile
+  end
 end
 
