@@ -284,7 +284,8 @@ module Dominion
 
     def on_play
       attacked_players.each do |player|
-        cards = player.reveal_cards_from_deck(2)
+        cards = player.draw_cards_from_deck(2)
+        player.reveal cards
         treasure = pick_a_treasure(cards)
         if treasure
           player.trash treasure
@@ -751,7 +752,8 @@ module Dominion
     cost 5
 
     def on_play
-      cards = player_to_left.reveal_cards_from_deck(2)
+      cards = player_to_left.draw_cards_from_deck(2)
+      player_to_left.reveal cards
       unique_cards = cards.map(&:card_class).uniq
       unique_cards.each do |card|
         add_actions 2 if card.action?
@@ -911,6 +913,24 @@ module Dominion
   
   class Lookout < Card
     set :seaside
+    type :action
+    cost 3
+    actions 1
+
+    def on_play
+      cards = draw_cards_from_deck(3)
+
+      card_to_trash = choose_card "Choose a card to trash", :restrict_to => cards, :required => true
+      trash card_to_trash
+      cards.delete card_to_trash
+
+      card_to_discard = choose_card "Choose a card to discard", :restrict_to => cards, :required => true
+      discard card_to_discard
+      cards.delete card_to_discard
+
+      card_to_put_back = cards.first
+      put_on_deck card_to_put_back
+    end
   end
   
   class Smugglers < Card

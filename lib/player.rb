@@ -184,6 +184,15 @@ module Dominion
       @deck.pop
     end
 
+    def draw_cards_from_deck(num_cards)
+      cards = []
+      num_cards.times do
+        card = draw_from_deck
+        cards << card if card
+      end
+      cards
+    end
+
     def play(card_or_class, options = {})
       check_turn
       card = resolve_card_or_class(card_or_class)
@@ -393,15 +402,6 @@ module Dominion
       end
     end
     
-    def reveal_cards_from_deck(num_cards)
-      cards = []
-      num_cards.times do
-        card = draw_from_deck
-        cards << card if card
-      end
-      reveal cards
-    end
-
     def reveal_from_hand(card_or_class_or_type, options = {})
       card = find_card_in_hand(card_or_class_or_type)
       if card

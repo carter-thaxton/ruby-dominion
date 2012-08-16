@@ -25,9 +25,9 @@ module Dominion
 
     def choose_one(messages, symbols, options = {})
       if symbols.count > 1
-        options[:message] = 'Choose one: ' + messages.join(' or ')
+        options[:message] ||= 'Choose one: ' + messages.join(' or ')
         options[:messages] = messages
-        options[:type] = :symbol
+        options[:type] = :enum
         options[:multiple] = false
         options[:restrict_to] = symbols
         options[:required] = true
@@ -39,9 +39,9 @@ module Dominion
     end
 
     def choose_two(messages, symbols, options = {})
-      options[:message] = 'Choose two: ' + messages.join(' or ')
+      options[:message] ||= 'Choose two: ' + messages.join(' or ')
       options[:messages] = messages
-      options[:type] = :symbol
+      options[:type] = :enum
       options[:multiple] = true
       options[:restrict_to] = symbols
       options[:unique] = true
@@ -107,10 +107,16 @@ module Dominion
             response = find_card_in_hand(response)
           end
         elsif from == :supply
-          raise "Cannot choose multiple cards from supply" if multiple
+          raise "Not yet implemented: cannot choose multiple cards from supply" if multiple
           response = peek_from_supply(response)
+        elsif restrict_to
+          if multiple
+            response = associate_classes_to_cards(response, restrict_to)
+          else
+            response = associate_class_to_card(response, restrict_to)
+          end
         else
-          raise "Cards must be chosen from hand or supply"
+          raise "Cards must be chosen from hand, from supply, or use restrict_to"
         end
       end
 
@@ -129,14 +135,12 @@ module Dominion
           response.each do |r|
             raise "Response must be an array of one of: " + restrict_to.to_s unless restrict_to.include?(r)
           end
-        elsif type == :card
-          raise "Response must be one of: " + restrict_to.to_s unless restrict_to.include?(response.card_class)
         else
           raise "Response must be one of: " + restrict_to.to_s unless restrict_to.include?(response)
         end
       end
 
-      if type == :card && response
+      if type == :card && !multiple && response
         if max_cost
           raise "Card must cost no more than #{max_cost}, but #{response} costs #{response.cost}" if response.cost > max_cost
         end
@@ -171,5 +175,22 @@ module Dominion
       response
     end
 
+    def associate_class_to_card(card_or_class, restrict_to)
+      associate_classes_to_cards([card_or_class], restrict_to).first
+    end
+
+    def associate_classes_to_cards(cards_or_classes, restrict_to)
+      result_map = {}
+      restrict_to.each do |result|
+        result_map[result.card_class] ||= []
+        result_map[result.card_class] << result
+      end
+
+      result = cards_or_classes.map do |card|
+        result_map[card.card_class] && result_map[card.card_class].shift
+      end
+
+      result
+    end
   end
 end

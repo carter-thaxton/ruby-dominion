@@ -771,5 +771,25 @@ class TestCards < Test::Unit::TestCase
 
     assert_card_ownership game
   end
+
+  def test_lookout
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Lookout]
+    player = game.current_player
+
+    player.gain Lookout, :to => :hand
+    player.gain [Copper, Duchy, Estate], :to => :deck
+
+    player.strategy = respond_with Estate, Copper       # trash Estate, discard Copper (put Duchy on deck)
+    player.play Lookout
+
+    assert_has_a Estate, game.trash_pile
+    assert_has_a Copper, player.discard_pile
+    assert_has_a Duchy, player.deck
+    assert_has_no Estate, player.all_cards
+
+    assert_equal 1, player.actions_available
+
+    assert_card_ownership game    
+  end
 end
 
