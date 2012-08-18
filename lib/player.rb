@@ -279,14 +279,21 @@ module Dominion
       end
     end
 
-    def put_on_deck(card_or_class)
-      return if card_or_class.nil?
-      card = resolve_card_or_class(card_or_class)
-      if card
-        hand.delete card
-        deck << card
+    def put_on_deck(cards_or_classes)
+      return if cards_or_classes.nil?
+      if cards_or_classes.is_a?(Enumerable)
+        # Loop in reverse, so first goes on top of deck
+        cards_or_classes.reverse.map do |card_or_class|
+          put_on_deck(card_or_class)
+        end
+      else
+        card = resolve_card_or_class(cards_or_classes)
+        if card
+          hand.delete card
+          deck << card
+        end
+        card
       end
-      card
     end
 
     def put_in_hand(cards)

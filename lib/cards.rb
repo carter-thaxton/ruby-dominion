@@ -1066,6 +1066,16 @@ module Dominion
   
   class GhostShip < Card
     set :seaside
+    type :action, :attack
+    cost 5
+    cards 2
+
+    def on_play
+      attacked_players.each do |player|
+        cards = player.choose_cards "Choose two cards to put back on deck (first on top)", :from => :hand, :count => 2, :ordered => true
+        player.put_on_deck cards
+      end
+    end
   end
   
   class MerchantShip < Card

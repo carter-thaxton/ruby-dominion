@@ -894,5 +894,41 @@ class TestCards < Test::Unit::TestCase
 
     assert_card_ownership game    
   end
+
+  def test_ghost_ship
+    game = Game.new :num_players => 3, :no_cards => true, :kingdom_cards => [GhostShip]
+    p1 = game.players[0]
+    p2 = game.players[1]
+    p3 = game.players[2]
+
+    p1.gain GhostShip, :to => :hand
+    p1.gain [Copper, Estate], :to => :deck
+    p2.gain [Copper, Estate, Silver, Duchy, Gold], :to => :hand
+    p3.gain [Copper, Estate, Silver, Duchy], :to => :hand
+
+    p2.strategy = respond_with [Estate, Duchy]
+    p1.play GhostShip
+
+    assert_has_a Copper, p1.hand
+    assert_has_a Estate, p1.hand
+
+    assert_equal 3, p2.hand.size
+    assert_has_a Gold, p2.hand
+    assert_has_a Silver, p2.hand
+    assert_has_a Copper, p2.hand
+    assert_has_no Estate, p2.hand
+    assert_has_no Duchy, p2.hand
+
+    assert_has_a Estate, p2.deck
+    assert_has_a Duchy, p2.deck
+
+    card = p2.draw_from_deck
+    assert card.is_a?(Estate), "Top card should be an Estate"
+
+    assert_equal 4, p3.hand.size
+    assert_equal 0, p3.deck.size
+
+    assert_card_ownership game    
+  end
 end
 
