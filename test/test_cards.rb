@@ -837,5 +837,22 @@ class TestCards < Test::Unit::TestCase
 
     assert_card_ownership game    
   end
+
+  def test_seahag
+    game = Game.new :num_players => 2, :no_cards => true, :kingdom_cards => [SeaHag]
+    p1 = game.players[0]
+    p2 = game.players[1]
+
+    p1.gain SeaHag, :to => :hand
+    p2.gain [Copper, Estate], :to => :deck
+
+    p1.play SeaHag
+
+    assert_has_a Curse, p2.deck
+    assert_has_a Estate, p2.deck
+    assert_has_a Copper, p2.discard_pile
+
+    assert_card_ownership game    
+  end
 end
 

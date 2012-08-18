@@ -1008,6 +1008,15 @@ module Dominion
   
   class SeaHag < Card
     set :seaside
+    type :action, :attack
+    cost 4
+
+    def on_play
+      attacked_players.each do |player|
+        player.discard player.draw_from_deck
+        player.gain Curse, :to => :deck
+      end
+    end
   end
   
   class TreasureMap < Card
