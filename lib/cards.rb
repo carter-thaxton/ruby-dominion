@@ -1021,6 +1021,22 @@ module Dominion
   
   class TreasureMap < Card
     set :seaside
+    type :action
+    cost 4
+
+    def on_play
+      p = player
+      other_treasure_map = find_card_in_hand TreasureMap
+      trashed1 = trash other_treasure_map
+      trashed2 = trash self
+
+      if trashed1 && trashed2
+        4.times do
+          # use explicit player, because self gets trashed, and there is no implicit player
+          p.gain Gold, :to => :deck
+        end
+      end
+    end
   end
   
   class Bazaar < Card

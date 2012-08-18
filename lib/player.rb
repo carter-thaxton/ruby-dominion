@@ -254,9 +254,9 @@ module Dominion
     end
     
     def trash(cards_or_classes)
-      return if cards_or_classes.nil?
+      return nil if cards_or_classes.nil?
       if cards_or_classes.is_a?(Enumerable)
-        cards_or_classes.dup.each do |card_or_class|
+        cards_or_classes.dup.map do |card_or_class|
           trash(card_or_class)
         end
       else
@@ -269,9 +269,13 @@ module Dominion
 
           # Add to trash it unless it's already there (e.g. Throne Room + Feast)
           card.player = nil
-          game.trash_pile << card unless game.trash_pile.include?(card)
+          if game.trash_pile.include?(card)
+            return nil
+          else
+            game.trash_pile << card
+            return card
+          end
         end
-        card
       end
     end
 
@@ -296,7 +300,7 @@ module Dominion
     def discard(cards_or_classes)
       return if cards_or_classes.nil?
       if cards_or_classes.is_a? Enumerable
-        cards_or_classes.dup.each do |card_or_class|
+        cards_or_classes.dup.map do |card_or_class|
           discard card_or_class
         end
       else
@@ -318,7 +322,7 @@ module Dominion
       return if cards_or_classes.nil?
       if cards_or_classes.is_a?(Enumerable)
         # Loop in reverse, so first goes on top of deck or discard
-        cards_or_classes.reverse.each do |card_or_class|
+        cards_or_classes.reverse.map do |card_or_class|
           gain(card_or_class, options)
         end
       else

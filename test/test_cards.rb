@@ -854,5 +854,24 @@ class TestCards < Test::Unit::TestCase
 
     assert_card_ownership game    
   end
+
+  def test_treasure_map
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [TreasureMap, ThroneRoom]
+    player = game.current_player
+
+    player.gain [ThroneRoom, TreasureMap, TreasureMap, TreasureMap], :to => :hand
+    player.gain [Estate, Estate], :to => :deck
+
+    player.play ThroneRoom, :choice => TreasureMap
+
+    # first Treasure Map hits, both get trashed, then second Treasure Map gets hit and trashed,
+    # but because the Throne-Room'ed Treasure Map didn't actually "get trashed" the second time,
+    # you don't gain 4 more Golds.
+    assert_has_count Gold, player.deck, 4
+    assert_has_no TreasureMap, player.hand
+    assert_has_count TreasureMap, game.trash_pile, 3
+
+    assert_card_ownership game    
+  end
 end
 
