@@ -1050,6 +1050,18 @@ module Dominion
   
   class Explorer < Card
     set :seaside
+    type :action
+    cost 5
+
+    def on_play
+      province = find_card_in_hand Province
+      if province && ask("Reveal Province?")
+        reveal province
+        gain Gold, :to => :hand
+      else
+        gain Silver, :to => :hand
+      end
+    end
   end
   
   class GhostShip < Card

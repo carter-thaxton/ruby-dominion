@@ -873,5 +873,26 @@ class TestCards < Test::Unit::TestCase
 
     assert_card_ownership game    
   end
+
+  def test_explorer
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Explorer]
+    player = game.current_player
+
+    player.add_actions 2
+    player.gain [Explorer, Explorer, Explorer], :to => :hand
+    player.play Explorer
+    assert_has_a Silver, player.hand
+    assert_has_no Gold, player.hand
+
+    player.gain Province, :to => :hand
+    player.play Explorer, :choice => false
+    assert_has_count Silver, player.hand, 2
+    assert_has_no Gold, player.hand
+
+    player.play Explorer, :choice => true
+    assert_has_a Gold, player.hand
+
+    assert_card_ownership game    
+  end
 end
 
