@@ -1508,6 +1508,118 @@ module Dominion
 
   
   #
+  # Hinterlands
+  #
+
+  class Crossroads < Card
+    set :hinterlands
+  end
+
+  class Duchess < Card
+    set :hinterlands
+  end
+
+  class FoolsGold < Card
+    set :hinterlands
+#    type :treasure, :reaction
+  end
+
+  class Develop < Card
+    set :hinterlands
+  end
+
+  class Trader < Card
+    set :hinterlands
+#    type :action, :reaction
+  end
+
+  class Tunnel < Card
+    set :hinterlands
+#    type :victory, :reaction
+  end
+
+  class Oasis < Card
+    set :hinterlands
+  end
+
+  class Oracle < Card
+    set :hinterlands
+  end
+
+  class Scheme < Card
+    set :hinterlands
+  end
+
+  class JackOfAllTrades < Card
+    set :hinterlands
+  end
+
+  class NobleBrigand < Card
+    set :hinterlands
+  end
+
+  class NomadCamp < Card
+    set :hinterlands
+  end
+
+  class SilkRoad < Card
+    set :hinterlands
+  end
+
+  class SpiceMerchant < Card
+    set :hinterlands
+  end
+
+  class Cache < Card
+    set :hinterlands
+  end
+
+  class Cartographer < Card
+    set :hinterlands
+  end
+
+  class Embassy < Card
+    set :hinterlands
+  end
+
+  class Haggler < Card
+    set :hinterlands
+  end
+
+  class Highway < Card
+    set :hinterlands
+  end
+
+  class IllGottenGains < Card
+    set :hinterlands
+  end
+
+  class Inn < Card
+    set :hinterlands
+  end
+
+  class Mandarin < Card
+    set :hinterlands
+  end
+
+  class Margrave < Card
+    set :hinterlands
+  end
+
+  class Stables < Card
+    set :hinterlands
+  end
+
+  class BorderVillage < Card
+    set :hinterlands
+  end
+
+  class Farmland < Card
+    set :hinterlands
+  end
+
+
+  #
   # Promo
   #
 
@@ -1515,20 +1627,20 @@ module Dominion
     set :promo
     # Good luck...
   end
-  
+
   class Envoy < Card
     set :promo
   end
-  
-  class Stash < Card
-    set :promo
-  end
-  
+
   class WalledVillage < Card
     set :promo
   end
 
   class Governor < Card
+    set :promo
+  end
+
+  class Stash < Card
     set :promo
   end
 
