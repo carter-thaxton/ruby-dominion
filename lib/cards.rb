@@ -159,7 +159,7 @@ module Dominion
     cost 3
 
     def on_play
-      card = choose_card "Choose a card to gain", :from => :supply, :max_cost => 4, :required => true
+      card = choose_card "Choose a card to gain", :from => :supply, :max_cost => 4
       gain card
     end
   end
@@ -173,7 +173,7 @@ module Dominion
     def on_play
       gain Silver, :to => :deck
       attacked_players.each do |player|
-        card = player.reveal_from_hand :victory, :required => true
+        card = player.reveal_from_hand :victory
         player.put card, :to => :deck if card
       end
     end
@@ -185,7 +185,7 @@ module Dominion
     cost 4
 
     def on_play
-      card = choose_card "Choose a card to gain", :from => :supply, :max_cost => 5, :required => true
+      card = choose_card "Choose a card to gain", :from => :supply, :max_cost => 5
       gain card
       trash self
     end
@@ -239,7 +239,7 @@ module Dominion
     cost 4
 
     def on_play
-      card = choose_card "Choose a card to remodel", :from => :hand, :required => true
+      card = choose_card "Choose a card to remodel", :from => :hand
       if card
         max_cost = card.cost + 2
         new_card = choose_card "Choose a card from the supply costing up to #{max_cost}", :from => :supply, :max_cost => max_cost
@@ -316,7 +316,7 @@ module Dominion
     multiplier 2
 
     def on_play
-      card = choose_card "Choose a card to play twice", :from => :hand, :required => true
+      card = choose_card "Choose a card to play twice", :from => :hand, :optional => false
       if card
         2.times do
           play card, :played_by_card => self
@@ -451,7 +451,7 @@ module Dominion
     cards 2
 
     def on_play
-      card = choose_card "Choose a card to put back on the deck", :from => :hand, :required => true
+      card = choose_card "Choose a card to put back on the deck", :from => :hand
       put_on_deck card
     end
   end
@@ -501,7 +501,7 @@ module Dominion
     def on_play
       # choose cards
       cards = players.map do |player|
-        card = player.choose_card "Choose a card to pass to #{player_to_left_of(player)}", :from => :hand, :required => :true
+        card = player.choose_card "Choose a card to pass to #{player_to_left_of(player)}", :from => :hand
       end
 
       # pass to next player
@@ -510,7 +510,7 @@ module Dominion
       end
 
       # optionally trash a card
-      card = choose_card "Choose a card to trash", :from => :hand
+      card = choose_card "Choose a card to trash", :from => :hand, :optional => true
       trash card if card
     end
   end
@@ -539,7 +539,7 @@ module Dominion
       elsif choice == :coins
         add_coins 2
       elsif choice == :trash
-        cards = choose_cards "Choose 2 cards to trash", :from => :hand, :count => 2, :required => true
+        cards = choose_cards "Choose 2 cards to trash", :from => :hand, :count => 2
         trash cards
       end
     end
@@ -554,7 +554,7 @@ module Dominion
     def on_play
       card = player_to_left.draw_from_deck
       if card
-        new_card = choose_card "Choose a replacement costing #{card.cost}", :from => :supply, :required => true, :cost => card.cost
+        new_card = choose_card "Optionally choose a replacement costing #{card.cost}", :from => :supply, :cost => card.cost, :optional => true
         trash card
         player_to_left.gain new_card
       end
@@ -569,7 +569,7 @@ module Dominion
     actions 1
 
     def on_play
-      choice = choose_card "Wish for a card", :from => :supply, :required => true
+      choice = choose_card "Wish for a card", :from => :supply
       card = draw_from_deck
       if card
         reveal card
@@ -627,7 +627,7 @@ module Dominion
     cost 4
 
     def on_play
-      card = choose_card "Choose a card to gain", :from => :supply, :max_cost => 4, :required => true
+      card = choose_card "Choose a card to gain", :from => :supply, :max_cost => 4
       if card
         add_actions 1 if card.action?
         add_coins 1 if card.treasure?
@@ -703,7 +703,7 @@ module Dominion
             set_aside << card
           else
             max_cost = card.cost - 2
-            new_card = player.choose_card "Choose a card to replace #{card} costing up to #{max_cost}", :from => :supply, :max_cost => max_cost
+            new_card = player.choose_card "Optionally choose a card to replace #{card} costing up to #{max_cost}", :from => :supply, :max_cost => max_cost, :optional => true
             player.gain new_card
             break
           end
@@ -738,7 +738,7 @@ module Dominion
     cost 5
 
     def on_play
-      cards = choose_cards "Choose two cards to trash", :from => :hand, :count => 2, :required => true
+      cards = choose_cards "Choose two cards to trash", :from => :hand, :count => 2
       trash cards
       if cards.count == 2
         gain Silver, :to => :hand
@@ -772,7 +772,7 @@ module Dominion
     actions 1
 
     def on_play
-      card = choose_card "Choose a card to upgrade", :from => :hand, :required => true
+      card = choose_card "Choose a card to upgrade", :from => :hand
       if card
         max_cost = card.cost + 1
         new_card = choose_card "Choose a card from the supply costing up to #{max_cost}", :from => :supply, :max_cost => max_cost
@@ -823,7 +823,7 @@ module Dominion
     cards 1
 
     def on_play
-      @set_aside_card = choose_card "Choose a card to set aside for next turn", :from => :hand, :required => true
+      @set_aside_card = choose_card "Choose a card to set aside for next turn", :from => :hand
       hand.delete @set_aside_card
     end
 
@@ -878,7 +878,7 @@ module Dominion
     cost 3
 
     def on_play
-      card = choose_card "Choose a card to return to the supply", :from => :hand, :required => true
+      card = choose_card "Choose a card to return to the supply", :from => :hand
       if card
         card_class = card.card_class
         count = hand.count {|c| c.is_a?(card_class)}
@@ -920,11 +920,11 @@ module Dominion
     def on_play
       cards = draw_cards_from_deck(3)
 
-      card_to_trash = choose_card "Choose a card to trash", :restrict_to => cards, :required => true
+      card_to_trash = choose_card "Choose a card to trash", :restrict_to => cards
       trash card_to_trash
       cards.delete card_to_trash
 
-      card_to_discard = choose_card "Choose a card to discard", :restrict_to => cards, :required => true
+      card_to_discard = choose_card "Choose a card to discard", :restrict_to => cards
       discard card_to_discard
       cards.delete card_to_discard
 
@@ -1136,7 +1136,7 @@ module Dominion
 
     def on_play
       add_vp_tokens 1
-      card = choose_card "Choose a card to trash", :from => :hand, :required => true
+      card = choose_card "Choose a card to trash", :from => :hand
       if card
         add_vp_tokens (card.cost / 2).floor
         trash card
@@ -1292,7 +1292,7 @@ module Dominion
     cost 7
 
     def on_play
-      card = choose_card "Choose a card to expand", :from => :hand, :required => true
+      card = choose_card "Choose a card to expand", :from => :hand
       if card
         max_cost = card.cost + 3
         new_card = choose_card "Choose a card from the supply costing up to #{max_cost}", :from => :supply, :max_cost => max_cost
@@ -1313,7 +1313,7 @@ module Dominion
     multiplier 3
 
     def on_play
-      card = choose_card "Choose a card to play thrice", :from => :hand, :required => false
+      card = choose_card "Choose a card to play thrice", :from => :hand, :optional => true
       if card
         3.times do
           play card, :played_by_card => self
@@ -1374,7 +1374,7 @@ module Dominion
 
     def on_play
       2.times do
-        card = choose_card "Choose a card to remake", :from => :hand, :required => true
+        card = choose_card "Choose a card to remake", :from => :hand
         if card
           max_cost = card.cost + 1
           new_card = choose_card "Choose a card from the supply costing up to #{max_cost}", :from => :supply, :max_cost => max_cost
@@ -1397,7 +1397,7 @@ module Dominion
     cards 2
 
     def on_play
-      cards = choose_cards "Choose two cards to discard", :from => :hand, :required => true
+      cards = choose_cards "Choose two cards to discard", :from => :hand
       discard cards
 
       attacked_players.each do |player|

@@ -3,35 +3,49 @@ module Dominion
     attr_reader :choice_in_progress
 
     def ask(message, options = {})
-      options[:message] = message
-      options[:type] = :bool
-      options[:multiple] = false
-      choose(options)
+      args = {
+        message: message,
+        type: :bool,
+        multiple: false,
+        optional: false
+      }
+      args.merge! options
+      choose(args)
     end
     
     def choose_card(message, options = {})
-      options[:message] = message
-      options[:type] = :card
-      options[:multiple] = false
-      choose(options)
+      args = {
+        message: message,
+        type: :card,
+        multiple: false,
+        optional: false
+      }
+      args.merge! options
+      choose(args)
     end
     
     def choose_cards(message, options = {})
-      options[:message] = message
-      options[:type] = :card
-      options[:multiple] = true
-      choose(options)
+      args = {
+        message: message,
+        type: :card,
+        multiple: true,
+        optional: true
+      }
+      args.merge! options
+      choose(args)
     end
 
     def choose_one(messages, symbols, options = {})
       if symbols.count > 1
-        options[:message] ||= 'Choose one: ' + messages.join(' or ')
-        options[:messages] = messages
-        options[:type] = :enum
-        options[:multiple] = false
-        options[:restrict_to] = symbols
-        options[:required] = true
-        choose(options)
+        args = {
+          message: 'Choose one: ' + messages.join(' or '),
+          messages: messages,
+          type: :enum,
+          restrict_to: symbols,
+          optional: false
+        }
+        args.merge! options
+        choose(args)
       else
         # Don't bother asking for zero or one choices
         symbols.first
@@ -39,27 +53,31 @@ module Dominion
     end
 
     def choose_two(messages, symbols, options = {})
-      options[:message] ||= 'Choose two: ' + messages.join(' or ')
-      options[:messages] = messages
-      options[:type] = :enum
-      options[:multiple] = true
-      options[:restrict_to] = symbols
-      options[:unique] = true
-      options[:count] = 2
-      choose(options)
+      args = {
+        message: 'Choose two: ' + messages.join(' or '),
+        messages: messages,
+        type: :enum,
+        multiple: true,
+        restrict_to: symbols,
+        optional: false,
+        unique: true,
+        count: 2
+      }
+      args.merge! options
+      choose(args)
     end
 
-    def choose(options = {})
-      options[:player] = self
-      options[:card] = @card_in_play
-      @choice_in_progress = options
+    def choose(args)
+      args[:player] ||= self
+      args[:card] ||= @card_in_play
+      @choice_in_progress = args
 
       # use choice if given directly in call to play
       # otherwise defer to strategy if available
       response = if @play_choice
         handle_response(@play_choice)
       elsif @strategy
-        handle_response(@strategy.choose(options))
+        handle_response(@strategy.choose(args))
       else
         nil
       end
