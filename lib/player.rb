@@ -413,7 +413,7 @@ module Dominion
           end
         end
       elsif options[:required]
-        reveal hand
+        reveal_hand
         nil
       end
     end
@@ -425,6 +425,10 @@ module Dominion
         log "#{self} reveals a #{card}"
       end
       card
+    end
+
+    def reveal_hand
+      log "#{self} reveals hand containing #{hand.join(', ')}"
     end
 
     def find_card_in_hand(card_or_class_or_type, options = {})

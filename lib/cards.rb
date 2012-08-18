@@ -522,7 +522,7 @@ module Dominion
     actions 2
 
     def on_play
-      reveal hand
+      reveal_hand
       draw 2 if hand.none? &:action?
     end
   end
@@ -939,6 +939,15 @@ module Dominion
   
   class Warehouse < Card
     set :seaside
+    type :action
+    cost 3
+    cards 3
+    actions 1
+
+    def on_play
+      cards = choose_cards "Choose 3 cards to discard", :from => hand, :count => 3
+      discard cards
+    end
   end
   
   class Caravan < Card
@@ -955,6 +964,20 @@ module Dominion
   
   class Cutpurse < Card
     set :seaside
+    type :action, :attack
+    cost 4
+    coins 2
+
+    def on_play
+      attacked_players.each do |player|
+        copper = player.find_card_in_hand(Copper)
+        if copper
+          player.discard copper
+        else
+          player.reveal_hand
+        end
+      end
+    end
   end
   
   class Island < Card
