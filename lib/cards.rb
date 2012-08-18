@@ -1136,10 +1136,14 @@ module Dominion
 
     def on_play
       add_vp_tokens 1
-      card = choose_card "Choose a card to trash", :from => :hand
+      card = choose_card "Choose a card to trash", :from => :hand, :required => true
       if card
         add_vp_tokens (card.cost / 2).floor
         trash card
+      end
+      other_players.each do |player|
+        card = player.choose_card "Optionally choose a card to trash", :from => :hand
+        player.trash card
       end
     end
   end

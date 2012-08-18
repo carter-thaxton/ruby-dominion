@@ -791,5 +791,31 @@ class TestCards < Test::Unit::TestCase
 
     assert_card_ownership game    
   end
+
+  def test_bishop
+    game = Game.new :num_players => 3, :no_cards => true, :kingdom_cards => [Bishop]
+    p1 = game.players[0]
+    p2 = game.players[1]
+    p3 = game.players[2]
+
+    p1.gain [Bishop, Estate, Copper], :to => :hand
+    p2.gain [Estate, Silver], :to => :hand
+    p3.gain [Estate, Silver], :to => :hand
+
+    p1.strategy = respond_with Estate       # trash an Estate
+    p2.strategy = respond_with Estate       # trash an Estate
+    p3.strategy = respond_with nil          # trash nothing
+    p1.play Bishop
+
+    assert_has_count Estate, game.trash_pile, 2
+    assert_has_no Estate, p1.hand
+    assert_has_no Estate, p2.hand
+    assert_has_a Estate, p3.hand
+
+    assert_equal 1, p1.coins_available
+    assert_equal 2, p1.vp_tokens
+
+    assert_card_ownership game    
+  end
 end
 
