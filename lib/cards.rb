@@ -935,6 +935,16 @@ module Dominion
   
   class Smugglers < Card
     set :seaside
+    type :action
+    cost 3
+
+    def on_play
+      candidates = player_to_right.cards_gained_last_turn.select {|c| c.cost < 6}.map(&:card_class).uniq
+      if candidates.any?
+        card = choose_card "Choose a card gained by #{player_to_right} last turn", :restrict_to => candidates
+        gain card
+      end
+    end
   end
   
   class Warehouse < Card
@@ -1099,6 +1109,18 @@ module Dominion
   
   class Treasury < Card
     set :seaside
+    type :action
+    cost 5
+    cards 1
+    actions 1
+    coins 1
+
+    def on_cleanup
+      bought_victory = cards_bought_this_turn.any? &:victory?
+      if !bought_victory && ask("Return Treasury to deck?")
+        put_on_deck self
+      end
+    end
   end
   
   class Wharf < Card

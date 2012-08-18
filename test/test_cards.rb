@@ -930,5 +930,63 @@ class TestCards < Test::Unit::TestCase
 
     assert_card_ownership game    
   end
+
+  def test_treasury
+    game = Game.new :num_players => 1, :no_cards => true, :kingdom_cards => [Treasury]
+    player = game.current_player
+
+    player.gain [Treasury, Treasury, Treasury], :to => :hand
+    player.gain [Estate, Estate, Estate, Estate, Estate, Gold, Gold, Duchy, Duchy, Duchy, Duchy, Duchy, Duchy], :to => :deck
+    player.play Treasury
+    player.play Treasury
+    player.play Treasury
+
+    player.buy Silver
+    assert player.cards_bought_this_turn.any?(&:treasure?), "#{player} should have bought a treasure this turn"
+    assert !player.cards_bought_this_turn.any?(&:victory?), "#{player} should not have bought a victory this turn"
+
+    player.strategy = respond_with true, false, true
+    player.end_turn
+
+    assert_has_count Treasury, player.hand, 2
+    assert_has_count Treasury, player.discard_pile, 1
+    assert_has_a Silver, player.discard_pile
+
+    player.play Treasury
+    player.play Treasury
+    player.play_all_treasures
+    player.buy Province
+    assert !player.cards_bought_this_turn.any?(&:treasure?), "#{player} should not have bought a treasure this turn"
+    assert player.cards_bought_this_turn.any?(&:victory?), "#{player} should have bought a victory this turn"
+
+    player.end_turn
+    assert_has_no Treasury, player.hand
+
+    assert_card_ownership game    
+  end
+
+  def test_smugglers
+    game = Game.new :num_players => 3, :no_cards => true, :kingdom_cards => [Smugglers]
+    p1 = game.players[0]
+    p2 = game.players[1]
+    p3 = game.players[2]
+
+    p1.gain [Silver, Silver], :to => :hand
+    p1.play_all_treasures
+    p1.buy Silver
+
+    assert !p1.cards_gained_last_turn.any? {|c| c.is_a? Silver}, "#{p1} should not have gained a Silver last turn"
+    assert p1.cards_gained_this_turn.any? {|c| c.is_a? Silver}, "#{p1} should have gained a Silver this turn"
+    p1.end_turn
+    assert p1.cards_gained_last_turn.any? {|c| c.is_a? Silver}, "#{p1} should have gained a Silver last turn"
+    assert !p1.cards_gained_this_turn.any? {|c| c.is_a? Silver}, "#{p1} should not have gained a Silver this turn"
+
+    p2.gain Smugglers, :to => :hand
+    p2.play Smugglers, :choice => Silver
+
+    assert_has_a Silver, p2.discard_pile
+
+    assert_card_ownership game    
+  end
 end
 

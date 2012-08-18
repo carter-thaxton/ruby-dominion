@@ -16,7 +16,8 @@ module Dominion
       :actions_in_play_from_previous_turn,
       :actions_available, :coins_available, :buys_available,
       :actions_played, :vp_tokens, :pirate_ship_tokens,
-      :turn, :card_in_play
+      :turn, :card_in_play,
+      :cards_bought_this_turn, :cards_gained_this_turn, :cards_gained_last_turn
     
     def initialize(game, position, identity, strategy)
       @game = game
@@ -38,6 +39,9 @@ module Dominion
       @turn = 0
       @card_in_play = nil
       @attack_prevented = false
+      @cards_bought_this_turn = []
+      @cards_gained_this_turn = []
+      @cards_gained_last_turn = []
     end
     
     def prepare(options = {})
@@ -59,6 +63,10 @@ module Dominion
     
     def player_to_left
       game.player_to_left_of self
+    end
+    
+    def player_to_right
+      game.player_to_right_of self
     end
     
     def cards_in_play
@@ -88,6 +96,8 @@ module Dominion
       @actions_available = 1
       @coins_available = 0
       @buys_available = 1
+      @cards_bought_this_turn = []
+      @cards_gained_this_turn = []
 
       # Play duration cards again, accounting for Throne Room and King's Court
       @actions_in_play_from_previous_turn.each do |card|
@@ -127,10 +137,17 @@ module Dominion
         c.played_by = nil
       end
 
+      # Only discard those cards that weren't put somewhere else on cleanup
+      to_discard = to_discard.select {|c| !deck.include?(c) && !trash_pile.include?(c)}
+
       @discard_pile += to_discard
       @actions_in_play_from_previous_turn = Set.new(actions_to_keep)
       @actions_in_play = Set.new
       @treasures_in_play = Set.new
+
+      @cards_gained_last_turn = @cards_gained_this_turn
+      @cards_gained_this_turn = []
+      @cards_bought_this_turn = []
 
       @discard_pile += @hand
       @hand = []
@@ -353,6 +370,8 @@ module Dominion
           when :hand
             @hand << card
           end
+
+          @cards_gained_this_turn << card
         end
         card
       end
@@ -376,6 +395,7 @@ module Dominion
 
       @coins_available -= card.cost
       @buys_available -= 1
+      @cards_bought_this_turn << card
       
       card
     end
@@ -404,6 +424,7 @@ module Dominion
         return false
       end
 
+      # pretend for a moment that the card is owned by the player, now ask the card if it can be bought
       orig_player = card.player
       begin
         card.player = self
